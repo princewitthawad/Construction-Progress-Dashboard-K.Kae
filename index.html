@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🏗️ Admin Portal — จัดการโครงการ</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080d14;--bg2:#0d1525;--bgc:#111827;
+  --tx:#e8f0fe;--tx2:#8899aa;--tx3:#445566;
+  --green:#00e676;--cyan:#00d4ff;--gold:#ffd600;
+  --blue:#388bfd;--orange:#ff9500;--red:#ff4444;--purple:#ce93d8;
+  --bdr:rgba(255,255,255,.08);
+  --f:'Sarabun',sans-serif;--m:'JetBrains Mono',monospace;
+}
+body{background:var(--bg);color:var(--tx);font-family:var(--f);min-height:100vh}
+.header{
+  background:linear-gradient(135deg,rgba(13,21,37,.98),rgba(8,13,20,.98));
+  border-bottom:2px solid rgba(255,214,0,.3);
+  padding:20px 24px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);
+}
+.header-left{display:flex;align-items:center;gap:14px}
+.header-icon{font-size:32px}
+.header-title{font-size:20px;font-weight:800;color:var(--gold)}
+.header-sub{font-size:11px;color:var(--tx3);margin-top:2px;font-family:var(--m)}
+.btn{padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-family:var(--f);font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;transition:all .2s}
+.btn:hover{transform:translateY(-1px)}
+.btn-g{background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.4);color:var(--green)}
+.btn-b{background:rgba(56,139,253,.15);border:1px solid rgba(56,139,253,.4);color:var(--blue)}
+.btn-r{background:rgba(255,68,68,.12);border:1px solid rgba(255,68,68,.3);color:var(--red)}
+.btn-gold{background:rgba(255,214,0,.15);border:1px solid rgba(255,214,0,.4);color:var(--gold)}
+.btn-o{background:rgba(255,149,0,.15);border:1px solid rgba(255,149,0,.4);color:var(--orange)}
+
+.main{max-width:1100px;margin:0 auto;padding:28px 20px}
+
+/* Stats bar */
+.stats-bar{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:28px;
+}
+.stat-card{
+  background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:16px;text-align:center;
+}
+.stat-val{font-size:32px;font-weight:800;font-family:var(--m)}
+.stat-lbl{font-size:10px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-top:4px}
+
+/* Project cards grid */
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:24px}
+.proj-card{
+  background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;overflow:hidden;
+  transition:all .2s;cursor:default;
+}
+.proj-card:hover{border-color:rgba(255,255,255,.15);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.proj-card-header{padding:16px 18px 12px;border-bottom:1px solid var(--bdr)}
+.proj-card-name{font-size:15px;font-weight:800}
+.proj-card-client{font-size:11px;color:var(--tx3);margin-top:3px}
+.proj-card-body{padding:14px 18px}
+.proj-progress-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.proj-pct{font-size:22px;font-weight:800;font-family:var(--m)}
+.proj-bar-bg{height:6px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;margin-bottom:10px}
+.proj-bar-fill{height:100%;border-radius:99px;transition:width .6s ease}
+.proj-meta{display:flex;gap:12px;font-size:10px;color:var(--tx3);font-family:var(--m);flex-wrap:wrap}
+.proj-card-footer{padding:12px 18px;border-top:1px solid var(--bdr);display:flex;gap:8px;flex-wrap:wrap}
+.status-badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
+
+/* Add project card */
+.add-card{
+  background:rgba(255,255,255,.02);border:2px dashed rgba(255,255,255,.1);border-radius:14px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  padding:40px 20px;cursor:pointer;transition:all .2s;min-height:220px;
+}
+.add-card:hover{border-color:rgba(0,230,118,.4);background:rgba(0,230,118,.04)}
+.add-card-icon{font-size:40px;opacity:.5}
+.add-card-text{font-size:14px;font-weight:700;color:var(--tx3)}
+
+/* Modal */
+.modal-bg{
+  display:none;position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,.85);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;padding:16px;
+}
+.modal-bg.show{display:flex}
+.modal{
+  background:linear-gradient(135deg,#0a1020,#0d1a2e);
+  border:1px solid rgba(56,139,253,.3);border-radius:18px;
+  padding:28px;width:100%;max-width:520px;
+  max-height:90vh;overflow-y:auto;
+}
+.modal-title{font-size:17px;font-weight:800;color:var(--cyan);margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.form-group{margin-bottom:16px}
+.form-label{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block}
+.form-input{
+  width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:8px;padding:10px 12px;color:var(--tx);font-size:14px;font-family:var(--f);
+  outline:none;transition:border-color .2s;
+}
+.form-input:focus{border-color:rgba(56,139,253,.5);background:rgba(255,255,255,.07)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-hint{font-size:10px;color:var(--tx3);margin-top:4px}
+.form-section{font-size:12px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:.6px;margin:20px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--bdr)}
+.modal-footer{display:flex;gap:10px;margin-top:24px;justify-content:flex-end}
+
+/* Color picker for project */
+.color-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.color-opt{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s}
+.color-opt.selected,.color-opt:hover{border-color:#fff;transform:scale(1.1)}
+
+/* Delete confirm */
+.del-modal{max-width:380px}
+
+/* Responsive */
+@media(max-width:600px){
+  .form-row{grid-template-columns:1fr}
+  .proj-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-icon">🏗️</div>
+    <div>
+      <div class="header-title">Admin Portal — จัดการโครงการ</div>
+      <div class="header-sub">Construction Progress Dashboard · Multi-Project</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button class="btn btn-gold" onclick="openAddModal()">➕ เพิ่มโครงการใหม่</button>
+    <button class="btn btn-b" onclick="exportAll()">📤 Export ทั้งหมด</button>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+
+  <!-- Stats -->
+  <div class="stats-bar" id="stats-bar"></div>
+
+  <!-- Project grid -->
+  <div class="proj-grid" id="proj-grid"></div>
+
+</div>
+
+<!-- ═══ ADD/EDIT MODAL ═══ -->
+<div class="modal-bg" id="add-modal">
+  <div class="modal">
+    <div class="modal-title"><span id="modal-icon">➕</span><span id="modal-title-text">เพิ่มโครงการใหม่</span></div>
+
+    <div class="form-section">ข้อมูลโครงการ</div>
+    <div class="form-group">
+      <label class="form-label">ชื่อโครงการ *</label>
+      <input class="form-input" id="f-name" placeholder="เช่น อาคารพาณิชย์ 5 ชั้น โครงการ A">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ชื่อลูกค้า / เจ้าของโครงการ</label>
+      <input class="form-input" id="f-client" placeholder="เช่น คุณสมชาย ใจดี">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">วันเริ่มโครงการ *</label>
+        <input class="form-input" id="f-start" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">วันส่งมอบ (Deadline) *</label>
+        <input class="form-input" id="f-deadline" type="date">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">สีโครงการ</label>
+      <div class="color-row" id="color-row"></div>
+    </div>
+
+    <div class="form-section">Firebase Realtime Database</div>
+    <div class="form-group">
+      <label class="form-label">Firebase URL *</label>
+      <input class="form-input" id="f-fb" placeholder="https://your-project-default-rtdb.firebaseio.com">
+      <div class="form-hint">สร้าง Firebase project ใหม่สำหรับแต่ละโครงการ เพื่อให้ข้อมูลแยกกัน</div>
+    </div>
+
+    <div class="form-section">รหัสผ่าน</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">รหัส Admin (แก้ไขข้อมูล)</label>
+        <input class="form-input" id="f-admin-pw" type="text" placeholder="เช่น 19841984" maxlength="8">
+        <div class="form-hint">ตัวเลข 4-8 หลัก</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">รหัส ACCT (รายรับ-รายจ่าย)</label>
+        <input class="form-input" id="f-acct-pw" type="text" placeholder="เช่น 30072530" maxlength="8">
+        <div class="form-hint">ตัวเลข 4-8 หลัก</div>
+      </div>
+    </div>
+
+    <div class="form-section">ไฟล์ Dashboard</div>
+    <div class="form-group">
+      <label class="form-label">ชื่อไฟล์ Dashboard Template</label>
+      <input class="form-input" id="f-template" placeholder="dashboard_template.html" value="dashboard_template.html">
+      <div class="form-hint">ต้องอยู่ใน folder เดียวกับ admin_portal.html</div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-r" onclick="closeAddModal()">ยกเลิก</button>
+      <button class="btn btn-g" onclick="saveProject()">✅ บันทึกโครงการ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DELETE CONFIRM MODAL ═══ -->
+<div class="modal-bg" id="del-modal">
+  <div class="modal del-modal">
+    <div class="modal-title">🗑️ ลบโครงการ</div>
+    <div style="font-size:14px;color:var(--tx2);margin-bottom:16px">
+      ต้องการลบโครงการ <strong id="del-proj-name" style="color:var(--red)"></strong> ใช่ไหม?<br>
+      <span style="font-size:12px;color:var(--tx3);margin-top:6px;display:block">ข้อมูลใน Admin Portal จะถูกลบ (Firebase ไม่กระทบ)</span>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeDelModal()" style="background:rgba(255,255,255,.05);border:1px solid var(--bdr);color:var(--tx2)">ยกเลิก</button>
+      <button class="btn btn-r" onclick="confirmDelete()">🗑️ ลบ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// STORAGE
+// ════════════════════════════════════════════════════════════════
+var STORE_KEY = 'cp_admin_projects';
+
+function loadProjects(){
+  try{ return JSON.parse(localStorage.getItem(STORE_KEY)||'[]'); }catch(e){ return []; }
+}
+function saveProjects(arr){
+  localStorage.setItem(STORE_KEY, JSON.stringify(arr));
+}
+function genId(){
+  return 'proj_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6);
+}
+
+// ════════════════════════════════════════════════════════════════
+// COLORS
+// ════════════════════════════════════════════════════════════════
+var COLORS = [
+  '#00e676','#00d4ff','#ffd600','#ff9500','#ce93d8','#388bfd',
+  '#f48fb1','#80cbc4','#ffcc02','#ff6b6b','#69f0ae','#40c4ff',
+];
+var _selectedColor = COLORS[0];
+
+function renderColorPicker(){
+  var row = document.getElementById('color-row');
+  row.innerHTML = COLORS.map(function(c){
+    return '<div class="color-opt'+(c===_selectedColor?' selected':'')+'" '
+      +'style="background:'+c+'" onclick="selectColor(\''+c+'\')" title="'+c+'"></div>';
+  }).join('');
+}
+function selectColor(c){
+  _selectedColor=c;
+  renderColorPicker();
+}
+
+// ════════════════════════════════════════════════════════════════
+// STATS
+// ════════════════════════════════════════════════════════════════
+function renderStats(projects){
+  var el=document.getElementById('stats-bar');
+  var active=projects.filter(function(p){return p.status!=='done';}).length;
+  var done=projects.filter(function(p){return p.status==='done';}).length;
+  var today=new Date();
+  var overdue=projects.filter(function(p){
+    return p.deadline&&new Date(p.deadline)<today&&p.status!=='done';
+  }).length;
+  var avgPct=projects.length?Math.round(projects.reduce(function(a,p){return a+(p.lastPct||0);},0)/projects.length):0;
+
+  el.innerHTML=
+    '<div class="stat-card"><div class="stat-val" style="color:var(--cyan)">'+projects.length+'</div><div class="stat-lbl">โครงการทั้งหมด</div></div>'+
+    '<div class="stat-card"><div class="stat-val" style="color:var(--green)">'+active+'</div><div class="stat-lbl">กำลังดำเนินการ</div></div>'+
+    '<div class="stat-card"><div class="stat-val" style="color:var(--gold)">'+done+'</div><div class="stat-lbl">เสร็จแล้ว</div></div>'+
+    '<div class="stat-card"><div class="stat-val" style="color:'+(overdue?'var(--red)':'var(--green)')+'">'+overdue+'</div><div class="stat-lbl">เลยกำหนด</div></div>'+
+    '<div class="stat-card"><div class="stat-val" style="color:var(--blue)">'+avgPct+'%</div><div class="stat-lbl">ความคืบหน้าเฉลี่ย</div></div>';
+}
+
+// ════════════════════════════════════════════════════════════════
+// PROJECT CARDS
+// ════════════════════════════════════════════════════════════════
+function daysLeft(deadlineStr){
+  if(!deadlineStr) return null;
+  var d=Math.ceil((new Date(deadlineStr)-new Date())/(86400000));
+  return d;
+}
+function fmtDate(str){
+  if(!str) return '—';
+  var d=new Date(str+'T00:00:00');
+  return d.toLocaleDateString('th-TH',{year:'numeric',month:'short',day:'numeric'});
+}
+function statusBadge(project){
+  var dl=daysLeft(project.deadline);
+  if(project.status==='done') return '<span class="status-badge" style="background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.3);color:var(--green)">✅ เสร็จแล้ว</span>';
+  if(dl!==null&&dl<0) return '<span class="status-badge" style="background:rgba(255,68,68,.15);border:1px solid rgba(255,68,68,.3);color:var(--red)">🔴 เลยกำหนด '+Math.abs(dl)+' วัน</span>';
+  if(dl!==null&&dl<=7) return '<span class="status-badge" style="background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.2);color:var(--orange)">⚠️ ใกล้ครบ '+dl+' วัน</span>';
+  if(dl!==null&&dl<=14) return '<span class="status-badge" style="background:rgba(255,149,0,.1);border:1px solid rgba(255,149,0,.2);color:var(--gold)">🟡 เหลือ '+dl+' วัน</span>';
+  var txt=dl!==null?'🟢 เหลือ '+dl+' วัน':'🔵 ดำเนินการ';
+  return '<span class="status-badge" style="background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.15);color:var(--green)">'+txt+'</span>';
+}
+
+function renderProjects(){
+  var projects=loadProjects();
+  renderStats(projects);
+  var grid=document.getElementById('proj-grid');
+  var html='';
+
+  projects.forEach(function(p,idx){
+    var col=p.color||'#00d4ff';
+    var pct=p.lastPct||0;
+    var barW=Math.min(100,pct).toFixed(1);
+    var dl=daysLeft(p.deadline);
+    var dlTxt=dl!==null?(dl>=0?dl+' วัน':'เลยกำหนด '+Math.abs(dl)+' วัน'):'—';
+    var dlCol=dl!==null?(dl<0?'var(--red)':dl<=7?'var(--orange)':'var(--tx3)'):'var(--tx3)';
+
+    html+='<div class="proj-card" style="border-color:'+col+'33;border-top:3px solid '+col+'">';
+    html+='<div class="proj-card-header">';
+    html+='<div class="proj-card-name" style="color:'+col+'">🏗️ '+p.name+'</div>';
+    html+='<div class="proj-card-client" style="color:var(--tx3)">'+(p.clientName?'👤 '+p.clientName:'')+'</div>';
+    html+='</div>';
+    html+='<div class="proj-card-body">';
+    html+='<div class="proj-progress-row">';
+    html+='<span style="font-size:12px;color:var(--tx3)">ความคืบหน้า</span>';
+    html+='<span class="proj-pct" style="color:'+col+'">'+pct.toFixed(1)+'%</span>';
+    html+='</div>';
+    html+='<div class="proj-bar-bg"><div class="proj-bar-fill" style="width:'+barW+'%;background:'+col+'"></div></div>';
+    html+='<div class="proj-meta">';
+    html+='<span>📅 เริ่ม: '+fmtDate(p.startDate)+'</span>';
+    html+='<span style="color:'+dlCol+'">🎯 กำหนดส่ง: '+fmtDate(p.deadline)+' ('+dlTxt+')</span>';
+    html+='</div>';
+    html+='<div style="margin-top:10px">'+statusBadge(p)+'</div>';
+    html+='</div>';
+    html+='<div class="proj-card-footer">';
+    html+='<button class="btn btn-g" onclick="openDashboard(\''+idx+'\')" style="flex:1;font-size:12px">🚀 เปิด Dashboard</button>';
+    html+='<button class="btn btn-b" onclick="openEdit(\''+idx+'\')" style="font-size:12px">✏️ แก้ไข</button>';
+    html+='<button class="btn btn-o" onclick="toggleDone(\''+idx+'\')" style="font-size:12px">'+(p.status==='done'?'🔄 เปิดใหม่':'✅ ปิดงาน')+'</button>';
+    html+='<button class="btn btn-r" onclick="openDelete(\''+idx+'\')" style="font-size:12px">🗑️</button>';
+    html+='</div>';
+    html+='</div>';
+  });
+
+  // Add new card
+  html+='<div class="add-card" onclick="openAddModal()">';
+  html+='<div class="add-card-icon">➕</div>';
+  html+='<div class="add-card-text">เพิ่มโครงการใหม่</div>';
+  html+='</div>';
+
+  grid.innerHTML=html;
+}
+
+// ════════════════════════════════════════════════════════════════
+// OPEN DASHBOARD
+// ════════════════════════════════════════════════════════════════
+function openDashboard(idx){
+  var projects=loadProjects();
+  var p=projects[parseInt(idx)];
+  if(!p){ alert('ไม่พบโครงการ'); return; }
+
+  // Write config to localStorage
+  var cfg={
+    projectId:  p.id,
+    projectName:p.name,
+    clientName: p.clientName||'',
+    startDate:  p.startDate||'2026-03-17',
+    deadline:   p.deadline||'2026-04-22',
+    fbUrl:      p.fbUrl||'',
+    acctHash:   p.acctHash||'30072530',
+  };
+  localStorage.setItem('cp_project_config', JSON.stringify(cfg));
+  if(cfg.fbUrl) localStorage.setItem('cp_fb_url', cfg.fbUrl);
+
+  // Open dashboard template
+  var template=p.template||'dashboard_template.html';
+  window.open(template+'?pid='+encodeURIComponent(p.id),'dashboard_'+p.id);
+}
+
+// ════════════════════════════════════════════════════════════════
+// ADD / EDIT MODAL
+// ════════════════════════════════════════════════════════════════
+var _editIdx = -1;
+
+function openAddModal(){
+  _editIdx=-1;
+  document.getElementById('modal-icon').textContent='➕';
+  document.getElementById('modal-title-text').textContent='เพิ่มโครงการใหม่';
+  document.getElementById('f-name').value='';
+  document.getElementById('f-client').value='';
+  document.getElementById('f-start').value=new Date().toISOString().slice(0,10);
+  document.getElementById('f-deadline').value='';
+  document.getElementById('f-fb').value='';
+  document.getElementById('f-admin-pw').value='19841984';
+  document.getElementById('f-acct-pw').value='30072530';
+  document.getElementById('f-template').value='dashboard_template.html';
+  _selectedColor=COLORS[loadProjects().length%COLORS.length];
+  renderColorPicker();
+  document.getElementById('add-modal').classList.add('show');
+  setTimeout(function(){document.getElementById('f-name').focus();},100);
+}
+function openEdit(idx){
+  var projects=loadProjects();
+  var p=projects[parseInt(idx)];
+  if(!p) return;
+  _editIdx=parseInt(idx);
+  document.getElementById('modal-icon').textContent='✏️';
+  document.getElementById('modal-title-text').textContent='แก้ไขโครงการ';
+  document.getElementById('f-name').value=p.name||'';
+  document.getElementById('f-client').value=p.clientName||'';
+  document.getElementById('f-start').value=p.startDate||'';
+  document.getElementById('f-deadline').value=p.deadline||'';
+  document.getElementById('f-fb').value=p.fbUrl||'';
+  document.getElementById('f-admin-pw').value=p.adminHash||'19841984';
+  document.getElementById('f-acct-pw').value=p.acctHash||'30072530';
+  document.getElementById('f-template').value=p.template||'dashboard_template.html';
+  _selectedColor=p.color||COLORS[0];
+  renderColorPicker();
+  document.getElementById('add-modal').classList.add('show');
+}
+function closeAddModal(){
+  document.getElementById('add-modal').classList.remove('show');
+}
+function saveProject(){
+  var name=(document.getElementById('f-name').value||'').trim();
+  if(!name){ alert('กรุณาใส่ชื่อโครงการ'); return; }
+  var fb=(document.getElementById('f-fb').value||'').trim();
+  if(!fb){ alert('กรุณาใส่ Firebase URL'); return; }
+  var deadline=(document.getElementById('f-deadline').value||'').trim();
+  if(!deadline){ alert('กรุณาระบุวันส่งมอบ'); return; }
+
+  var projects=loadProjects();
+  var proj={
+    id:       _editIdx>=0?projects[_editIdx].id:genId(),
+    name:     name,
+    clientName:document.getElementById('f-client').value.trim(),
+    startDate: document.getElementById('f-start').value,
+    deadline:  deadline,
+    fbUrl:     fb,
+    adminHash: document.getElementById('f-admin-pw').value||'19841984',
+    acctHash:  document.getElementById('f-acct-pw').value||'30072530',
+    template:  document.getElementById('f-template').value||'dashboard_template.html',
+    color:     _selectedColor,
+    status:    'active',
+    lastPct:   0,
+    createdAt: _editIdx>=0?(projects[_editIdx].createdAt||new Date().toISOString()):new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  if(_editIdx>=0){
+    proj.status=projects[_editIdx].status||'active';
+    proj.lastPct=projects[_editIdx].lastPct||0;
+    projects[_editIdx]=proj;
+  } else {
+    projects.push(proj);
+  }
+  saveProjects(projects);
+  closeAddModal();
+  renderProjects();
+  showToast(_editIdx>=0?'แก้ไขโครงการแล้ว ✓':'เพิ่มโครงการใหม่แล้ว ✓');
+}
+
+// ════════════════════════════════════════════════════════════════
+// DELETE
+// ════════════════════════════════════════════════════════════════
+var _delIdx=-1;
+function openDelete(idx){
+  var projects=loadProjects();
+  _delIdx=parseInt(idx);
+  document.getElementById('del-proj-name').textContent=projects[_delIdx]?.name||'';
+  document.getElementById('del-modal').classList.add('show');
+}
+function closeDelModal(){ document.getElementById('del-modal').classList.remove('show'); }
+function confirmDelete(){
+  var projects=loadProjects();
+  projects.splice(_delIdx,1);
+  saveProjects(projects);
+  closeDelModal();
+  renderProjects();
+  showToast('ลบโครงการแล้ว');
+}
+function toggleDone(idx){
+  var projects=loadProjects();
+  var p=projects[parseInt(idx)];
+  if(!p) return;
+  p.status=p.status==='done'?'active':'done';
+  p.updatedAt=new Date().toISOString();
+  saveProjects(projects);
+  renderProjects();
+  showToast(p.status==='done'?'✅ ปิดงานแล้ว':'🔄 เปิดโครงการใหม่');
+}
+
+// ════════════════════════════════════════════════════════════════
+// EXPORT
+// ════════════════════════════════════════════════════════════════
+function exportAll(){
+  var projects=loadProjects();
+  var json=JSON.stringify(projects,null,2);
+  var blob=new Blob([json],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='admin_portal_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+}
+
+// ════════════════════════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════════════════════════
+function showToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.4);color:#00e676;border-radius:10px;padding:12px 24px;font-weight:700;font-size:13px;z-index:9999;font-family:var(--f);white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.4)';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.remove();},3000);
+}
+
+// ════════════════════════════════════════════════════════════════
+// KEYBOARD
+// ════════════════════════════════════════════════════════════════
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){
+    closeAddModal();
+    closeDelModal();
+  }
+});
+
+// ════════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════════
+renderColorPicker();
+renderProjects();
+
+// Auto-refresh progress from Firebase every 30s
+setInterval(function(){
+  // In a real setup, this would fetch latest pct from each project's Firebase
+  // For now, just re-render to catch any changes
+  renderProjects();
+},30000);
+</script>
+</body>
+</html>
