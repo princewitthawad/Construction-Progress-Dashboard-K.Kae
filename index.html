@@ -370,11 +370,20 @@ function openDashboard(idx){
     clientName: p.clientName||'',
     startDate:  p.startDate||'2026-03-17',
     deadline:   p.deadline||'2026-04-22',
+    fastDeadline: p.fastDeadline||p.deadline||'2026-04-22',
     fbUrl:      p.fbUrl||'',
-    acctHash:   p.acctHash||'30072530',
+    adminHash:  p.adminHash||'',
+    acctHash:   p.acctHash||'',
   };
   localStorage.setItem('cp_project_config', JSON.stringify(cfg));
   if(cfg.fbUrl) localStorage.setItem('cp_fb_url', cfg.fbUrl);
+  // Sync project dates into dashboard's own key
+  var projDates = {
+    startDate: cfg.startDate,
+    fastDeadlineDate: cfg.fastDeadline,
+    deadlineDate: cfg.deadline,
+  };
+  localStorage.setItem('cp_project_dates', JSON.stringify(projDates));
 
   // Open dashboard template
   var template=p.template||'dashboard_template.html';
@@ -533,12 +542,173 @@ document.addEventListener('keydown',function(e){
 renderColorPicker();
 renderProjects();
 
-// Auto-refresh progress from Firebase every 30s
-setInterval(function(){
-  // In a real setup, this would fetch latest pct from each project's Firebase
-  // For now, just re-render to catch any changes
-  renderProjects();
-},30000);
+// ════════════════════════════════════════════════════════════════
+// REAL-TIME FIREBASE SYNC
+// ════════════════════════════════════════════════════════════════
+
+// Fetch overall% from a project's Firebase
+// Dashboard saves: construction_progress.json (legacy) + s_data_v3 node
+async function fetchProjectPct(fbUrl) {
+  if (!fbUrl || !fbUrl.startsWith('https://')) return null;
+  var base = fbUrl.replace(/\/+$/, '');
+  try {
+    // Try new s_data_v3 node first (v3.0 dashboard)
+    var r1 = await fetch(base + '/s_data_v3.json');
+    if (r1.ok) {
+      var sData = await r1.json();
+      if (sData && typeof sData === 'object') {
+        var vals = Object.values(sData);
+        if (vals.length) {
+          var sum = vals.reduce(function(a, d) { return a + Math.min(100, Math.max(0, d.pct || 0)); }, 0);
+          return parseFloat((sum / vals.length).toFixed(2));
+        }
+      }
+    }
+    // Fallback: construction_progress.json (legacy v2 dashboard)
+    var r2 = await fetch(base + '/construction_progress.json');
+    if (r2.ok) {
+      var state = await r2.json();
+      if (state && typeof state === 'object') {
+        // Try to compute from old state keys
+        var s1 = state.s1 || 0;
+        var f25 = state.fd ? (state.fd.reduce(function(a,v){return a+v;},0)/state.fd.length) : 0;
+        var s5 = state.s5 || 0;
+        var s6 = state.s6 || 0;
+        var s7 = state.s7 || 0;
+        var vals2 = [s1, f25, s5, s6, s7].filter(function(v){ return v > 0 || true; });
+        return parseFloat((vals2.reduce(function(a,b){return a+b;},0)/vals2.length).toFixed(2));
+      }
+    }
+  } catch(e) {}
+  return null;
+}
+
+// Fetch project_dates from Firebase (set by Dev mode)
+async function fetchProjectDates(fbUrl) {
+  if (!fbUrl || !fbUrl.startsWith('https://')) return null;
+  var base = fbUrl.replace(/\/+$/, '');
+  try {
+    var r = await fetch(base + '/project_dates.json');
+    if (r.ok) {
+      var d = await r.json();
+      if (d && d.deadlineDate) return d;
+    }
+  } catch(e) {}
+  return null;
+}
+
+// Refresh a single project card's pct live
+var _refreshTimers = {};
+async function refreshProjectPct(projId) {
+  var projects = loadProjects();
+  var p = projects.find(function(x){ return x.id === projId; });
+  if (!p || !p.fbUrl) return;
+  var pct = await fetchProjectPct(p.fbUrl);
+  var dates = await fetchProjectDates(p.fbUrl);
+  if (pct === null && dates === null) return;
+  var changed = false;
+  if (pct !== null && Math.abs((p.lastPct||0) - pct) > 0.01) {
+    p.lastPct = pct;
+    p.lastSync = new Date().toISOString();
+    changed = true;
+  }
+  if (dates) {
+    if (dates.deadlineDate && dates.deadlineDate !== p.deadline) {
+      p.deadline = dates.deadlineDate;
+      changed = true;
+    }
+    if (dates.startDate && dates.startDate !== p.startDate) {
+      p.startDate = dates.startDate;
+      changed = true;
+    }
+  }
+  if (changed) {
+    saveProjects(projects);
+    renderProjects();
+  }
+}
+
+// Refresh all projects
+async function refreshAllProjects() {
+  var projects = loadProjects();
+  for (var i = 0; i < projects.length; i++) {
+    if (projects[i].fbUrl && projects[i].status !== 'done') {
+      await refreshProjectPct(projects[i].id);
+    }
+  }
+}
+
+// Show live sync indicator on header
+function updateSyncStatus(syncing) {
+  var el = document.getElementById('sync-status');
+  if (!el) return;
+  if (syncing) {
+    el.innerHTML = '<span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--cyan);font-family:var(--m)"><div style="width:8px;height:8px;border:2px solid var(--cyan);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite"></div>ซิงค์...</span>';
+  } else {
+    var now = new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    el.innerHTML = '<span style="font-size:10px;color:var(--tx3);font-family:var(--m)">🔄 อัพเดท: ' + now + '</span>';
+  }
+}
+
+// Add sync status + live badge to header
+(function addSyncUI(){
+  var header = document.querySelector('.header > div:last-child');
+  if (!header) return;
+  var div = document.createElement('div');
+  div.id = 'sync-status';
+  div.style.cssText = 'display:flex;align-items:center;gap:6px;padding:0 4px;';
+  div.innerHTML = '<span style="font-size:10px;color:var(--tx3);font-family:var(--m)">🔄 รอซิงค์...</span>';
+  header.appendChild(div);
+})();
+
+// Spin animation
+var spinStyle = document.createElement('style');
+spinStyle.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+document.head.appendChild(spinStyle);
+
+// ── Add lastSync display to project cards ──────────────────────────────────
+var _origRenderProjects = renderProjects;
+renderProjects = function() {
+  _origRenderProjects();
+  // After render, patch each card with sync time
+  var projects = loadProjects();
+  projects.forEach(function(p, idx) {
+    var card = document.querySelectorAll('.proj-card')[idx];
+    if (!card || !p.lastSync) return;
+    var syncEl = card.querySelector('.proj-sync-time');
+    if (!syncEl) {
+      var foot = card.querySelector('.proj-card-footer');
+      if (foot) {
+        var st = document.createElement('div');
+        st.className = 'proj-sync-time';
+        st.style.cssText = 'width:100%;padding:4px 0 0;font-size:9px;color:var(--tx3);font-family:var(--m);text-align:right';
+        var d = new Date(p.lastSync);
+        st.textContent = 'ซิงค์: ' + d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+        foot.parentElement.insertBefore(st, foot);
+      }
+    }
+  });
+};
+
+// ── LIVE REFRESH LOOP ──────────────────────────────────────────────────────
+var REFRESH_INTERVAL = 15000; // 15 seconds
+var _liveTimer = null;
+
+async function liveRefreshLoop() {
+  updateSyncStatus(true);
+  await refreshAllProjects();
+  updateSyncStatus(false);
+  _liveTimer = setTimeout(liveRefreshLoop, REFRESH_INTERVAL);
+}
+
+// Start immediately
+setTimeout(liveRefreshLoop, 500);
+
+// Manual refresh button
+document.querySelector('.header > div:last-child').insertAdjacentHTML('beforeend',
+  '<button class="btn btn-b" onclick="liveRefreshLoop()" style="font-size:11px;padding:7px 12px">🔄 รีเฟรช</button>'
+);
+
 </script>
 </body>
 </html>
