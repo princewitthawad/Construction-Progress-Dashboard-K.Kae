@@ -576,49 +576,15 @@ renderProjects();
 // ════════════════════════════════════════════════════════════════
 
 // Fetch overall% from a project's Firebase
-// Dashboard saves: construction_progress.json (legacy) + s_data_v3 node
+// Read overall% directly from Dashboard's pre-computed overall_pct node
 async function fetchProjectPct(fbUrl) {
   if (!fbUrl || !fbUrl.startsWith('https://')) return null;
   var base = fbUrl.replace(/\/+$/, '');
   try {
-    // ── Priority 1: overall_pct node (pre-computed by Dashboard v3 on every save) ──
-    var r0 = await fetch(base + '/overall_pct.json');
-    if (r0.ok) {
-      var op = await r0.json();
+    var r = await fetch(base + '/overall_pct.json');
+    if (r.ok) {
+      var op = await r.json();
       if (op && typeof op.pct === 'number') return op.pct;
-    }
-
-    // ── Priority 2: compute from s_data_v3 using EXACT same formula as Dashboard Donut ──
-    // Formula = calcAllOverall():
-    //   Σ( min(100, max(0, item.pct)) ) / totalCount
-    // (no pctTarget weighting — same as updateMainKPI / kp-o / pie-cpct)
-    var r1 = await fetch(base + '/s_data_v3.json');
-    if (r1.ok) {
-      var sData = await r1.json();
-      if (sData && typeof sData === 'object') {
-        var items = Object.values(sData);
-        if (items.length) {
-          var sum = items.reduce(function(a, d) {
-            return a + Math.min(100, Math.max(0, d.pct || 0));
-          }, 0);
-          return parseFloat((sum / items.length).toFixed(2));
-        }
-      }
-    }
-
-    // ── Priority 3: legacy construction_progress.json (v2 dashboard) ──
-    var r2 = await fetch(base + '/construction_progress.json');
-    if (r2.ok) {
-      var state = await r2.json();
-      if (state && typeof state === 'object') {
-        var s1 = state.s1 || 0;
-        var f25 = state.fd ? (state.fd.reduce(function(a,v){return a+v;},0)/state.fd.length) : 0;
-        var s5 = state.s5 || 0;
-        var s6 = state.s6 || 0;
-        var s7 = state.s7 || 0;
-        var v2 = [s1, f25, s5, s6, s7];
-        return parseFloat((v2.reduce(function(a,b){return a+b;},0)/v2.length).toFixed(2));
-      }
     }
   } catch(e) {}
   return null;
