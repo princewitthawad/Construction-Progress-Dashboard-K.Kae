@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -138,28 +139,6 @@ body{background:var(--bg);color:var(--tx);font-family:var(--f);min-height:100vh}
 <!-- ═══ MAIN ═══ -->
 <div class="main">
 
-  <!-- Firebase Cloud Panel -->
-  <div id="fb-cloud-panel" style="background:linear-gradient(135deg,rgba(8,20,40,.95),rgba(13,25,45,.95));border:1.5px solid rgba(56,139,253,.35);border-radius:14px;padding:18px 20px;margin-bottom:22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-    <div style="width:40px;height:40px;background:rgba(56,139,253,.15);border:1px solid rgba(56,139,253,.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">☁️</div>
-    <div style="flex:1;min-width:200px">
-      <div style="font-size:13px;font-weight:800;color:#e8f0fe;margin-bottom:2px">Firebase Cloud Sync
-        <span id="fb-panel-status" style="margin-left:8px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:rgba(255,149,0,.15);border:1px solid rgba(255,149,0,.3);color:#ff9500">⚠️ ยังไม่ได้ตั้งค่า</span>
-      </div>
-      <div style="font-size:10px;color:#6b7a8d;font-family:var(--m)">ใส่ Firebase URL เพื่อซิงค์ข้อมูลโครงการแบบ Real-time</div>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex:2;min-width:280px">
-      <input id="fb-panel-url" type="url"
-        placeholder="https://your-project-default-rtdb.firebaseio.com"
-        style="flex:1;min-width:200px;background:rgba(56,139,253,.06);border:1.5px solid rgba(56,139,253,.2);border-radius:8px;padding:9px 12px;color:#e8f0fe;font-size:12px;font-family:var(--m);outline:none;transition:border .2s"
-        onfocus="this.style.borderColor='rgba(56,139,253,.6)'" onblur="this.style.borderColor='rgba(56,139,253,.2)'"
-        onkeydown="if(event.key==='Enter')saveFbPanel()" oninput="onFbPanelInput()">
-      <button onclick="saveFbPanel()" style="background:rgba(56,139,253,.2);border:1px solid rgba(56,139,253,.5);color:#388bfd;border-radius:8px;padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f);white-space:nowrap">💾 บันทึก</button>
-      <button onclick="testFbPanel()" id="fb-panel-test-btn" style="background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:#00e676;border-radius:8px;padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f);white-space:nowrap">🔌 ทดสอบ</button>
-      <button onclick="openFbGuideModal()" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8899aa;border-radius:8px;padding:9px 10px;font-size:12px;cursor:pointer;font-family:var(--f)" title="คู่มือสร้าง Firebase">📖</button>
-    </div>
-    <div id="fb-panel-result" style="width:100%;font-size:11px;font-family:var(--m);min-height:0;padding-top:2px"></div>
-  </div>
-
   <!-- Stats -->
   <div class="stats-bar" id="stats-bar"></div>
 
@@ -197,17 +176,10 @@ body{background:var(--bg);color:var(--tx);font-family:var(--f);min-height:100vh}
       <div class="color-row" id="color-row"></div>
     </div>
 
-    <div class="form-section" style="display:flex;align-items:center;justify-content:space-between">
-      <span>☁️ Firebase Realtime Database</span>
-      <button type="button" onclick="openFbGuideModal()" style="background:rgba(56,139,253,.15);border:1px solid rgba(56,139,253,.4);color:#388bfd;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:var(--f);font-weight:700">📖 คู่มือสร้าง Firebase</button>
-    </div>
+    <div class="form-section">Firebase Realtime Database</div>
     <div class="form-group">
       <label class="form-label">Firebase URL *</label>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input class="form-input" id="f-fb" placeholder="https://your-project-default-rtdb.firebaseio.com" style="flex:1;margin-bottom:0">
-        <button type="button" id="fb-test-btn" onclick="testFbUrl()" style="white-space:nowrap;background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.35);color:#00e676;border-radius:8px;padding:10px 14px;font-size:12px;cursor:pointer;font-family:var(--f);font-weight:700;flex-shrink:0">🔌 ทดสอบ</button>
-      </div>
-      <div id="fb-test-result" style="font-size:11px;margin-top:6px;min-height:16px;font-family:var(--m)"></div>
+      <input class="form-input" id="f-fb" placeholder="https://your-project-default-rtdb.firebaseio.com">
       <div class="form-hint">สร้าง Firebase project ใหม่สำหรับแต่ละโครงการ เพื่อให้ข้อมูลแยกกัน</div>
     </div>
 
@@ -357,12 +329,7 @@ function renderProjects(){
     html+='<div class="proj-card-body">';
     html+='<div class="proj-progress-row">';
     html+='<span style="font-size:12px;color:var(--tx3)">ความคืบหน้า</span>';
-    var syncAgo='';
-    if(p.lastSync){var d=Math.round((Date.now()-new Date(p.lastSync).getTime())/60000);syncAgo=d<1?'เมื่อกี้':d<60?d+' นาทีที่แล้ว':Math.floor(d/60)+' ชม.ที่แล้ว';}
-    html+='<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">';
     html+='<span class="proj-pct" style="color:'+col+'">'+pct.toFixed(1)+'%</span>';
-    html+='<span style="font-size:10px;color:#445566;font-family:var(--m)" id="pct-sync-'+idx+'">'+(syncAgo?'🔄 '+syncAgo:'⏳ ยังไม่ซิงค์')+'</span>';
-    html+='</div>';
     html+='</div>';
     html+='<div class="proj-bar-bg"><div class="proj-bar-fill" style="width:'+barW+'%;background:'+col+'"></div></div>';
     html+='<div class="proj-meta">';
@@ -373,7 +340,6 @@ function renderProjects(){
     html+='</div>';
     html+='<div class="proj-card-footer">';
     html+='<button class="btn btn-g" onclick="openDashboard(\''+idx+'\')" style="flex:1;font-size:12px">🚀 เปิด Dashboard</button>';
-    if(p.fbUrl) html+='<button class="btn" onclick="refreshProjectPct(\''+p.id+'\');this.textContent=\'⏳\';setTimeout(()=>this.textContent=\'🔄\',3000)" style="font-size:12px;background:rgba(56,139,253,.12);border:1px solid rgba(56,139,253,.3);color:#388bfd;padding:9px 12px" title="ซิงค์จาก Firebase">🔄</button>';
     html+='<button class="btn btn-b" onclick="openEdit(\''+idx+'\')" style="font-size:12px">✏️ แก้ไข</button>';
     html+='<button class="btn btn-o" onclick="toggleDone(\''+idx+'\')" style="font-size:12px">'+(p.status==='done'?'🔄 เปิดใหม่':'✅ ปิดงาน')+'</button>';
     html+='<button class="btn btn-r" onclick="openDelete(\''+idx+'\')" style="font-size:12px">🗑️</button>';
@@ -405,20 +371,11 @@ function openDashboard(idx){
     clientName: p.clientName||'',
     startDate:  p.startDate||'2026-03-17',
     deadline:   p.deadline||'2026-04-22',
-    fastDeadline: p.fastDeadline||p.deadline||'2026-04-22',
     fbUrl:      p.fbUrl||'',
-    adminHash:  p.adminHash||'',
-    acctHash:   p.acctHash||'',
+    acctHash:   p.acctHash||'30072530',
   };
   localStorage.setItem('cp_project_config', JSON.stringify(cfg));
   if(cfg.fbUrl) localStorage.setItem('cp_fb_url', cfg.fbUrl);
-  // Sync project dates into dashboard's own key
-  var projDates = {
-    startDate: cfg.startDate,
-    fastDeadlineDate: cfg.fastDeadline,
-    deadlineDate: cfg.deadline,
-  };
-  localStorage.setItem('cp_project_dates', JSON.stringify(projDates));
 
   // Open dashboard template
   var template=p.template||'dashboard_template.html';
@@ -577,345 +534,12 @@ document.addEventListener('keydown',function(e){
 renderColorPicker();
 renderProjects();
 
-// ════════════════════════════════════════════════════════════════
-// REAL-TIME FIREBASE SYNC
-// ════════════════════════════════════════════════════════════════
-
-// Fetch overall% from a project's Firebase
-// Read overall% directly from Dashboard's pre-computed overall_pct node
-async function fetchProjectPct(fbUrl) {
-  if (!fbUrl || !fbUrl.startsWith('https://')) return null;
-  var base = fbUrl.replace(/\/+$/, '');
-  try {
-    var r = await fetch(base + '/overall_pct.json');
-    if (r.ok) {
-      var op = await r.json();
-      if (op && typeof op.pct === 'number') return op.pct;
-    }
-  } catch(e) {}
-  return null;
-}
-
-// Fetch project_dates from Firebase (set by Dev mode)
-async function fetchProjectDates(fbUrl) {
-  if (!fbUrl || !fbUrl.startsWith('https://')) return null;
-  var base = fbUrl.replace(/\/+$/, '');
-  try {
-    var r = await fetch(base + '/project_dates.json');
-    if (r.ok) {
-      var d = await r.json();
-      if (d && d.deadlineDate) return d;
-    }
-  } catch(e) {}
-  return null;
-}
-
-// Refresh a single project card's pct live
-var _refreshTimers = {};
-async function refreshProjectPct(projId) {
-  var projects = loadProjects();
-  var p = projects.find(function(x){ return x.id === projId; });
-  if (!p || !p.fbUrl) return;
-  var pct = await fetchProjectPct(p.fbUrl);
-  var dates = await fetchProjectDates(p.fbUrl);
-  if (pct === null && dates === null) return;
-  var changed = false;
-  if (pct !== null && Math.abs((p.lastPct||0) - pct) > 0.01) {
-    p.lastPct = pct;
-    p.lastSync = new Date().toISOString();
-    changed = true;
-  }
-  if (dates) {
-    if (dates.deadlineDate && dates.deadlineDate !== p.deadline) {
-      p.deadline = dates.deadlineDate;
-      changed = true;
-    }
-    if (dates.startDate && dates.startDate !== p.startDate) {
-      p.startDate = dates.startDate;
-      changed = true;
-    }
-  }
-  if (changed) {
-    saveProjects(projects);
-    renderProjects();
-  }
-}
-
-// Auto-refresh every 30s
-function startAutoRefresh(){
-  refreshAllProjects();
-  setInterval(refreshAllProjects, 30000);
-}
-
-// Refresh all projects
-async function refreshAllProjects() {
-  var projects = loadProjects();
-  for (var i = 0; i < projects.length; i++) {
-    if (projects[i].fbUrl && projects[i].status !== 'done') {
-      await refreshProjectPct(projects[i].id);
-    }
-  }
-}
-
-// Show live sync indicator on header
-function updateSyncStatus(syncing) {
-  var el = document.getElementById('sync-status');
-  if (!el) return;
-  if (syncing) {
-    el.innerHTML = '<span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--cyan);font-family:var(--m)"><div style="width:8px;height:8px;border:2px solid var(--cyan);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite"></div>ซิงค์...</span>';
-  } else {
-    var now = new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    el.innerHTML = '<span style="font-size:10px;color:var(--tx3);font-family:var(--m)">🔄 อัพเดท: ' + now + '</span>';
-  }
-}
-
-// Add sync status + live badge to header
-(function addSyncUI(){
-  var header = document.querySelector('.header > div:last-child');
-  if (!header) return;
-  var div = document.createElement('div');
-  div.id = 'sync-status';
-  div.style.cssText = 'display:flex;align-items:center;gap:6px;padding:0 4px;';
-  div.innerHTML = '<span style="font-size:10px;color:var(--tx3);font-family:var(--m)">🔄 รอซิงค์...</span>';
-  header.appendChild(div);
-})();
-
-// Spin animation
-var spinStyle = document.createElement('style');
-spinStyle.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
-document.head.appendChild(spinStyle);
-
-// ── Add lastSync display to project cards ──────────────────────────────────
-var _origRenderProjects = renderProjects;
-renderProjects = function() {
-  _origRenderProjects();
-  // After render, patch each card with sync time
-  var projects = loadProjects();
-  projects.forEach(function(p, idx) {
-    var card = document.querySelectorAll('.proj-card')[idx];
-    if (!card || !p.lastSync) return;
-    var syncEl = card.querySelector('.proj-sync-time');
-    if (!syncEl) {
-      var foot = card.querySelector('.proj-card-footer');
-      if (foot) {
-        var st = document.createElement('div');
-        st.className = 'proj-sync-time';
-        st.style.cssText = 'width:100%;padding:4px 0 0;font-size:9px;color:var(--tx3);font-family:var(--m);text-align:right';
-        var d = new Date(p.lastSync);
-        st.textContent = 'ซิงค์: ' + d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-        foot.parentElement.insertBefore(st, foot);
-      }
-    }
-  });
-};
-
-// ── LIVE REFRESH LOOP ──────────────────────────────────────────────────────
-var REFRESH_INTERVAL = 15000; // 15 seconds
-var _liveTimer = null;
-
-async function liveRefreshLoop() {
-  updateSyncStatus(true);
-  await refreshAllProjects();
-  updateSyncStatus(false);
-  _liveTimer = setTimeout(liveRefreshLoop, REFRESH_INTERVAL);
-}
-
-// Start immediately
-setTimeout(liveRefreshLoop, 500);
-
-// Manual refresh button
-document.querySelector('.header > div:last-child').insertAdjacentHTML('beforeend',
-  '<button class="btn btn-b" onclick="liveRefreshLoop()" style="font-size:11px;padding:7px 12px">🔄 รีเฟรช</button>'
-);
-
+// Auto-refresh progress from Firebase every 30s
+setInterval(function(){
+  // In a real setup, this would fetch latest pct from each project's Firebase
+  // For now, just re-render to catch any changes
+  renderProjects();
+},30000);
 </script>
-
-<!-- ═══ FIREBASE GUIDE MODAL ═══ -->
-<div id="fb-guide-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(4,8,16,.92);backdrop-filter:blur(16px);align-items:center;justify-content:center;padding:16px;overflow-y:auto">
-  <div style="width:100%;max-width:540px;margin:auto;background:#0a1020;border:1px solid rgba(56,139,253,.35);border-radius:20px;overflow:hidden;box-shadow:0 16px 64px rgba(0,0,0,.7)">
-    <div style="height:2px;background:linear-gradient(90deg,transparent,#388bfd,#00d4ff,transparent)"></div>
-    <div style="padding:24px">
-
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:44px;height:44px;background:rgba(56,139,253,.12);border:1px solid rgba(56,139,253,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">☁️</div>
-          <div>
-            <div style="font-size:16px;font-weight:800;color:#e8f0fe">สร้าง Firebase ฟรี</div>
-            <div style="font-size:10px;color:#6b7a8d;font-family:var(--m);margin-top:2px">Real-time Sync สำหรับโครงการ</div>
-          </div>
-        </div>
-        <button onclick="closeFbGuideModal()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#8899aa;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:var(--f)">✕ ปิด</button>
-      </div>
-
-      <!-- Steps -->
-      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
-        <div style="display:flex;gap:12px;padding:12px 14px;background:rgba(56,139,253,.06);border:1px solid rgba(56,139,253,.15);border-radius:10px">
-          <div style="width:26px;height:26px;background:rgba(56,139,253,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#388bfd;flex-shrink:0">1</div>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:#e8f0fe;margin-bottom:3px">เปิด Firebase Console</div>
-            <div style="font-size:12px;color:#8899aa">ไปที่ <a href="https://console.firebase.google.com" target="_blank" style="color:#388bfd;font-weight:700">console.firebase.google.com</a> → <strong style="color:#e8f0fe">Add project</strong> → ตั้งชื่อโครงการ</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:12px;padding:12px 14px;background:rgba(56,139,253,.06);border:1px solid rgba(56,139,253,.15);border-radius:10px">
-          <div style="width:26px;height:26px;background:rgba(56,139,253,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#388bfd;flex-shrink:0">2</div>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:#e8f0fe;margin-bottom:3px">สร้าง Realtime Database</div>
-            <div style="font-size:12px;color:#8899aa">เมนูซ้าย → <strong style="color:#e8f0fe">Build → Realtime Database</strong> → <strong style="color:#e8f0fe">Create Database</strong> → เลือก Location (asia-southeast1 สำหรับไทย)</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:12px;padding:12px 14px;background:rgba(56,139,253,.06);border:1px solid rgba(56,139,253,.15);border-radius:10px">
-          <div style="width:26px;height:26px;background:rgba(56,139,253,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#388bfd;flex-shrink:0">3</div>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:#e8f0fe;margin-bottom:3px">เลือก Test Mode</div>
-            <div style="font-size:12px;color:#8899aa">เลือก <strong style="color:#00e676">Start in test mode</strong> → Enable — ข้อมูลจะ Public อ่าน/เขียนได้ 30 วัน (ต่ออายุได้)</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:12px;padding:12px 14px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2);border-radius:10px">
-          <div style="width:26px;height:26px;background:rgba(0,230,118,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#00e676;flex-shrink:0">4</div>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:#e8f0fe;margin-bottom:3px">คัดลอก Database URL</div>
-            <div style="font-size:12px;color:#8899aa">หลัง Create เสร็จ จะเห็น URL ในรูปแบบ:</div>
-            <div style="margin-top:6px;padding:7px 10px;background:rgba(0,0,0,.3);border-radius:6px;font-family:var(--m);font-size:11px;color:#00d4ff;word-break:break-all">https://your-project-default-rtdb.asia-southeast1.firebasedatabase.app</div>
-            <div style="font-size:11px;color:#8899aa;margin-top:5px">คัดลอก URL นี้ → วางในช่อง Firebase URL ในฟอร์ม</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:12px;padding:12px 14px;background:rgba(255,214,0,.05);border:1px solid rgba(255,214,0,.2);border-radius:10px">
-          <div style="width:26px;height:26px;background:rgba(255,214,0,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#ffd600;flex-shrink:0">5</div>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:#e8f0fe;margin-bottom:3px">ทดสอบและบันทึก</div>
-            <div style="font-size:12px;color:#8899aa">วาง URL แล้วกด <strong style="color:#00e676">🔌 ทดสอบ</strong> เพื่อยืนยันการเชื่อมต่อ → กด <strong style="color:#00e676">✅ บันทึกโครงการ</strong></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Note -->
-      <div style="padding:12px 14px;background:rgba(255,214,0,.05);border:1px solid rgba(255,214,0,.2);border-radius:8px;font-size:11px;color:#8899aa;line-height:1.7">
-        💡 <strong style="color:#ffd600">เคล็ดลับ:</strong> สร้าง Firebase Project แยกสำหรับแต่ละโครงการก่อสร้าง เพื่อให้ข้อมูลไม่ปนกัน และทุกเครื่องที่ใส่ URL เดียวกันจะ Sync ข้อมูล Real-time
-      </div>
-
-      <div style="margin-top:16px;text-align:right">
-        <button onclick="closeFbGuideModal()" style="background:rgba(56,139,253,.15);border:1px solid rgba(56,139,253,.4);color:#388bfd;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">✅ เข้าใจแล้ว</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-function openFbGuideModal(){
-  document.getElementById('fb-guide-modal').style.display='flex';
-}
-function closeFbGuideModal(){
-  document.getElementById('fb-guide-modal').style.display='none';
-}
-
-async function testFbUrl(){
-  var url=(document.getElementById('f-fb').value||'').trim();
-  var res=document.getElementById('fb-test-result');
-  var btn=document.getElementById('fb-test-btn');
-  if(!url){res.innerHTML='<span style="color:#ff9500">กรุณาใส่ Firebase URL ก่อน</span>';return;}
-  if(!url.startsWith('https://')){res.innerHTML='<span style="color:#ff4444">URL ต้องขึ้นต้นด้วย https://</span>';return;}
-  btn.textContent='⏳ กำลังทดสอบ...';btn.disabled=true;
-  res.innerHTML='<span style="color:#8899aa">กำลังเชื่อมต่อ...</span>';
-  try{
-    var testUrl=url.replace(/\/+$/,'')+'/.json';
-    var r=await fetch(testUrl,{method:'GET',signal:AbortSignal.timeout(6000)});
-    if(r.ok||r.status===404||r.status===401){
-      res.innerHTML='<span style="color:#00e676">✅ เชื่อมต่อสำเร็จ! Firebase URL ใช้งานได้</span>';
-      btn.textContent='✅ สำเร็จ';
-    } else {
-      throw new Error('HTTP '+r.status);
-    }
-  }catch(e){
-    res.innerHTML='<span style="color:#ff4444">❌ เชื่อมต่อไม่ได้: '+e.message+' — ตรวจสอบ URL อีกครั้ง</span>';
-    btn.textContent='❌ ล้มเหลว';
-  }
-  setTimeout(function(){btn.textContent='🔌 ทดสอบ';btn.disabled=false;},3000);
-}
-</script>
-
-
-<script>
-// ── Firebase Panel (main page) ───────────────────────────────────────────
-var _panelFbUrl = localStorage.getItem('cp_fb_url') || '';
-
-function initFbPanel() {
-  var inp = document.getElementById('fb-panel-url');
-  if(inp && _panelFbUrl) inp.value = _panelFbUrl;
-  updateFbPanelStatus();
-}
-
-function updateFbPanelStatus() {
-  var st = document.getElementById('fb-panel-status');
-  if(!st) return;
-  _panelFbUrl = localStorage.getItem('cp_fb_url') || '';
-  if(_panelFbUrl && _panelFbUrl.startsWith('https://')) {
-    var short = _panelFbUrl.replace('https://','').split('.')[0];
-    st.innerHTML = '✅ เชื่อมต่อแล้ว: ' + short;
-    st.style.background = 'rgba(0,230,118,.12)';
-    st.style.borderColor = 'rgba(0,230,118,.3)';
-    st.style.color = '#00e676';
-  } else {
-    st.innerHTML = '⚠️ ยังไม่ได้ตั้งค่า';
-    st.style.background = 'rgba(255,149,0,.15)';
-    st.style.borderColor = 'rgba(255,149,0,.3)';
-    st.style.color = '#ff9500';
-  }
-}
-
-function onFbPanelInput() {
-  var res = document.getElementById('fb-panel-result');
-  if(res) res.innerHTML = '';
-}
-
-function saveFbPanel() {
-  var url = (document.getElementById('fb-panel-url').value || '').trim();
-  var res = document.getElementById('fb-panel-result');
-  if(!url) {
-    localStorage.removeItem('cp_fb_url');
-    _panelFbUrl = '';
-    updateFbPanelStatus();
-    if(res) res.innerHTML = '<span style="color:#8899aa">ลบ URL แล้ว</span>';
-    return;
-  }
-  if(!url.startsWith('https://')) {
-    if(res) res.innerHTML = '<span style="color:#ff4444">❌ URL ต้องขึ้นต้นด้วย https://</span>';
-    return;
-  }
-  _panelFbUrl = url;
-  localStorage.setItem('cp_fb_url', url);
-  updateFbPanelStatus();
-  if(res) res.innerHTML = '<span style="color:#00e676">✅ บันทึก Firebase URL สำเร็จแล้ว — ข้อมูลโครงการจะ Sync อัตโนมัติ</span>';
-}
-
-async function testFbPanel() {
-  var url = (document.getElementById('fb-panel-url').value || '').trim();
-  var res = document.getElementById('fb-panel-result');
-  var btn = document.getElementById('fb-panel-test-btn');
-  if(!url || !url.startsWith('https://')) {
-    if(res) res.innerHTML = '<span style="color:#ff9500">กรุณาใส่ Firebase URL ก่อนทดสอบ</span>';
-    return;
-  }
-  if(btn) { btn.textContent = '⏳ กำลังทดสอบ...'; btn.disabled = true; }
-  if(res) res.innerHTML = '<span style="color:#8899aa">กำลังเชื่อมต่อ Firebase...</span>';
-  try {
-    var r = await fetch(url.replace(/\/+$/, '') + '/.json', { method:'GET', signal: AbortSignal.timeout(6000) });
-    if(r.ok || r.status === 404 || r.status === 401) {
-      if(res) res.innerHTML = '<span style="color:#00e676">✅ เชื่อมต่อ Firebase สำเร็จ! URL ใช้งานได้</span>';
-      if(btn) btn.textContent = '✅ สำเร็จ';
-    } else throw new Error('HTTP ' + r.status);
-  } catch(e) {
-    if(res) res.innerHTML = '<span style="color:#ff4444">❌ เชื่อมต่อไม่ได้: ' + e.message + ' — ตรวจสอบ URL อีกครั้ง</span>';
-    if(btn) btn.textContent = '❌ ล้มเหลว';
-  }
-  setTimeout(function() { if(btn) { btn.textContent = '🔌 ทดสอบ'; btn.disabled = false; } }, 3000);
-}
-
-// Init on load
-document.addEventListener('DOMContentLoaded', function(){
-  initFbPanel();
-  startAutoRefresh();
-});
-</script>
-
 </body>
 </html>
