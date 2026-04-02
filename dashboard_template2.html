@@ -252,10 +252,12 @@ body.view-mode .edit-only{display:none!important}
 #toast.ok{border-color:rgba(0,230,118,.5);color:var(--green)}
 #toast.err{border-color:rgba(255,68,68,.5);color:var(--red)}
 #toast.info{border-color:rgba(56,139,253,.5);color:var(--blue)}
-#lock-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.05);backdrop-filter:blur(2px);padding:16px;overflow-y:auto}
+#lock-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.08);backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);padding:16px;overflow-y:auto}
 #lock-modal.show{display:flex!important}
-.lm-card{width:100%;max-width:360px;margin:16px auto;background:rgba(10,15,30,.1);border:1px solid rgba(255,255,255,.15);border-radius:22px;overflow:visible;box-shadow:0 8px 32px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.15);backdrop-filter:blur(8px)}
+.lm-card{width:100%;max-width:360px;margin:16px auto;background:linear-gradient(135deg,rgba(255,255,255,.09),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.28);border-radius:22px;overflow:visible;box-shadow:0 12px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(255,255,255,.08);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);position:relative}
 .lm-acc{height:1px;background:linear-gradient(90deg,transparent,rgba(56,139,253,.5) 30%,rgba(120,220,255,.5) 60%,transparent)}
+.lm-card::before,.pwc-card::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(120deg,rgba(255,255,255,.35) 0%,rgba(255,255,255,.14) 18%,transparent 42%,transparent 58%,rgba(255,255,255,.1) 82%,rgba(255,255,255,.18) 100%);pointer-events:none}
+
 .lm-body{padding:26px 22px 22px;background:transparent}
 .lm-icon{width:46px;height:46px;background:rgba(56,139,253,.07);border:1px solid rgba(56,139,253,.18);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
 .lm-h{font-size:19px;font-weight:800;color:#dce8fb;text-align:center;margin-bottom:6px}
@@ -298,14 +300,15 @@ body.view-mode .edit-only{display:none!important}
 
 
 .lm-num{aspect-ratio:1/1;width:100%;border-radius:50%;
-  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.18) 0%,rgba(255,255,255,.04) 40%,transparent 70%);
-  border:1px solid rgba(255,255,255,.25);
+  background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.04));
+  border:1px solid rgba(255,255,255,.32);
   color:#ffffff;font-size:28px;font-weight:300;
   cursor:pointer;display:flex;align-items:center;justify-content:center;
   touch-action:manipulation;-webkit-tap-highlight-color:transparent;
   transition:transform .7s cubic-bezier(.34,1.56,.64,1), box-shadow .7s ease, background .7s ease;
   user-select:none;position:relative;overflow:visible;letter-spacing:-.5px;
-  box-shadow:0 4px 16px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.3),inset 0 -1px 0 rgba(0,0,0,.15);
+  box-shadow:0 6px 20px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(0,0,0,.18);
+  backdrop-filter:blur(12px) saturate(170%);-webkit-backdrop-filter:blur(12px) saturate(170%);
   will-change:transform;transform:scale(1) translateZ(0)}
 .lm-num:active{
   transform:scale(1.2) translateZ(0)!important;
@@ -330,9 +333,11 @@ body.view-mode .edit-only{display:none!important}
 .lm-ghost{width:100%;padding:10px;border-radius:10px;background:transparent;border:1px solid #080f1a;color:#1e3050;font-size:11px;font-weight:600;cursor:pointer;touch-action:manipulation;transition:all .15s}
 .lm-ghost:hover{background:#040b14;color:#2d4a6a}
 .lm-foot{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;padding-top:14px;border-top:1px solid #050c16;font-size:9px;color:#0d1a28;font-family:var(--m)}
-#pwc-modal{position:fixed;inset:0;z-index:99998;display:none;align-items:center;justify-content:center;background:rgba(4,8,16,.95);backdrop-filter:blur(16px);padding:16px}
+
+.lm-card::before{content:'';position:absolute;inset:0;border-radius:22px;background:linear-gradient(120deg,rgba(255,255,255,.15),transparent 40%,transparent 60%,rgba(255,255,255,.1));pointer-events:none}
+.pwc-card{position:relative;background:linear-gradient(135deg,rgba(255,255,255,.09),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.28);border-radius:14px;padding:24px 22px;width:100%;max-width:360px;box-shadow:0 12px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(255,255,255,.08);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);overflow:hidden}
+#pwc-modal{position:fixed;inset:0;z-index:99998;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.1);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:16px}
 #pwc-modal.show{display:flex!important}
-.pwc-card{background:#08111e;border:1px solid rgba(56,139,253,.2);border-radius:14px;padding:24px 22px;width:100%;max-width:360px;box-shadow:var(--shadow)}
 .pwc-h{font-size:16px;font-weight:800;color:#dce8fb;margin-bottom:4px}.pwc-s{font-size:11px;color:var(--tx3);font-family:var(--m);margin-bottom:20px}.cl-report{width:100%;box-sizing:border-box;background:var(--bg2);border:1.5px solid var(--bdr);border-radius:9px;padding:12px 14px;color:var(--tx);font-family:var(--f);font-size:14px;line-height:1.7;resize:vertical;min-height:110px;outline:none;transition:border .2s;-webkit-user-select:text;user-select:text}.cl-report:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(56,139,253,.12)}
 .pwc-fld{margin-bottom:12px}.pwc-lbl{display:block;font-size:9px;font-weight:700;color:#2d4a6a;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
 .pwc-inp{width:100%;background:#040b14;border:1.5px solid #101e2e;border-radius:8px;padding:10px 12px;color:#c0d4ec;font-size:13px;font-family:var(--m);outline:none;transition:border .2s}
@@ -415,6 +420,37 @@ body.view-mode .edit-only{display:none!important}
   .overlay, #lock-modal, #pwc-modal, #jpeg-modal { display: none !important; }
   canvas { max-width: 100%; height: auto !important; }
 }
+
+/* Password popup cards only: 90% transparent glass */
+.lm-card,
+.pwc-card{
+  background: rgba(255,255,255,.10) !important;
+  border: 1px solid rgba(255,255,255,.25) !important;
+  box-shadow:
+    0 12px 40px rgba(0,0,0,.28),
+    inset 0 1px 0 rgba(255,255,255,.35),
+    inset 0 -1px 0 rgba(255,255,255,.10) !important;
+  backdrop-filter: blur(24px) saturate(165%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(165%) !important;
+}
+.lm-card::before,
+.pwc-card::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  background: linear-gradient(
+    120deg,
+    rgba(255,255,255,.38) 0%,
+    rgba(255,255,255,.14) 20%,
+    transparent 46%,
+    transparent 58%,
+    rgba(255,255,255,.10) 82%,
+    rgba(255,255,255,.16) 100%
+  ) !important;
+  pointer-events:none;
+}
+
 </style>
 </head>
 <body>
