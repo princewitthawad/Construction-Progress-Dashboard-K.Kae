@@ -116,7 +116,6 @@ body{background:var(--bg);color:var(--tx);font-family:var(--f);min-height:100vh}
   .form-row{grid-template-columns:1fr}
   .proj-grid{grid-template-columns:1fr}
 }
-@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -159,6 +158,22 @@ body{background:var(--bg);color:var(--tx);font-family:var(--f);min-height:100vh}
       <button onclick="openFbGuideModal()" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8899aa;border-radius:8px;padding:9px 10px;font-size:12px;cursor:pointer;font-family:var(--f)" title="คู่มือสร้าง Firebase">📖</button>
     </div>
     <div id="fb-panel-result" style="width:100%;font-size:11px;font-family:var(--m);min-height:0;padding-top:2px"></div>
+  </div>
+
+  <!-- Online Hosting Guide -->
+  <div id="host-panel" style="background:linear-gradient(135deg,rgba(0,212,255,.04),rgba(0,230,118,.04));border:1.5px solid rgba(0,212,255,.2);border-radius:14px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div style="font-size:22px;flex-shrink:0">🌐</div>
+    <div style="flex:1;min-width:220px">
+      <div style="font-size:12px;font-weight:800;color:#00d4ff;margin-bottom:3px">วิธีดูออนไลน์ได้ทุกที่ (ฟรี)</div>
+      <div style="font-size:10px;color:#8899aa;line-height:1.7">
+        อัพโหลดไฟล์นี้ขึ้น <strong style="color:#e8f0fe">Netlify Drop</strong> (ลากวางได้เลย) หรือ <strong style="color:#e8f0fe">GitHub Pages</strong> แล้วแชร์ URL ให้ทีมงาน
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a href="https://app.netlify.com/drop" target="_blank" style="background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.4);color:#00d4ff;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;text-decoration:none;font-family:var(--f);white-space:nowrap">🚀 Netlify Drop</a>
+      <a href="https://pages.github.com" target="_blank" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:#e8f0fe;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;text-decoration:none;font-family:var(--f);white-space:nowrap">🐙 GitHub Pages</a>
+      <button onclick="document.getElementById('host-panel').style.display='none'" style="background:none;border:none;color:#445566;cursor:pointer;font-size:16px;padding:0 4px" title="ปิด">✕</button>
+    </div>
   </div>
 
   <!-- Stats -->
@@ -423,7 +438,10 @@ function openDashboard(idx){
 
   // Open dashboard template
   var template=p.template||'dashboard_template.html';
-  window.open(template+'?pid='+encodeURIComponent(p.id),'dashboard_'+p.id);
+  var win=window.open(template+'?pid='+encodeURIComponent(p.id),'dashboard_'+p.id);
+  if(!win || win.closed){
+    showToast('⚠️ กรุณาอนุญาต Popup หรือตรวจสอบว่าไฟล์ dashboard_template.html อยู่ใน folder เดียวกัน');
+  }
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -569,7 +587,6 @@ document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){
     closeAddModal();
     closeDelModal();
-    closeFbGuideModal();
   }
 });
 
@@ -643,10 +660,9 @@ async function refreshProjectPct(projId) {
   }
 }
 
-// Auto-refresh every 30s
+// Auto-refresh every 30s (handled by liveRefreshLoop below)
 function startAutoRefresh(){
-  refreshAllProjects();
-  setInterval(refreshAllProjects, 30000);
+  // handled by liveRefreshLoop
 }
 
 // Refresh all projects
@@ -671,7 +687,7 @@ function updateSyncStatus(syncing) {
   }
 }
 
-// ── Add sync status + live badge to header (safe, runs after DOM ready) ──
+// Add sync status + live badge to header
 (function addSyncUI(){
   var header = document.querySelector('.header > div:last-child');
   if (!header) return;
@@ -680,11 +696,12 @@ function updateSyncStatus(syncing) {
   div.style.cssText = 'display:flex;align-items:center;gap:6px;padding:0 4px;';
   div.innerHTML = '<span style="font-size:10px;color:var(--tx3);font-family:var(--m)">🔄 รอซิงค์...</span>';
   header.appendChild(div);
-  // Manual refresh button
-  header.insertAdjacentHTML('beforeend',
-    '<button class="btn btn-b" onclick="liveRefreshLoop()" style="font-size:11px;padding:7px 12px">🔄 รีเฟรช</button>'
-  );
 })();
+
+// Spin animation
+var spinStyle = document.createElement('style');
+spinStyle.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+document.head.appendChild(spinStyle);
 
 // ── Add lastSync display to project cards ──────────────────────────────────
 var _origRenderProjects = renderProjects;
@@ -724,11 +741,15 @@ async function liveRefreshLoop() {
 // Start immediately
 setTimeout(liveRefreshLoop, 500);
 
+// Manual refresh button
+document.querySelector('.header > div:last-child').insertAdjacentHTML('beforeend',
+  '<button class="btn btn-b" onclick="liveRefreshLoop()" style="font-size:11px;padding:7px 12px">🔄 รีเฟรช</button>'
+);
 
 </script>
 
 <!-- ═══ FIREBASE GUIDE MODAL ═══ -->
-<div id="fb-guide-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(4,8,16,.92);backdrop-filter:blur(16px);align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto">
+<div id="fb-guide-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(4,8,16,.92);backdrop-filter:blur(16px);align-items:center;justify-content:center;padding:16px;overflow-y:auto;flex-direction:column">
   <div style="width:100%;max-width:540px;margin:auto;background:#0a1020;border:1px solid rgba(56,139,253,.35);border-radius:20px;overflow:hidden;box-shadow:0 16px 64px rgba(0,0,0,.7)">
     <div style="height:2px;background:linear-gradient(90deg,transparent,#388bfd,#00d4ff,transparent)"></div>
     <div style="padding:24px">
@@ -799,12 +820,12 @@ setTimeout(liveRefreshLoop, 500);
 
 <script>
 function openFbGuideModal(){
-  var m = document.getElementById('fb-guide-modal');
-  m.style.display = 'flex';
+  var m=document.getElementById('fb-guide-modal');
+  m.style.display='flex';
+  m.style.flexDirection='column';
 }
 function closeFbGuideModal(){
-  var m = document.getElementById('fb-guide-modal');
-  m.style.display = 'none';
+  document.getElementById('fb-guide-modal').style.display='none';
 }
 
 async function testFbUrl(){
@@ -912,6 +933,7 @@ async function testFbPanel() {
 // Init on load
 document.addEventListener('DOMContentLoaded', function(){
   initFbPanel();
+  // liveRefreshLoop starts automatically via setTimeout(liveRefreshLoop, 500) below
 });
 </script>
 
