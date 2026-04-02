@@ -357,7 +357,12 @@ function renderProjects(){
     html+='<div class="proj-card-body">';
     html+='<div class="proj-progress-row">';
     html+='<span style="font-size:12px;color:var(--tx3)">ความคืบหน้า</span>';
+    var syncAgo='';
+    if(p.lastSync){var d=Math.round((Date.now()-new Date(p.lastSync).getTime())/60000);syncAgo=d<1?'เมื่อกี้':d<60?d+' นาทีที่แล้ว':Math.floor(d/60)+' ชม.ที่แล้ว';}
+    html+='<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">';
     html+='<span class="proj-pct" style="color:'+col+'">'+pct.toFixed(1)+'%</span>';
+    html+='<span style="font-size:10px;color:#445566;font-family:var(--m)" id="pct-sync-'+idx+'">'+(syncAgo?'🔄 '+syncAgo:'⏳ ยังไม่ซิงค์')+'</span>';
+    html+='</div>';
     html+='</div>';
     html+='<div class="proj-bar-bg"><div class="proj-bar-fill" style="width:'+barW+'%;background:'+col+'"></div></div>';
     html+='<div class="proj-meta">';
@@ -368,6 +373,7 @@ function renderProjects(){
     html+='</div>';
     html+='<div class="proj-card-footer">';
     html+='<button class="btn btn-g" onclick="openDashboard(\''+idx+'\')" style="flex:1;font-size:12px">🚀 เปิด Dashboard</button>';
+    if(p.fbUrl) html+='<button class="btn" onclick="refreshProjectPct(\''+p.id+'\');this.textContent=\'⏳\';setTimeout(()=>this.textContent=\'🔄\',3000)" style="font-size:12px;background:rgba(56,139,253,.12);border:1px solid rgba(56,139,253,.3);color:#388bfd;padding:9px 12px" title="ซิงค์จาก Firebase">🔄</button>';
     html+='<button class="btn btn-b" onclick="openEdit(\''+idx+'\')" style="font-size:12px">✏️ แก้ไข</button>';
     html+='<button class="btn btn-o" onclick="toggleDone(\''+idx+'\')" style="font-size:12px">'+(p.status==='done'?'🔄 เปิดใหม่':'✅ ปิดงาน')+'</button>';
     html+='<button class="btn btn-r" onclick="openDelete(\''+idx+'\')" style="font-size:12px">🗑️</button>';
@@ -635,6 +641,12 @@ async function refreshProjectPct(projId) {
   }
 }
 
+// Auto-refresh every 30s
+function startAutoRefresh(){
+  refreshAllProjects();
+  setInterval(refreshAllProjects, 30000);
+}
+
 // Refresh all projects
 async function refreshAllProjects() {
   var projects = loadProjects();
@@ -899,7 +911,10 @@ async function testFbPanel() {
 }
 
 // Init on load
-document.addEventListener('DOMContentLoaded', initFbPanel);
+document.addEventListener('DOMContentLoaded', function(){
+  initFbPanel();
+  startAutoRefresh();
+});
 </script>
 
 </body>
