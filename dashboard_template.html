@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -420,37 +422,6 @@ body.view-mode .edit-only{display:none!important}
   .overlay, #lock-modal, #pwc-modal, #jpeg-modal { display: none !important; }
   canvas { max-width: 100%; height: auto !important; }
 }
-
-/* Password popup cards only: 90% transparent glass */
-.lm-card,
-.pwc-card{
-  background: rgba(255,255,255,.10) !important;
-  border: 1px solid rgba(255,255,255,.25) !important;
-  box-shadow:
-    0 12px 40px rgba(0,0,0,.28),
-    inset 0 1px 0 rgba(255,255,255,.35),
-    inset 0 -1px 0 rgba(255,255,255,.10) !important;
-  backdrop-filter: blur(24px) saturate(165%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(165%) !important;
-}
-.lm-card::before,
-.pwc-card::before{
-  content:'';
-  position:absolute;
-  inset:0;
-  border-radius:inherit;
-  background: linear-gradient(
-    120deg,
-    rgba(255,255,255,.38) 0%,
-    rgba(255,255,255,.14) 20%,
-    transparent 46%,
-    transparent 58%,
-    rgba(255,255,255,.10) 82%,
-    rgba(255,255,255,.16) 100%
-  ) !important;
-  pointer-events:none;
-}
-
 </style>
 </head>
 <body>
