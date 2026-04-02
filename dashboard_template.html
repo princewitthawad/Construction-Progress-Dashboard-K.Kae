@@ -939,9 +939,25 @@ async function loadData(){
     try{const bk=localStorage.getItem('cp_backup');if(bk){applyState(JSON.parse(bk));showToast('โหลดจาก Backup ท้องถิ่น','info');setSvStatus('saved','💾 Backup ท้องถิ่น');}}catch(e2){}
   }
 }
+// Push overall% to Firebase immediately (lightweight — no full saveData)
+let _ovPushTimer=null;
+function pushOverallPct(){
+  if(!isFirebaseReady())return;
+  clearTimeout(_ovPushTimer);
+  _ovPushTimer=setTimeout(function(){
+    try{
+      const ov=typeof calcAllOverall==='function'?calcAllOverall():0;
+      cloudPutNode('overall_pct',{pct:parseFloat(ov.toFixed(2)),updatedAt:new Date().toISOString()}).catch(function(){});
+      // Also sync s_data_v3 for fallback
+      if(typeof _sData!=='undefined') cloudPutNode('s_data_v3',_sData).catch(function(){});
+    }catch(e){}
+  },2000); // 2s debounce — frequent but not spammy
+}
+
 function scheduleAutoSave(){
   clearTimeout(_saveTimer);
   setSvStatus('unsaved','● มีการเปลี่ยนแปลง...');
+  pushOverallPct(); // Push overall% to Firebase immediately
   // บันทึกอัตโนมัติ 5 วินาทีหลังเปลี่ยนแปลง (ไม่ต้องรอ Firebase)
   _saveTimer=setTimeout(saveData,5000);
 }
@@ -1789,7 +1805,7 @@ function renderDailyLogUI(){
   const c=document.getElementById('an-log');if(!c)return;
   const _def=getLiveDef(),vs=getLiveVals(),logs=getDailyLog();
   c.innerHTML=`<div style="margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap"><div style="font-size:14px;font-weight:800">📝 บันทึกรายวัน</div><button onclick="saveLogEntry()" class="btn btn-g edit-only" style="font-size:11px;padding:6px 12px">💾 บันทึกวันนี้</button><span style="font-size:11px;color:var(--tx3);font-family:var(--m)">${todayStr()}</span></div>
-  <div style="margin-bottom:16px;padding:12px;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px"><div style="font-size:11px;color:var(--tx2);margin-bottom:8px">ข้อมูลปัจจุบัน</div><div style="display:flex;gap:8px;flex-wrap:wrap">${SUMDEF.map((d,i)=>`<span style="background:${d.col}22;border:1px solid ${d.col}55;border-radius:6px;padding:3px 8px;font-size:11px;font-family:var(--m);color:${d.col}">${d.lbl}: ${vs[i].toFixed(1)}%</span>`).join('')}</div></div>
+  <div style="margin-bottom:16px;padding:12px;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px"><div style="font-size:11px;color:var(--tx2);margin-bottom:8px">ข้อมูลปัจจุบัน</div><div style="display:flex;gap:8px;flex-wrap:wrap">${SUMDEF.map((d,i)=>`<span style="background:${d.col}22;border:1px solid ${d.col}55;border-radius:6px;padding:3px 8px;font-size:11px;font-family:var(--m);color:${d.col}">${d.lbl}: ${(vs[i]||0).toFixed(1)}%</span>`).join('')}</div></div>
   <div>${logs.length===0?'<div style="color:var(--tx2);font-size:12px;padding:16px 0">ยังไม่มีบันทึก</div>':logs.slice().reverse().map(l=>`<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px 14px;margin-bottom:8px"><div style="font-size:11px;color:var(--tx3);font-family:var(--m);margin-bottom:8px">${l.date}</div><div style="display:flex;gap:6px;flex-wrap:wrap">${_def.map((d,i)=>`<span style="background:${d.col}22;border:1px solid ${d.col}44;border-radius:5px;padding:2px 7px;font-size:10px;font-family:var(--m);color:${d.col}">${d.lbl}: ${(l.vals?.[i]||0).toFixed(1)}%</span>`).join('')}</div></div>`).join('')}</div>`;
 }
 function saveLogEntry(){
@@ -2093,8 +2109,8 @@ function openJupiterPageAI(isLoginPopup){
 
   // Build data summary for AI
   const dataSummary=names.map((n,i)=>{
-    const pct=vs[i]||0,tgt=tgts[i],gap=tgt-pct,ratio=pct/tgt;
-    return `${n}: ${pct.toFixed(1)}% / เป้า ${tgt}% (เหลือ ${gap.toFixed(1)}%, ${ratio>=1?'บรรลุเป้าแล้ว':ratio<0.3?'ล่าช้ามาก':ratio<0.6?'ล่าช้า':'กำลังดี'})`;
+    const pct=parseFloat(vs[i])||0,tgt=parseFloat(tgts[i])||100,gap=tgt-pct,ratio=tgt>0?pct/tgt:0;
+    return `${n}: ${pct.toFixed(1)}% / เป้า ${tgt}% (เหลือ ${Math.max(0,gap).toFixed(1)}%, ${ratio>=1?'บรรลุเป้าแล้ว':ratio<0.3?'ล่าช้ามาก':ratio<0.6?'ล่าช้า':'กำลังดี'})`;
   }).join('\n');
 
   const deadline=getProjDeadline(); // 22 เมษายน 2569 (ค.ศ.2026)
@@ -2228,15 +2244,17 @@ function openJupiterWithAI(){
 function runJupiterAI(){
   const result=document.getElementById('_jupiter_ai_result');
   if(!result)return;
+  const key=jupGetKey()||localStorage.getItem('cp_api_key')||'';
+  if(!key){result.innerHTML='<div style="color:#ff9500;font-size:12px">⚠️ กรุณาตั้งค่า API Key ก่อน <button onclick="showAPIKeyModal()" style="background:rgba(255,214,0,.12);border:1px solid rgba(255,214,0,.4);color:#ffd600;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:var(--f);font-weight:700;margin-left:6px">🔑 ตั้งค่า</button></div>';return;}
   result.innerHTML='<div style="display:flex;align-items:center;gap:10px;color:#8899aa;font-size:12px"><div style="width:16px;height:16px;border:2px solid #ffd600;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;flex-shrink:0"></div>Jupiter กำลังวิเคราะห์...</div>';
   if(!document.getElementById('_spin_style')){const st=document.createElement('style');st.id='_spin_style';st.textContent='@keyframes spin{to{transform:rotate(360deg)}}';document.head.appendChild(st);}
-  const v=getVals(),vs=[v.s1,v.f25,v.out,v.s4,v.s5,v.s6,v.s7];
-  const _aiDef=getLiveDef(),_aiVs=getLiveVals(),names=_aiDef.map(d=>d.lbl),tgts=_aiDef.map(d=>d.tgt||100);
+  const _aiDef=getLiveDef(),vs=getLiveVals(),names=_aiDef.map(d=>d.lbl),tgts=_aiDef.map(d=>d.tgt||100);
   const today=new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
-  const dataSummary=names.map((n,i)=>`${n}: ${vs[i].toFixed(1)}% / เป้า ${tgts[i]}% (${vs[i]>=tgts[i]?'บรรลุเป้า':vs[i]/tgts[i]<0.3?'ล่าช้ามาก':vs[i]/tgts[i]<0.6?'ล่าช้า':'กำลังดี'})`).join('\n');
-  const deadline2=getProjDeadline();
-  const daysLeft2=Math.ceil((deadline2-new Date())/(1000*60*60*24));
-  const prompt=`คุณคือ Jupiter ที่ปรึกษาก่อสร้างอาวุโส มีประสบการณ์ 20 ปี\n\n📋 โครงการ: อาคารอพาร์ตเมนต์ 5 ชั้น (ชั้น 2-5 ชั้นละ 11 ห้อง, ชั้น 1 มี 3 ห้อง)\nวันนี้: ${today} | กำหนดส่งงาน: 22 เมษายน 2569 | เหลือ: ${daysLeft2} วัน\n\n📊 ความคืบหน้า:\n${dataSummary}\n\n🎯 เป้าหมาย: S1 100%, S2 100%, S3 50%, S4 100%, S5 80%, S6 50%, S7 40%, ทำความสะอาดทุกวัน\n\nวิเคราะห์:\n1. สถานะโดยรวม — ส่งงานทันหรือไม่?\n2. งานวิกฤตและวิธีแก้ไขเร่งด่วน\n3. แผนงาน ${daysLeft2} วัน (ต้องทำ%/วัน ของแต่ละงาน)\n4. การจัดช่างและทีม\n5. ความเสี่ยงและการป้องกัน\n\nตอบภาษาไทย กระชับ ปฏิบัติได้จริง`;
+  const daysLeft2=getProjDaysLeft();
+  const projDates=getProjectDates();
+  const dataSummary=names.map((n,i)=>{const _p=parseFloat(vs[i])||0,_t=parseFloat(tgts[i])||100,_r=_t>0?_p/_t:0;return `${n}: ${_p.toFixed(1)}% / เป้า ${_t}% (${_r>=1?'บรรลุเป้า':_r<0.3?'ล่าช้ามาก':_r<0.6?'ล่าช้า':'กำลังดี'})`;}).join('\n');
+  const tgtStr=names.map((n,i)=>`${n}=${tgts[i]}%`).join(', ');
+  const prompt=`คุณคือ Jupiter ที่ปรึกษาก่อสร้างอาวุโส มีประสบการณ์ 20 ปี\n\nวันนี้: ${today} | เริ่ม: ${projDates.startDate} | ส่งมอบ: ${projDates.deadlineDate} | เหลือ: ${daysLeft2} วัน\n\n📊 ความคืบหน้าปัจจุบัน:\n${dataSummary}\n\n🎯 เป้าหมาย: ${tgtStr}\n\nวิเคราะห์:\n1. สถานะโดยรวม — ส่งงานทันหรือไม่?\n2. งานวิกฤตและวิธีแก้ไขเร่งด่วน\n3. แผนงาน ${daysLeft2} วัน (ต้องทำ%/วัน ของแต่ละงาน)\n4. การจัดช่างและทีม\n5. ความเสี่ยงและการป้องกัน\n\nตอบภาษาไทย กระชับ ปฏิบัติได้จริง`;
   fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:1000,messages:[{role:'user',content:prompt}]})})
   .then(r=>r.json())
   .then(data=>{
@@ -2425,17 +2443,21 @@ function jupSaveKey(){
 function jupGetKey(){return localStorage.getItem('cp_jup_key')||'';}
 function jupSetKey(k){localStorage.setItem('cp_jup_key',k);showToast('✅ API Key บันทึกแล้ว','ok');}
 function jupBuildContext(){
-  const v=getVals(),vs=[v.s1,v.f25,v.out,v.s4,v.s5,v.s6,v.s7];
-  const _aiDef=getLiveDef(),_aiVs=getLiveVals(),names=_aiDef.map(d=>d.lbl),tgts=_aiDef.map(d=>d.tgt||100);
+  const _def=getLiveDef(),vs=getLiveVals();
+  const names=_def.map(d=>d.lbl),tgts=_def.map(d=>d.tgt||100);
   const today=new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
-  const deadline=getProjDeadline();
+  const projDates=getProjectDates();
   const daysLeft=getProjDaysLeft();
-  const data=names.map((n,i)=>`${n}: ${vs[i].toFixed(1)}% / เป้า ${tgts[i]}% (${vs[i]>=tgts[i]?'✅ บรรลุ':vs[i]/tgts[i]<0.3?'🔴 ล่าช้ามาก':vs[i]/tgts[i]<0.6?'🟡 ล่าช้า':'🟢 กำลังดี'})`).join('\n');
-  return `โครงการ: อาคารอพาร์ตเมนต์ 5 ชั้น | วันที่: ${today} | กำหนดส่ง: 22 เม.ย. 2569 | เหลือ: ${daysLeft} วัน\n\nความคืบหน้าปัจจุบัน:\n${data}${jupBuildHistoryContext()}`;
+  const data=names.map((n,i)=>{
+    const p=parseFloat(vs[i])||0,t=parseFloat(tgts[i])||100,r=t>0?p/t:0;
+    return `${n}: ${p.toFixed(1)}% / เป้า ${t}% (${r>=1?'✅ บรรลุ':r<0.3?'🔴 ล่าช้ามาก':r<0.6?'🟡 ล่าช้า':'🟢 กำลังดี'})`;
+  }).join('\n');
+  const tgtStr=names.map((n,i)=>`${n}=${tgts[i]}%`).join(', ');
+  return `โครงการ | วันที่: ${today} | เริ่ม: ${projDates.startDate} | ส่งมอบ: ${projDates.deadlineDate} | เหลือ: ${daysLeft} วัน\n\nความคืบหน้าปัจจุบัน:\n${data}\n\nเป้าหมาย: ${tgtStr}${jupBuildHistoryContext()}`;
 }
 async function jupCallAPI(messages){
-  const key=jupGetKey();
-  if(!key){showToast('กรุณาใส่ API Key ก่อน','err');return null;}
+  const key=jupGetKey()||localStorage.getItem('cp_api_key')||'';
+  if(!key) throw new Error('ยังไม่ได้ตั้งค่า API Key — กดปุ่ม 🔑 ตั้งค่า API Key');
   const res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
@@ -2503,8 +2525,8 @@ function doSaveAPIKey(){
     errEl.textContent='❌ ใส่ API Key ด้วย';
     return;
   }
-  if(!key.startsWith('sk-ant-api')){
-    errEl.textContent='❌ API Key ต้องเริ่มด้วย sk-ant-api03-';
+  if(!key.startsWith('sk-ant-')){
+    errEl.textContent='❌ API Key ต้องเริ่มด้วย sk-ant-';
     return;
   }
   jupSetKey(key);
@@ -2715,7 +2737,7 @@ function jupRenderSnapshots(){
           <div style="font-size:12px;font-weight:700;color:var(--gold)">📅 ประวัติ Snapshot ย้อนหลัง</div>
           <div style="display:flex;gap:8px">
             <button onclick="jupSaveSnapshot();jupRenderSnapshots();showToast('บันทึก Snapshot แล้ว ✅','ok')" class="btn" style="background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.4);color:var(--green);font-size:11px;padding:5px 12px">📸 บันทึก Snapshot</button>
-            <button onclick="if(confirm('ล้างประวัติทั้งหมด?'))jupClearSnapshots()" class="btn" style="background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.3);color:var(--red);font-size:11px;padding:5px 12px">🗑️ ล้าง</button>
+            <button onclick="resetJup7History()" class="btn" style="background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.3);color:var(--red);font-size:11px;padding:5px 12px">🗑️ ล้างและรีเซ็ต</button>
           </div>
         </div>
         <div id="jup-snap-list" style="padding:12px;max-height:220px;overflow-y:auto">
@@ -3507,20 +3529,45 @@ async function acctShareA4(){
 
 // ======================== JUPITER AUTO-SAVE + 7-DAY HISTORY ========================
 const JUP_AUTOSAVE_KEY='cp_jup_autosave';
+function resetJup7History(){
+  if(!confirm('ล้างประวัติ 7 วันทั้งหมดและบันทึก Snapshot ปัจจุบันใหม่?')) return;
+  localStorage.removeItem(JUP_HISTORY_KEY);
+  setTimeout(function(){
+    jupAutoSaveSnapshot(false);
+    renderJup7DayChart();
+    showToast('✅ รีเซ็ตประวัติแล้ว — บันทึก Snapshot ปัจจุบันเรียบร้อย','ok',4000);
+  }, 300);
+}
+
+// On init: if history has stale data (vs.length mismatch with current live vals), clear it
+function validateJup7History(){
+  try{
+    const hist = JSON.parse(localStorage.getItem(JUP_HISTORY_KEY)||'[]');
+    const liveLen = getLiveVals().length;
+    if(!liveLen) return;
+    // If any snapshot has different number of series, clear history
+    const stale = hist.some(h => h.vs && h.vs.length !== liveLen);
+    if(stale){
+      console.log('[Jupiter] Clearing stale 7-day history (series count changed)');
+      localStorage.removeItem(JUP_HISTORY_KEY);
+    }
+  }catch(e){}
+}
+
 const JUP_HISTORY_KEY='cp_jup_7day';
 
 // Auto-save snapshot every time data changes (called from scheduleAutoSave)
 function jupAutoSaveSnapshot(manual=false){
-  if(typeof getVals!=='function')return;
+  if(typeof getLiveVals!=='function')return;
   try{
-    const v=getVals();
-    const vs=[v.s1,v.f25,v.out,v.s4,v.s5,v.s6,v.s7];
+    // Use live vals from new S system (matches donut dashboard)
+    const vs=getLiveVals();
     const today=localDateIso();
     const now=new Date().toLocaleString('th-TH');
     let hist=[];
     try{hist=JSON.parse(localStorage.getItem(JUP_HISTORY_KEY)||'[]');}catch(e){hist=[];}
     const idx=hist.findIndex(h=>h.date===today);
-    const snap={date:today,ts:now,vs:vs.map(x=>parseFloat(x.toFixed(2)))};
+    const snap={date:today,ts:now,vs:vs.map(x=>parseFloat((x||0).toFixed(2)))};
     if(idx>=0)hist[idx]=snap; else hist.push(snap);
     hist.sort((a,b)=>a.date.localeCompare(b.date));
     if(hist.length>7)hist=hist.slice(-7);
@@ -4811,6 +4858,7 @@ function getSData() {
 function saveSData() {
   try { localStorage.setItem('cp_s_data_v3', JSON.stringify(_sData)); } catch(e) {}
   cloudPutNode('s_data_v3', _sData).catch(()=>{});
+  pushOverallPct();
 }
 
 function getSNames() {
@@ -4887,6 +4935,10 @@ function initSSystem() {
   updateCategoryCards();
   buildAllDonuts();
   updateMainKPI();
+  // Validate and clear stale 7-day history if series count changed
+  setTimeout(validateJup7History, 600);
+  // Auto-snapshot with corrected live values
+  setTimeout(function(){ if(typeof jupAutoSaveSnapshot==='function') jupAutoSaveSnapshot(false); }, 1500);
 }
 
 // ── Update category overview cards ────────────────────────────────────────
