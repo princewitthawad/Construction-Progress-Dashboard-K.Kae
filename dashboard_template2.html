@@ -1871,8 +1871,7 @@ function init(){
     }
     startAutoRefresh();
     setTimeout(()=>{
-      if(sessionStorage.getItem(SESSION_KEY)==='1'){applyEditMode();}
-      else{applyViewMode();}
+      applyEditMode();
     },300);
   },150);
 }
@@ -3599,20 +3598,23 @@ function jupGet7DayHistory(){
 }
 
 // Also call jupAutoSaveSnapshot in original jupSaveSnapshot (extend it)
-const _origJupSaveSnapshot=window.jupSaveSnapshot;
-function jupSaveSnapshot(){
-  if(typeof _origJupSaveSnapshot==='function')_origJupSaveSnapshot();
-  jupAutoSaveSnapshot();
-}
+(function(){
+  const _orig=window.jupSaveSnapshot;
+  window.jupSaveSnapshot=function(){
+    if(typeof _orig==='function')_orig();
+    jupAutoSaveSnapshot();
+  };
+})();
 
 // Extend scheduleAutoSave to also save Jupiter snapshot
-const _origScheduleAutoSave=window.scheduleAutoSave;
-function scheduleAutoSave(){
-  if(typeof _origScheduleAutoSave==='function')_origScheduleAutoSave();
-  // Debounce Jupiter auto-snapshot
-  clearTimeout(window._jupAutoSaveTimer);
-  window._jupAutoSaveTimer=setTimeout(()=>{jupAutoSaveSnapshot();},3000);
-}
+(function(){
+  const _orig=window.scheduleAutoSave;
+  window.scheduleAutoSave=function(){
+    if(typeof _orig==='function')_orig();
+    clearTimeout(window._jupAutoSaveTimer);
+    window._jupAutoSaveTimer=setTimeout(()=>{jupAutoSaveSnapshot();},3000);
+  };
+})();
 
 // Open 7-day chart overlay
 function openJup7DayChart(){
