@@ -1494,9 +1494,36 @@ function showLockModal(){
 }
 function closeLockModal(){document.getElementById('lock-modal').classList.remove('show');_numBuf='';_syncDots();}
 function applyViewMode(){document.body.classList.add('view-mode');_isLocked=true;const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');if(link)link.style.display='';if(logout)logout.style.display='none';}
-function applyEditMode(){document.body.classList.remove('view-mode');_isLocked=false;sessionStorage.setItem(SESSION_KEY,'1');const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');if(link)link.style.display='none';if(logout)logout.style.display='';}
+function applyEditMode(){
+  document.body.classList.remove('view-mode');
+  _isLocked=false;
+  sessionStorage.setItem(SESSION_KEY,'1');
+  const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');
+  if(link)link.style.display='none';
+  if(logout)logout.style.display='';
+  // Auto-logout after 2 hours
+  clearTimeout(window._autoLogoutTimer);
+  const TWO_HOURS = 2 * 60 * 60 * 1000;
+  window._autoLogoutTimer = setTimeout(()=>{
+    doLogout();
+    showToast('⏰ หมดเวลา Session — กรุณา Login ใหม่','info',6000);
+  }, TWO_HOURS);
+  // Show countdown in logout button
+}
 function showGreeting(){const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;pointer-events:none';d.innerHTML=`<div style="background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:36px 72px;backdrop-filter:blur(20px);box-shadow:0 12px 60px rgba(0,0,0,.5);animation:greetIn .35s cubic-bezier(.34,1.56,.64,1) both"><span style="font-size:42px;font-weight:800;color:#e8f0fe;font-family:'Sarabun',sans-serif;letter-spacing:1px">สวัสดี ค่ะ</span></div>`;document.body.appendChild(d);setTimeout(()=>{d.firstElementChild.style.cssText+=';animation:greetOut .3s ease forwards';setTimeout(()=>d.remove(),300);},3000);}
-function doLogout(){sessionStorage.removeItem(SESSION_KEY);applyViewMode();showToast('ออกจากระบบแล้ว 🔒','ok');}
+function doLogout(){
+  clearTimeout(window._autoLogoutTimer);
+  sessionStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem('cp_dev_session');
+  document.body.classList.remove('dev-mode');
+  applyViewMode();
+  // Reset dev link
+  const lnk=document.getElementById('dev-login-link');
+  if(lnk){lnk.textContent='🛠️ Dev';lnk.style.color='#9b66ff';lnk.style.borderColor='rgba(120,80,255,.3)';lnk.style.background='rgba(120,80,255,.08)';lnk.setAttribute('onclick','event.preventDefault();showDevLoginModal()');}
+  const btn=document.getElementById('logout-btn');
+  if(btn)btn.textContent='🔒 Logout';
+  showToast('ออกจากระบบแล้ว 🔒','ok');
+}
 // ── Biometric Login (Fingerprint / Face ID) ──
 async function checkBiometricSupport(){
   if(!window.PublicKeyCredential)return;
@@ -1871,10 +1898,15 @@ function init(){
     }
     startAutoRefresh();
     setTimeout(()=>{
-      applyEditMode();
+      // Always start in view mode — user must press Login manually
+      sessionStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem('cp_dev_session');
+      applyViewMode();
     },300);
   },150);
 }
+
+
 
 const shakeStyle=document.createElement('style');
 shakeStyle.textContent='@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}@keyframes greetIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}@keyframes greetOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.85)}}';
@@ -5820,11 +5852,8 @@ function doDevLogout() {
 }
 // Restore dev mode on page load if session active
 document.addEventListener('DOMContentLoaded', function() {
-  if (isDevMode()) {
-    document.body.classList.add('dev-mode');
-    const lnk = document.getElementById('dev-login-link');
-    if (lnk) { lnk.textContent = '🛠️ Dev ✓'; lnk.style.color = '#76ff03'; lnk.style.borderColor = 'rgba(118,255,3,.5)'; lnk.style.background = 'rgba(118,255,3,.08)'; lnk.setAttribute('onclick', 'event.preventDefault();doDevLogout()'); }
-  }
+  // Dev mode does NOT restore across page loads — must re-login every time
+  sessionStorage.removeItem('cp_dev_session');
 });
 
 </script>
