@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -1489,54 +1487,16 @@ function ra(){
   const s7v=gv('s7'),s7p=document.getElementById('s7p');if(s7p){s7p.textContent=ceilTo2(s7v)+'%';s7p.style.color=gcol(s7v/40);}
 }
 const SESSION_KEY='cp_edit_session';
-const SESSION_EXPIRES_KEY='cp_edit_expires_at';
-const AUTO_LOGOUT_MS=2*60*60*1000;
-let _isLocked=false,_numBuf='',_lastTouch=0,_autoLogoutTimer=null,_autoLogoutWatch=null;
+let _isLocked=false,_numBuf='',_lastTouch=0;
 function showLockModal(){
   document.getElementById('lock-modal').classList.add('show');
   checkBiometricSupport();
 }
 function closeLockModal(){document.getElementById('lock-modal').classList.remove('show');_numBuf='';_syncDots();}
-function clearAutoLogoutTimers(){if(_autoLogoutTimer){clearTimeout(_autoLogoutTimer);_autoLogoutTimer=null;}if(_autoLogoutWatch){clearInterval(_autoLogoutWatch);_autoLogoutWatch=null;}}
-function enforceSessionExpiry(showMsg=true){
-  clearAutoLogoutTimers();
-  try{sessionStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_EXPIRES_KEY);}catch(e){}
-  document.body.classList.add('view-mode');
-  _isLocked=true;
-  const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');
-  if(link)link.style.display='';
-  if(logout)logout.style.display='none';
-  if(showMsg)showToast('ออกจากระบบอัตโนมัติหลังครบ 2 ชั่วโมง 🔒','info');
-}
-function scheduleAutoLogout(){
-  clearAutoLogoutTimers();
-  const expiresAt=Date.now()+AUTO_LOGOUT_MS;
-  try{sessionStorage.setItem(SESSION_EXPIRES_KEY,String(expiresAt));}catch(e){}
-  _autoLogoutTimer=setTimeout(()=>enforceSessionExpiry(true),AUTO_LOGOUT_MS);
-  _autoLogoutWatch=setInterval(()=>{
-    const exp=parseInt(sessionStorage.getItem(SESSION_EXPIRES_KEY)||'0',10);
-    if(exp&&Date.now()>=exp)enforceSessionExpiry(true);
-  },30000);
-}
-function applyViewMode(){
-  clearAutoLogoutTimers();
-  document.body.classList.add('view-mode');
-  _isLocked=true;
-  const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');
-  if(link)link.style.display='';
-  if(logout)logout.style.display='none';
-}
-function applyEditMode(){
-  document.body.classList.remove('view-mode');
-  _isLocked=false;
-  try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){}
-  const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');
-  if(link)link.style.display='none';
-  if(logout)logout.style.display='';
-  scheduleAutoLogout();
-}
+function applyViewMode(){document.body.classList.add('view-mode');_isLocked=true;const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');if(link)link.style.display='';if(logout)logout.style.display='none';}
+function applyEditMode(){document.body.classList.remove('view-mode');_isLocked=false;sessionStorage.setItem(SESSION_KEY,'1');const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');if(link)link.style.display='none';if(logout)logout.style.display='';}
 function showGreeting(){const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;pointer-events:none';d.innerHTML=`<div style="background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:36px 72px;backdrop-filter:blur(20px);box-shadow:0 12px 60px rgba(0,0,0,.5);animation:greetIn .35s cubic-bezier(.34,1.56,.64,1) both"><span style="font-size:42px;font-weight:800;color:#e8f0fe;font-family:'Sarabun',sans-serif;letter-spacing:1px">สวัสดี ค่ะ</span></div>`;document.body.appendChild(d);setTimeout(()=>{d.firstElementChild.style.cssText+=';animation:greetOut .3s ease forwards';setTimeout(()=>d.remove(),300);},3000);}
-function doLogout(){enforceSessionExpiry(false);showToast('ออกจากระบบแล้ว 🔒','ok');}
+function doLogout(){sessionStorage.removeItem(SESSION_KEY);applyViewMode();showToast('ออกจากระบบแล้ว 🔒','ok');}
 // ── Biometric Login (Fingerprint / Face ID) ──
 async function checkBiometricSupport(){
   if(!window.PublicKeyCredential)return;
@@ -1911,8 +1871,7 @@ function init(){
     }
     startAutoRefresh();
     setTimeout(()=>{
-      try{sessionStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_EXPIRES_KEY);}catch(e){}
-      applyViewMode();
+      applyEditMode();
     },300);
   },150);
 }
@@ -4712,35 +4671,45 @@ function saveNewCatModal(){
 
 
 <!-- ═══ Dev Login Modal ═══ -->
-<div id="dev-login-modal" style="display:none;position:fixed;inset:0;z-index:99999;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);padding:16px;overflow-y:auto">
-  <div style="width:100%;max-width:340px;margin:40px auto;background:rgba(10,15,30,.97);border:1px solid rgba(120,80,255,.4);border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5)">
-    <div style="height:2px;background:linear-gradient(90deg,transparent,#9b66ff,#ce93d8,transparent)"></div>
-    <div style="padding:26px 22px 22px">
-      <div style="width:44px;height:44px;background:rgba(120,80,255,.1);border:1px solid rgba(120,80,255,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:20px">🛠️</div>
-      <div style="font-size:18px;font-weight:800;color:#c9a8ff;text-align:center;margin-bottom:4px">Developer Mode</div>
-      <div style="font-size:11px;color:#445566;font-family:var(--m);text-align:center;margin-bottom:18px">สิทธิ์แก้ไขชื่อ S และเพิ่ม S ใหม่</div>
-      <div style="display:flex;justify-content:center;gap:14px;margin-bottom:18px" id="dev-dots-row">
-        <div class="lm-dot-inp" id="dvd0"></div><div class="lm-dot-inp" id="dvd1"></div>
-        <div class="lm-dot-inp" id="dvd2"></div><div class="lm-dot-inp" id="dvd3"></div>
+<div id="dev-login-modal" style="display:none;position:fixed;inset:0;z-index:99999;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.05);backdrop-filter:blur(2px);padding:16px;overflow-y:auto">
+  <div class="lm-card">
+    <div class="lm-acc"></div>
+    <div class="lm-body">
+      <div class="lm-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9b66ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
       </div>
-      <div style="display:none"><input id="dev-pw-inp" type="password" maxlength="20" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();doDevLogin();}"></div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:280px;margin:0 auto 16px">
-        <button class="lm-num" onmousedown="devNmDown(this,'1')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'1');event.preventDefault()" ontouchend="devNmUp(this)">1</button>
-        <button class="lm-num" onmousedown="devNmDown(this,'2')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'2');event.preventDefault()" ontouchend="devNmUp(this)">2</button>
-        <button class="lm-num" onmousedown="devNmDown(this,'3')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'3');event.preventDefault()" ontouchend="devNmUp(this)">3</button>
-        <button class="lm-num" onmousedown="devNmDown(this,'4')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'4');event.preventDefault()" ontouchend="devNmUp(this)">4</button>
-        <button class="lm-num" onmousedown="devNmDown(this,'5')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'5');event.preventDefault()" ontouchend="devNmUp(this)">5</button>
-        <button class="lm-num" onmousedown="devNmDown(this,'6')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'6');event.preventDefault()" ontouchend="devNmUp(this)">6</button>
-        <button class="lm-num" onmousedown="devNmDown(this,'7')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'7');event.preventDefault()" ontouchend="devNmUp(this)">7</button>
-        <button class="lm-num" onmousedown="devNmDown(this,'8')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'8');event.preventDefault()" ontouchend="devNmUp(this)">8</button>
-        <button class="lm-num" onmousedown="devNmDown(this,'9')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'9');event.preventDefault()" ontouchend="devNmUp(this)">9</button>
-        <button class="lm-num lm-num-s" onmousedown="devNmDown(this,null,'c')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,null,'c');event.preventDefault()" ontouchend="devNmUp(this)">ล้าง</button>
-        <button class="lm-num" onmousedown="devNmDown(this,'0')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'0');event.preventDefault()" ontouchend="devNmUp(this)">0</button>
-        <button class="lm-num lm-num-s" onmousedown="devNmDown(this,null,'d')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,null,'d');event.preventDefault()" ontouchend="devNmUp(this)">&#x232B;</button>
+      <div class="lm-h">Developer Mode</div>
+      <div class="lm-p" style="color:#25354a">สิทธิ์แก้ไขชื่อ S · เพิ่ม S ใหม่ · กำหนดวันโครงการ</div>
+      <div class="lm-dots" id="dev-dots-row">
+        <div class="lm-dot-inp" id="dvd0"></div><div class="lm-dot-inp" id="dvd1"></div><div class="lm-dot-inp" id="dvd2"></div>
+        <div class="lm-dot-inp" id="dvd3"></div><div class="lm-dot-inp" id="dvd4"></div><div class="lm-dot-inp" id="dvd5"></div>
+        <div class="lm-dot-inp" id="dvd6"></div><div class="lm-dot-inp" id="dvd7"></div>
       </div>
-      <div style="min-height:16px;font-size:11px;color:#dc6060;font-family:var(--m);text-align:center;margin-bottom:14px" id="dev-login-err"></div>
-      <button onclick="doDevLogin()" style="width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#5b2eff,#9b66ff);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;font-family:var(--f)">🛠️ เข้าสู่ Developer Mode</button>
-      <button onclick="closeDevLoginModal()" style="width:100%;padding:10px;border-radius:10px;background:transparent;border:1px solid rgba(120,80,255,.2);color:#445566;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--f)">ยกเลิก</button>
+      <div style="display:none"><input id="dev-pw-inp" type="password" maxlength="30" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();doDevLogin();}"></div>
+      <div class="lm-numgrid">
+        <button class="lm-num" ontouchstart="devNmDown(this,'1');event.preventDefault()" ontouchend="devNmUp(this)" ontouchcancel="devNmUp(this)" onmousedown="devNmDown(this,'1')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)">1</button>
+        <button class="lm-num" ontouchstart="devNmDown(this,'2');event.preventDefault()" ontouchend="devNmUp(this)" ontouchcancel="devNmUp(this)" onmousedown="devNmDown(this,'2')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)">2</button>
+        <button class="lm-num" ontouchstart="devNmDown(this,'3');event.preventDefault()" ontouchend="devNmUp(this)" ontouchcancel="devNmUp(this)" onmousedown="devNmDown(this,'3')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)">3</button>
+        <button class="lm-num" ontouchstart="devNmDown(this,'4');event.preventDefault()" ontouchend="devNmUp(this)" ontouchcancel="devNmUp(this)" onmousedown="devNmDown(this,'4')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)">4</button>
+        <button class="lm-num" ontouchstart="devNmDown(this,'5');event.preventDefault()" ontouchend="devNmUp(this)" ontouchcancel="devNmUp(this)" onmousedown="devNmDown(this,'5')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)">5</button>
+        <button class="lm-num" ontouchstart="devNmDown(this,'6');event.preventDefault()" ontouchend="devNmUp(this)" ontouchcancel="devNmUp(this)" onmousedown="devNmDown(this,'6')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)">6</button>
+        <button class="lm-num" ontouchstart="devNmDown(this,'7');event.preventDefault()" ontouchend="devNmUp(this)" ontouchcancel="devNmUp(this)" onmousedown="devNmDown(this,'7')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)">7</button>
+        <button class="lm-num" ontouchstart="devNmDown(this,'8');event.preventDefault()" ontouchend="devNmUp(this)" ontouchcancel="devNmUp(this)" onmousedown="devNmDown(this,'8')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)">8</button>
+        <button class="lm-num" ontouchstart="devNmDown(this,'9');event.preventDefault()" ontouchend="devNmUp(this)" ontouchcancel="devNmUp(this)" onmousedown="devNmDown(this,'9')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)">9</button>
+        <button class="lm-num lm-num-s" ontouchstart="devNmDown(this,null,'c');event.preventDefault()" ontouchend="devNmUp(this)" ontouchcancel="devNmUp(this)" onmousedown="devNmDown(this,null,'c')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)">ล้าง</button>
+        <button class="lm-num" ontouchstart="devNmDown(this,'0');event.preventDefault()" ontouchend="devNmUp(this)" ontouchcancel="devNmUp(this)" onmousedown="devNmDown(this,'0')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)">0</button>
+        <button class="lm-num lm-num-s" ontouchstart="devNmDown(this,null,'d');event.preventDefault()" ontouchend="devNmUp(this)" ontouchcancel="devNmUp(this)" onmousedown="devNmDown(this,null,'d')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)">&#x232B;</button>
+      </div>
+      <div class="lm-err" id="dev-login-err"></div>
+      <button class="lm-submit" style="background:linear-gradient(135deg,#5b2eff,#9b66ff)" onclick="doDevLogin()">🛠️ เข้าสู่ Developer Mode</button>
+      <button class="lm-ghost" onclick="closeDevLoginModal()">ยกเลิก</button>
+      <div class="lm-foot">
+        <div style="width:5px;height:5px;border-radius:50%;background:#0d1a28"></div>
+        Developer Mode · Secured
+        <div style="width:5px;height:5px;border-radius:50%;background:#0d1a28"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -5801,7 +5770,7 @@ function closeDevLoginModal() {
   _devBuf = ''; _devSyncDots();
 }
 function _devSyncDots() {
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 8; i++) {
     const d = document.getElementById('dvd' + i);
     if (d) d.classList.toggle('filled', i < _devBuf.length);
   }
@@ -5812,7 +5781,7 @@ function devNmDown(el, n, a) {
   const now = Date.now(); if (now - _devLastTouch < 80) return; _devLastTouch = now;
   el.style.transform = 'scale(1.15)';
   if (navigator.vibrate) navigator.vibrate(20);
-  if (n) { if (_devBuf.length < 4) { _devBuf += n; _devSyncDots(); if (_devBuf.length >= 4) setTimeout(() => { doDevLogin(); }, 120); } }
+  if (n) { if (_devBuf.length < 8) { _devBuf += n; _devSyncDots(); setTimeout(() => { if(sha256(_devBuf)===getDevHash()) doDevLogin(); }, 120); } }
   else if (a === 'c') { _devBuf = ''; _devSyncDots(); }
   else if (a === 'd') { _devBuf = _devBuf.slice(0, -1); _devSyncDots(); }
 }
@@ -5835,7 +5804,7 @@ function doDevLogin() {
     const err = document.getElementById('dev-login-err');
     if (err) err.textContent = 'รหัสผ่านไม่ถูกต้อง';
     _devBuf = ''; _devSyncDots();
-    const card = document.querySelector('#dev-login-modal > div');
+    const card = document.querySelector('#dev-login-modal .lm-card');
     if (card) { card.style.animation = 'none'; card.offsetHeight; card.style.animation = 'shake .4s ease'; }
   }
 }
