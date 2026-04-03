@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -457,7 +456,7 @@ body.view-mode .edit-only{display:none!important}
     <button class="btn edit-only" onclick="openExportJpegModal()" style="background:rgba(0,229,255,.15);color:#00e5ff;border:1px solid rgba(0,229,255,.5)">🖼️ Export JPEG</button>
     <button class="btn edit-only" onclick="downloadCurrentState()" style="background:rgba(179,136,255,.15);color:#b388ff;border:1px solid rgba(179,136,255,.5)">💾 บันทึกไฟล์</button>
     <button class="btn edit-only" onclick="exportDataJSON()" style="background:rgba(255,149,0,.15);color:#ff9500;border:1px solid rgba(255,149,0,.5)">📤 Export JSON</button>
-    <button class="btn btn-b view-only" onclick="openFirebaseModal()">☁️ ลงทะเบียน</button>
+    <button class="btn btn-b" onclick="openFirebaseModal()" id="fb-register-btn" style="position:relative">☁️ ลงทะเบียน<span id="fb-dot" style="position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:var(--orange);display:none"></span></button>
     <button class="btn btn-gold edit-only" onclick="showPwChange()">🔑 รหัสผ่าน</button>
     <a id="dev-login-link" href="#" onclick="event.preventDefault();showDevLoginModal()" style="font-size:11px;font-weight:600;color:#9b66ff;text-decoration:none;padding:5px 10px;border-radius:6px;border:1px solid rgba(120,80,255,.3);background:rgba(120,80,255,.08);transition:color .2s" title="Developer Mode">🛠️ Dev</a>
     <a id="lockin-link" href="#" onclick="event.preventDefault();showLockModal()" style="font-size:11px;font-weight:600;color:var(--tx2);text-decoration:none;padding:5px 10px;border-radius:6px;transition:color .2s" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--tx2)'">🔓 Login</a>
@@ -983,6 +982,17 @@ function openFirebaseModal(){
   modal.style.display = 'flex';
   setTimeout(()=>inp?.focus(), 80);
 }
+function updateFbDot(){
+  const dot = document.getElementById('fb-dot');
+  if(!dot) return;
+  if(!_fbUrl || !_fbUrl.startsWith('https://')){
+    dot.style.display='block'; dot.style.background='var(--orange)';
+    dot.title='ยังไม่ได้ตั้งค่า Firebase';
+  } else {
+    dot.style.display='block'; dot.style.background='var(--green)';
+    dot.title='เชื่อมต่อ Firebase แล้ว';
+  }
+}
 function closeFirebaseModal(){
   const modal = document.getElementById('firebase-modal');
   if(modal) modal.style.display = 'none';
@@ -1004,6 +1014,7 @@ function saveFirebaseUrl(){
   localStorage.setItem('cp_fb_url', _fbUrl);
   updateFbStatus();
   showToast('✅ บันทึก Firebase URL สำเร็จ!','ok',4000);
+  updateFbDot();
   closeFirebaseModal();
   // Auto-load if already have session
   if(isAdminMode() || sessionStorage.getItem('cp_edit_session')==='1'){
@@ -1488,54 +1499,16 @@ function ra(){
   const s7v=gv('s7'),s7p=document.getElementById('s7p');if(s7p){s7p.textContent=ceilTo2(s7v)+'%';s7p.style.color=gcol(s7v/40);}
 }
 const SESSION_KEY='cp_edit_session';
-const SESSION_EXPIRES_KEY='cp_edit_expires_at';
-const AUTO_LOGOUT_MS=2*60*60*1000;
-let _isLocked=false,_numBuf='',_lastTouch=0,_autoLogoutTimer=null,_autoLogoutWatch=null;
+let _isLocked=false,_numBuf='',_lastTouch=0;
 function showLockModal(){
   document.getElementById('lock-modal').classList.add('show');
   checkBiometricSupport();
 }
 function closeLockModal(){document.getElementById('lock-modal').classList.remove('show');_numBuf='';_syncDots();}
-function clearAutoLogoutTimers(){if(_autoLogoutTimer){clearTimeout(_autoLogoutTimer);_autoLogoutTimer=null;}if(_autoLogoutWatch){clearInterval(_autoLogoutWatch);_autoLogoutWatch=null;}}
-function enforceSessionExpiry(showMsg=true){
-  clearAutoLogoutTimers();
-  try{sessionStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_EXPIRES_KEY);}catch(e){}
-  document.body.classList.add('view-mode');
-  _isLocked=true;
-  const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');
-  if(link)link.style.display='';
-  if(logout)logout.style.display='none';
-  if(showMsg)showToast('ออกจากระบบอัตโนมัติหลังครบ 2 ชั่วโมง 🔒','info');
-}
-function scheduleAutoLogout(){
-  clearAutoLogoutTimers();
-  const expiresAt=Date.now()+AUTO_LOGOUT_MS;
-  try{sessionStorage.setItem(SESSION_EXPIRES_KEY,String(expiresAt));}catch(e){}
-  _autoLogoutTimer=setTimeout(()=>enforceSessionExpiry(true),AUTO_LOGOUT_MS);
-  _autoLogoutWatch=setInterval(()=>{
-    const exp=parseInt(sessionStorage.getItem(SESSION_EXPIRES_KEY)||'0',10);
-    if(exp&&Date.now()>=exp)enforceSessionExpiry(true);
-  },30000);
-}
-function applyViewMode(){
-  clearAutoLogoutTimers();
-  document.body.classList.add('view-mode');
-  _isLocked=true;
-  const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');
-  if(link)link.style.display='';
-  if(logout)logout.style.display='none';
-}
-function applyEditMode(){
-  document.body.classList.remove('view-mode');
-  _isLocked=false;
-  try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){}
-  const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');
-  if(link)link.style.display='none';
-  if(logout)logout.style.display='';
-  scheduleAutoLogout();
-}
+function applyViewMode(){document.body.classList.add('view-mode');_isLocked=true;const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');if(link)link.style.display='';if(logout)logout.style.display='none';}
+function applyEditMode(){document.body.classList.remove('view-mode');_isLocked=false;sessionStorage.setItem(SESSION_KEY,'1');const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');if(link)link.style.display='none';if(logout)logout.style.display='';}
 function showGreeting(){const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;pointer-events:none';d.innerHTML=`<div style="background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:36px 72px;backdrop-filter:blur(20px);box-shadow:0 12px 60px rgba(0,0,0,.5);animation:greetIn .35s cubic-bezier(.34,1.56,.64,1) both"><span style="font-size:42px;font-weight:800;color:#e8f0fe;font-family:'Sarabun',sans-serif;letter-spacing:1px">สวัสดี ค่ะ</span></div>`;document.body.appendChild(d);setTimeout(()=>{d.firstElementChild.style.cssText+=';animation:greetOut .3s ease forwards';setTimeout(()=>d.remove(),300);},3000);}
-function doLogout(){enforceSessionExpiry(false);showToast('ออกจากระบบแล้ว 🔒','ok');}
+function doLogout(){sessionStorage.removeItem(SESSION_KEY);applyViewMode();showToast('ออกจากระบบแล้ว 🔒','ok');}
 // ── Biometric Login (Fingerprint / Face ID) ──
 async function checkBiometricSupport(){
   if(!window.PublicKeyCredential)return;
@@ -1910,8 +1883,7 @@ function init(){
     }
     startAutoRefresh();
     setTimeout(()=>{
-      try{sessionStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_EXPIRES_KEY);}catch(e){}
-      applyViewMode();
+      applyEditMode();
     },300);
   },150);
 }
@@ -1923,6 +1895,8 @@ document.head.appendChild(shakeStyle);
 window.addEventListener('DOMContentLoaded',init);
 // Daily auto-snapshot: save on load and schedule daily at 19:00
 window.addEventListener('load',function(){
+  updateFbDot();
+  
   // Auto-snapshot on load (after 4s to let data settle)
   setTimeout(function(){
     if(typeof jupAutoSaveSnapshot==='function')jupAutoSaveSnapshot(false);
