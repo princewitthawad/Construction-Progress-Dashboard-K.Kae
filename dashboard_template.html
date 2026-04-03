@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -242,24 +241,16 @@ button:not(.btn):not(.lm-num):not(.ov-close):active{transform:scale(.96)}
 .s3-ext{overflow:hidden;max-height:0;opacity:0;transition:max-height .6s ease,opacity .4s ease}
 .s3-ext.open{max-height:900px;opacity:1}
 body.view-mode input,body.view-mode .DCI,body.view-mode .PI{pointer-events:none!important;opacity:.45!important;cursor:not-allowed!important}
-body.view-mode #login-pass-inline{pointer-events:auto!important;opacity:1!important;cursor:text!important}
 body.view-mode .edit-only{display:none!important}
-.login-inline{display:none;align-items:center;gap:8px;padding:4px 6px;border:1px solid rgba(56,139,253,.18);border-radius:10px;background:rgba(8,13,20,.45)}
-#login-pass-inline{width:120px;background:rgba(255,255,255,.05);border:1px solid rgba(56,139,253,.28);border-radius:8px;color:var(--tx);padding:7px 10px;font-family:var(--m);font-size:12px;outline:none}
-#login-pass-inline:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(56,139,253,.12)}
-.login-inline .btn{padding:7px 12px}
-@media(max-width:600px){.login-inline{width:100%;justify-content:flex-end}#login-pass-inline{width:100px}}
 #toast{position:fixed;bottom:24px;right:24px;background:#111b28;border:1px solid;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;z-index:9999;display:none;align-items:center;gap:8px;box-shadow:var(--shadow);animation:slideup .3s ease}
 @keyframes slideup{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
 #toast.ok{border-color:rgba(0,230,118,.5);color:var(--green)}
 #toast.err{border-color:rgba(255,68,68,.5);color:var(--red)}
 #toast.info{border-color:rgba(56,139,253,.5);color:var(--blue)}
-#lock-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.08);backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);padding:16px;overflow-y:auto}
+#lock-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.05);backdrop-filter:blur(2px);padding:16px;overflow-y:auto}
 #lock-modal.show{display:flex!important}
-.lm-card{width:100%;max-width:360px;margin:16px auto;background:linear-gradient(135deg,rgba(255,255,255,.09),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.28);border-radius:22px;overflow:visible;box-shadow:0 12px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(255,255,255,.08);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);position:relative}
+.lm-card{width:100%;max-width:360px;margin:16px auto;background:rgba(10,15,30,.1);border:1px solid rgba(255,255,255,.15);border-radius:22px;overflow:visible;box-shadow:0 8px 32px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.15);backdrop-filter:blur(8px)}
 .lm-acc{height:1px;background:linear-gradient(90deg,transparent,rgba(56,139,253,.5) 30%,rgba(120,220,255,.5) 60%,transparent)}
-.lm-card::before,.pwc-card::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(120deg,rgba(255,255,255,.35) 0%,rgba(255,255,255,.14) 18%,transparent 42%,transparent 58%,rgba(255,255,255,.1) 82%,rgba(255,255,255,.18) 100%);pointer-events:none}
-
 .lm-body{padding:26px 22px 22px;background:transparent}
 .lm-icon{width:46px;height:46px;background:rgba(56,139,253,.07);border:1px solid rgba(56,139,253,.18);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
 .lm-h{font-size:19px;font-weight:800;color:#dce8fb;text-align:center;margin-bottom:6px}
@@ -302,15 +293,14 @@ body.view-mode .edit-only{display:none!important}
 
 
 .lm-num{aspect-ratio:1/1;width:100%;border-radius:50%;
-  background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.04));
-  border:1px solid rgba(255,255,255,.32);
+  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.18) 0%,rgba(255,255,255,.04) 40%,transparent 70%);
+  border:1px solid rgba(255,255,255,.25);
   color:#ffffff;font-size:28px;font-weight:300;
   cursor:pointer;display:flex;align-items:center;justify-content:center;
   touch-action:manipulation;-webkit-tap-highlight-color:transparent;
   transition:transform .7s cubic-bezier(.34,1.56,.64,1), box-shadow .7s ease, background .7s ease;
   user-select:none;position:relative;overflow:visible;letter-spacing:-.5px;
-  box-shadow:0 6px 20px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(0,0,0,.18);
-  backdrop-filter:blur(12px) saturate(170%);-webkit-backdrop-filter:blur(12px) saturate(170%);
+  box-shadow:0 4px 16px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.3),inset 0 -1px 0 rgba(0,0,0,.15);
   will-change:transform;transform:scale(1) translateZ(0)}
 .lm-num:active{
   transform:scale(1.2) translateZ(0)!important;
@@ -335,11 +325,9 @@ body.view-mode .edit-only{display:none!important}
 .lm-ghost{width:100%;padding:10px;border-radius:10px;background:transparent;border:1px solid #080f1a;color:#1e3050;font-size:11px;font-weight:600;cursor:pointer;touch-action:manipulation;transition:all .15s}
 .lm-ghost:hover{background:#040b14;color:#2d4a6a}
 .lm-foot{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;padding-top:14px;border-top:1px solid #050c16;font-size:9px;color:#0d1a28;font-family:var(--m)}
-
-.lm-card::before{content:'';position:absolute;inset:0;border-radius:22px;background:linear-gradient(120deg,rgba(255,255,255,.15),transparent 40%,transparent 60%,rgba(255,255,255,.1));pointer-events:none}
-.pwc-card{position:relative;background:linear-gradient(135deg,rgba(255,255,255,.09),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.28);border-radius:14px;padding:24px 22px;width:100%;max-width:360px;box-shadow:0 12px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(255,255,255,.08);backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);overflow:hidden}
-#pwc-modal{position:fixed;inset:0;z-index:99998;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.1);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:16px}
+#pwc-modal{position:fixed;inset:0;z-index:99998;display:none;align-items:center;justify-content:center;background:rgba(4,8,16,.95);backdrop-filter:blur(16px);padding:16px}
 #pwc-modal.show{display:flex!important}
+.pwc-card{background:#08111e;border:1px solid rgba(56,139,253,.2);border-radius:14px;padding:24px 22px;width:100%;max-width:360px;box-shadow:var(--shadow)}
 .pwc-h{font-size:16px;font-weight:800;color:#dce8fb;margin-bottom:4px}.pwc-s{font-size:11px;color:var(--tx3);font-family:var(--m);margin-bottom:20px}.cl-report{width:100%;box-sizing:border-box;background:var(--bg2);border:1.5px solid var(--bdr);border-radius:9px;padding:12px 14px;color:var(--tx);font-family:var(--f);font-size:14px;line-height:1.7;resize:vertical;min-height:110px;outline:none;transition:border .2s;-webkit-user-select:text;user-select:text}.cl-report:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(56,139,253,.12)}
 .pwc-fld{margin-bottom:12px}.pwc-lbl{display:block;font-size:9px;font-weight:700;color:#2d4a6a;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
 .pwc-inp{width:100%;background:#040b14;border:1.5px solid #101e2e;border-radius:8px;padding:10px 12px;color:#c0d4ec;font-size:13px;font-family:var(--m);outline:none;transition:border .2s}
@@ -472,9 +460,7 @@ body.view-mode .edit-only{display:none!important}
     <button class="btn btn-b view-only" onclick="openFirebaseModal()">☁️ ลงทะเบียน</button>
     <button class="btn btn-gold edit-only" onclick="showPwChange()">🔑 รหัสผ่าน</button>
     <a id="dev-login-link" href="#" onclick="event.preventDefault();showDevLoginModal()" style="font-size:11px;font-weight:600;color:#9b66ff;text-decoration:none;padding:5px 10px;border-radius:6px;border:1px solid rgba(120,80,255,.3);background:rgba(120,80,255,.08);transition:color .2s" title="Developer Mode">🛠️ Dev</a>
-    <div id="login-inline" class="login-inline view-only">
-      <button id="lockin-link" class="btn btn-b" onclick="showUserLoginModal(event)">🔓 Login</button>
-    </div>
+    <a id="lockin-link" href="#" onclick="event.preventDefault();showLockModal()" style="font-size:11px;font-weight:600;color:var(--tx2);text-decoration:none;padding:5px 10px;border-radius:6px;transition:color .2s" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--tx2)'">🔓 Login</a>
     <button id="logout-btn" class="btn edit-only" onclick="doLogout()" style="display:none;background:rgba(255,68,68,.12);color:#ff6666;border:1px solid rgba(255,68,68,.3);font-size:11px">🔒 Logout</button>
     <button id="lock-btn" class="btn btn-o edit-only" onclick="applyViewMode()" style="display:none">🔒 ล็อก</button>
     <button class="btn edit-only" onclick="openACCT()" style="background:rgba(0,212,255,.15);color:var(--cyan);border:1px solid rgba(0,212,255,.4);font-size:11px">💰 ACCT</button>
@@ -635,7 +621,7 @@ body.view-mode .edit-only{display:none!important}
   </div>
 </div>
 
-<div id="lock-modal" style="display:none!important">
+<div id="lock-modal">
   <div class="lm-card">
     <div class="lm-acc"></div>
     <div class="lm-body">
@@ -1502,178 +1488,100 @@ function ra(){
   const s7v=gv('s7'),s7p=document.getElementById('s7p');if(s7p){s7p.textContent=ceilTo2(s7v)+'%';s7p.style.color=gcol(s7v/40);}
 }
 const SESSION_KEY='cp_edit_session';
-const SESSION_TS_KEY='cp_edit_session_ts';
-const SESSION_TIMEOUT_MS=2*60*60*1000;
-let _isLocked=false,_numBuf='',_lastTouch=0,_sessionTimer=null;
-
-function clearSessionTimer(){
-  if(_sessionTimer){clearTimeout(_sessionTimer);_sessionTimer=null;}
-}
-function scheduleSessionExpiry(){
-  clearSessionTimer();
-  const ts=parseInt(sessionStorage.getItem(SESSION_TS_KEY)||'0',10);
-  if(!ts)return;
-  const remain=SESSION_TIMEOUT_MS-(Date.now()-ts);
-  if(remain<=0){
-    forceSessionExpiry();
-    return;
-  }
-  _sessionTimer=setTimeout(forceSessionExpiry,remain);
-}
-function forceSessionExpiry(){
-  sessionStorage.removeItem(SESSION_KEY);
-  sessionStorage.removeItem(SESSION_TS_KEY);
-  applyViewMode();
-  showToast('Session หมดอายุอัตโนมัติหลัง 2 ชั่วโมง 🔒','info');
-}
-function setLoggedInSession(){
-  sessionStorage.setItem(SESSION_KEY,'1');
-  sessionStorage.setItem(SESSION_TS_KEY,String(Date.now()));
-  scheduleSessionExpiry();
-}
-function hasValidSession(){
-  const active=sessionStorage.getItem(SESSION_KEY)==='1';
-  const ts=parseInt(sessionStorage.getItem(SESSION_TS_KEY)||'0',10);
-  if(!active||!ts)return false;
-  if(Date.now()-ts>=SESSION_TIMEOUT_MS){
-    sessionStorage.removeItem(SESSION_KEY);
-    sessionStorage.removeItem(SESSION_TS_KEY);
-    return false;
-  }
-  return true;
-}
+const SESSION_EXPIRES_KEY='cp_edit_expires_at';
+const AUTO_LOGOUT_MS=2*60*60*1000;
+let _isLocked=false,_numBuf='',_lastTouch=0,_autoLogoutTimer=null,_autoLogoutWatch=null;
 function showLockModal(){
-  const inp=document.getElementById('login-pass-inline');
-  if(inp)inp.focus();
+  document.getElementById('lock-modal').classList.add('show');
+  checkBiometricSupport();
 }
-function closeLockModal(){_numBuf='';_syncDots();}
-function applyViewMode(){
+function closeLockModal(){document.getElementById('lock-modal').classList.remove('show');_numBuf='';_syncDots();}
+function clearAutoLogoutTimers(){if(_autoLogoutTimer){clearTimeout(_autoLogoutTimer);_autoLogoutTimer=null;}if(_autoLogoutWatch){clearInterval(_autoLogoutWatch);_autoLogoutWatch=null;}}
+function enforceSessionExpiry(showMsg=true){
+  clearAutoLogoutTimers();
+  try{sessionStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_EXPIRES_KEY);}catch(e){}
   document.body.classList.add('view-mode');
   _isLocked=true;
-  const loginWrap=document.getElementById('login-inline'),logout=document.getElementById('logout-btn'),inp=document.getElementById('login-pass-inline');
-  if(loginWrap)loginWrap.style.display='inline-flex';
+  const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');
+  if(link)link.style.display='';
   if(logout)logout.style.display='none';
-  if(inp)inp.value='';
+  if(showMsg)showToast('ออกจากระบบอัตโนมัติหลังครบ 2 ชั่วโมง 🔒','info');
+}
+function scheduleAutoLogout(){
+  clearAutoLogoutTimers();
+  const expiresAt=Date.now()+AUTO_LOGOUT_MS;
+  try{sessionStorage.setItem(SESSION_EXPIRES_KEY,String(expiresAt));}catch(e){}
+  _autoLogoutTimer=setTimeout(()=>enforceSessionExpiry(true),AUTO_LOGOUT_MS);
+  _autoLogoutWatch=setInterval(()=>{
+    const exp=parseInt(sessionStorage.getItem(SESSION_EXPIRES_KEY)||'0',10);
+    if(exp&&Date.now()>=exp)enforceSessionExpiry(true);
+  },30000);
+}
+function applyViewMode(){
+  clearAutoLogoutTimers();
+  document.body.classList.add('view-mode');
+  _isLocked=true;
+  const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');
+  if(link)link.style.display='';
+  if(logout)logout.style.display='none';
 }
 function applyEditMode(){
   document.body.classList.remove('view-mode');
   _isLocked=false;
-  setLoggedInSession();
-  const loginWrap=document.getElementById('login-inline'),logout=document.getElementById('logout-btn'),inp=document.getElementById('login-pass-inline');
-  if(loginWrap)loginWrap.style.display='none';
+  try{sessionStorage.setItem(SESSION_KEY,'1');}catch(e){}
+  const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');
+  if(link)link.style.display='none';
   if(logout)logout.style.display='';
-  if(inp)inp.value='';
-}
-function bootstrapEditSession(){
-  if(hasValidSession()){
-    document.body.classList.remove('view-mode');
-    _isLocked=false;
-    const loginWrap=document.getElementById('login-inline'),logout=document.getElementById('logout-btn');
-    if(loginWrap)loginWrap.style.display='none';
-    if(logout)logout.style.display='';
-    scheduleSessionExpiry();
-  }else{
-    applyViewMode();
-  }
+  scheduleAutoLogout();
 }
 function showGreeting(){const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;pointer-events:none';d.innerHTML=`<div style="background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:36px 72px;backdrop-filter:blur(20px);box-shadow:0 12px 60px rgba(0,0,0,.5);animation:greetIn .35s cubic-bezier(.34,1.56,.64,1) both"><span style="font-size:42px;font-weight:800;color:#e8f0fe;font-family:'Sarabun',sans-serif;letter-spacing:1px">สวัสดี ค่ะ</span></div>`;document.body.appendChild(d);setTimeout(()=>{d.firstElementChild.style.cssText+=';animation:greetOut .3s ease forwards';setTimeout(()=>d.remove(),300);},3000);}
-function doLogout(silent){
-  clearSessionTimer();
-  sessionStorage.removeItem(SESSION_KEY);
-  sessionStorage.removeItem(SESSION_TS_KEY);
-  applyViewMode();
-  if(!silent)showToast('ออกจากระบบแล้ว 🔒','ok');
+function doLogout(){enforceSessionExpiry(false);showToast('ออกจากระบบแล้ว 🔒','ok');}
+// ── Biometric Login (Fingerprint / Face ID) ──
+async function checkBiometricSupport(){
+  if(!window.PublicKeyCredential)return;
+  const cid=document.getElementById('biometric-btn');
+  if(!cid){return;}
+  const hasCreds=await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+  if(hasCreds){cid.style.display='block';}
 }
-function showUserLoginModal(ev){
-  if(ev&&ev.preventDefault)ev.preventDefault();
-  _userBuf='';_userSyncDots();
-  const err=document.getElementById('user-login-err'); if(err) err.textContent='';
-  const modal=document.getElementById('user-login-modal');
-  if(modal) modal.style.display='flex';
-  setTimeout(()=>document.getElementById('user-pw-inp')?.focus(),80);
+async function registerBiometric(){
+  if(!window.PublicKeyCredential){showToast('⚠️ จุดประสงค์นี้ไม่รองรับ','err');return;}
+  try{
+    const chal=crypto.getRandomValues(new Uint8Array(32));
+    const cred=await navigator.credentials.create({publicKey:{challenge:chal,rp:{name:'Construction Dashboard',id:window.location.hostname},user:{id:new Uint8Array(16),name:'user@dashboard.local',displayName:'Dashboard User'},pubKeyCredParams:[{alg:-7,type:'public-key'}],timeout:60000,attestation:'none',userVerification:'preferred'}});
+    if(!cred){showToast('❌ ยกเลิกการลงทะเบียน','err');return;}
+    const credId=Array.from(new Uint8Array(cred.id)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    localStorage.setItem('cp_biometric_cred',credId);
+    showToast('✅ ลงทะเบียน Face ID / Fingerprint สำเร็จ','ok');
+  }catch(e){showToast('❌ ข้อผิดพลาด: '+e.message,'err');}
 }
-function closeUserLoginModal(){
-  const modal=document.getElementById('user-login-modal');
-  if(modal) modal.style.display='none';
-  _userBuf='';_userSyncDots();
-}
-let _userBuf='', _userLastTouch=0, _userLoginPending=false;
-function _userSyncDots(){
-  const filled=Math.min(_userBuf.length,8);
-  for(let i=0;i<8;i++){
-    const d=document.getElementById('uld'+i);
-    if(d)d.classList.toggle('filled', i<filled);
-  }
-  const inp=document.getElementById('user-pw-inp');
-  if(inp)inp.value=_userBuf;
-}
-function _scheduleAutoUserLogin(){
-  if(_userLoginPending)return;
-  _userLoginPending=true;
-  setTimeout(()=>{
-    _userLoginPending=false;
-    doUserLogin();
-  },120);
-}
-function userNmDown(el,n,a){
-  const now=Date.now(); if(now-_userLastTouch<80)return; _userLastTouch=now;
-  if(el&&el.style)el.style.transform='scale(1.15)';
-  if(navigator.vibrate)navigator.vibrate(20);
-  if(n){
-    if(_userBuf.length<20){
-      _userBuf+=n;
-      _userSyncDots();
-      if(sha256(_userBuf)===getPassHash() || _userBuf.length>=8){
-        _scheduleAutoUserLogin();
-      }
-    }
-  }
-  else if(a==='c'){
-    _userLoginPending=false;
-    _userBuf='';
-    _userSyncDots();
-  }
-  else if(a==='d'){
-    _userLoginPending=false;
-    _userBuf=_userBuf.slice(0,-1);
-    _userSyncDots();
-  }
-}
-function userNmUp(el){ if(el&&el.style) el.style.transform='scale(1)'; }
-function doUserLogin(){
-  _userLoginPending=false;
-  const pw=_userBuf || (document.getElementById('user-pw-inp')?.value || '').trim();
-  const err=document.getElementById('user-login-err'); if(err) err.textContent='';
-  if(!pw){
-    if(err) err.textContent='กรุณากรอกรหัสผ่าน';
-    document.getElementById('user-pw-inp')?.focus();
-    return;
-  }
-  if(sha256(pw)===getPassHash()){
-    closeUserLoginModal();
+async function loginBiometric(){
+  if(!window.PublicKeyCredential){showToast('⚠️ จุดประสงค์นี้ไม่รองรับ','err');return;}
+  const credId=localStorage.getItem('cp_biometric_cred');
+  if(!credId){showToast('❌ ต้องลงทะเบียน Face ID / Fingerprint ก่อน','err');return;}
+  try{
+    const chal=crypto.getRandomValues(new Uint8Array(32));
+    const cred=await navigator.credentials.get({publicKey:{challenge:chal,timeout:60000,userVerification:'preferred'}});
+    if(!cred){showToast('❌ ตรวจสอบสิทธิ์ล้มเหลว','err');return;}
     applyEditMode();
-    showToast('เข้าสู่ระบบสำเร็จ 🔓','ok');
-  }else{
-    if(err) err.textContent='รหัสผ่านไม่ถูกต้อง';
-    _userBuf=''; _userSyncDots();
-    const card=document.querySelector('#user-login-modal > div');
-    if(card){ card.style.animation='none'; card.offsetHeight; card.style.animation='shake .4s ease'; }
-    document.getElementById('user-pw-inp')?.focus();
-  }
+    closeLockModal();
+    showGreeting();
+    showToast('✅ ล็อกอินด้วย Face ID / Fingerprint สำเร็จ','ok');
+  }catch(e){showToast('❌ ข้อผิดพลาด: '+e.message,'err');}
 }
-// ── Biometric Login (disabled by request) ──
-async function checkBiometricSupport(){return false;}
-async function registerBiometric(){showToast('ปิดการใช้งานการเข้าสู่ระบบแบบไบโอเมตริกแล้ว','info');}
-async function loginBiometric(){showToast('ปิดการใช้งานการเข้าสู่ระบบแบบไบโอเมตริกแล้ว','info');}
 function numPress(n){
   const now=Date.now();if(now-_lastTouch<180)return;_lastTouch=now;
   if(_numBuf.length>=8)return;
   _numBuf+=n;_syncDots();
+  // Wave ripple on pressed button
   document.querySelectorAll('.lm-num').forEach(b=>{
     if(b.textContent.trim()===n){
       b.classList.remove('pressed');void b.offsetWidth;b.classList.add('pressed');setTimeout(()=>b.classList.remove('pressed'),200);
     }
   });
+  // Auto-try at the correct password length
+  const correctLen=getPassHash()===getPassHash()?_numBuf.length:6;
+  // Try unlock at each length from 4-8 silently; shake only at max
   setTimeout(()=>{
     if(sha256(_numBuf)===getPassHash()){doUnlock();}
     else if(_numBuf.length>=8){doUnlock();}
@@ -1684,15 +1592,9 @@ function numClear(){_numBuf='';_syncDots();}
 function _syncDots(){for(let i=0;i<8;i++){const d=document.getElementById('d'+i);if(d)d.classList.toggle('filled',i<_numBuf.length);}}
 function doUnlock(){
   const pw=_numBuf||document.getElementById('lm-pw')?.value||'';
-  if(!pw){return;}
-  if(sha256(pw)===getPassHash()){
-    _numBuf='';_syncDots();
-    applyEditMode();
-    showToast('เข้าสู่ระบบสำเร็จ 🔓','ok');
-  }else{
-    _numBuf='';_syncDots();
-    showToast('รหัสผ่านไม่ถูกต้อง','err');
-  }
+  if(!pw){document.getElementById('lm-err').textContent='กรุณากรอกรหัสผ่าน';return;}
+  if(sha256(pw)===getPassHash()){closeLockModal();applyEditMode();showToast('ปลดล็อกสำเร็จ 🔓','ok');}
+  else{document.getElementById('lm-err').textContent='รหัสผ่านไม่ถูกต้อง';_numBuf='';_syncDots();const card=document.querySelector('.lm-card');if(card){card.style.animation='none';card.offsetHeight;card.style.animation='shake .4s ease';}}
 }
 
 let _s7Chart=null;
@@ -2008,7 +1910,8 @@ function init(){
     }
     startAutoRefresh();
     setTimeout(()=>{
-      bootstrapEditSession();
+      try{sessionStorage.removeItem(SESSION_KEY);sessionStorage.removeItem(SESSION_EXPIRES_KEY);}catch(e){}
+      applyViewMode();
     },300);
   },150);
 }
@@ -2026,11 +1929,6 @@ window.addEventListener('load',function(){
   },4000);
 });
 window.addEventListener('resize',()=>setTimeout(forcePieSquare,50));
-document.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState==='visible'&&!hasValidSession()){
-    doLogout(true);
-  }
-});
 
 document.addEventListener('input',function(e){
   const el=e.target;
@@ -4842,42 +4740,6 @@ function saveNewCatModal(){
       <div style="min-height:16px;font-size:11px;color:#dc6060;font-family:var(--m);text-align:center;margin-bottom:14px" id="dev-login-err"></div>
       <button onclick="doDevLogin()" style="width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#5b2eff,#9b66ff);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;font-family:var(--f)">🛠️ เข้าสู่ Developer Mode</button>
       <button onclick="closeDevLoginModal()" style="width:100%;padding:10px;border-radius:10px;background:transparent;border:1px solid rgba(120,80,255,.2);color:#445566;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--f)">ยกเลิก</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ User Login Modal ═══ -->
-<div id="user-login-modal" style="display:none;position:fixed;inset:0;z-index:99999;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);padding:16px;overflow-y:auto">
-  <div style="width:100%;max-width:340px;margin:40px auto;background:rgba(10,15,30,.97);border:1px solid rgba(56,139,253,.4);border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5)">
-    <div style="height:2px;background:linear-gradient(90deg,transparent,#388bfd,#00d4ff,transparent)"></div>
-    <div style="padding:26px 22px 22px">
-      <div style="width:44px;height:44px;background:rgba(56,139,253,.1);border:1px solid rgba(56,139,253,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:20px">🔓</div>
-      <div style="font-size:18px;font-weight:800;color:#9ecbff;text-align:center;margin-bottom:4px">Login</div>
-      <div style="font-size:11px;color:#445566;font-family:var(--m);text-align:center;margin-bottom:18px">กรอกรหัสเพื่อเข้าสู่โหมดแก้ไข</div>
-      <div style="display:flex;justify-content:center;gap:14px;margin-bottom:18px" id="user-dots-row">
-        <div class="lm-dot-inp" id="uld0"></div><div class="lm-dot-inp" id="uld1"></div>
-        <div class="lm-dot-inp" id="uld2"></div><div class="lm-dot-inp" id="uld3"></div>
-        <div class="lm-dot-inp" id="uld4"></div><div class="lm-dot-inp" id="uld5"></div>
-        <div class="lm-dot-inp" id="uld6"></div><div class="lm-dot-inp" id="uld7"></div>
-      </div>
-      <div style="display:none"><input id="user-pw-inp" type="password" maxlength="20" autocomplete="current-password" onkeydown="if(event.key==='Enter'){event.preventDefault();doUserLogin();}else if(event.key==='Backspace'){event.preventDefault();userNmDown(this,null,'d');}else if(/^\d$/.test(event.key)){event.preventDefault();userNmDown(this,event.key);} "></div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:280px;margin:0 auto 16px">
-        <button class="lm-num" onmousedown="userNmDown(this,'1')" onmouseup="userNmUp(this)" onmouseleave="userNmUp(this)" ontouchstart="userNmDown(this,'1');event.preventDefault()" ontouchend="userNmUp(this)">1</button>
-        <button class="lm-num" onmousedown="userNmDown(this,'2')" onmouseup="userNmUp(this)" onmouseleave="userNmUp(this)" ontouchstart="userNmDown(this,'2');event.preventDefault()" ontouchend="userNmUp(this)">2</button>
-        <button class="lm-num" onmousedown="userNmDown(this,'3')" onmouseup="userNmUp(this)" onmouseleave="userNmUp(this)" ontouchstart="userNmDown(this,'3');event.preventDefault()" ontouchend="userNmUp(this)">3</button>
-        <button class="lm-num" onmousedown="userNmDown(this,'4')" onmouseup="userNmUp(this)" onmouseleave="userNmUp(this)" ontouchstart="userNmDown(this,'4');event.preventDefault()" ontouchend="userNmUp(this)">4</button>
-        <button class="lm-num" onmousedown="userNmDown(this,'5')" onmouseup="userNmUp(this)" onmouseleave="userNmUp(this)" ontouchstart="userNmDown(this,'5');event.preventDefault()" ontouchend="userNmUp(this)">5</button>
-        <button class="lm-num" onmousedown="userNmDown(this,'6')" onmouseup="userNmUp(this)" onmouseleave="userNmUp(this)" ontouchstart="userNmDown(this,'6');event.preventDefault()" ontouchend="userNmUp(this)">6</button>
-        <button class="lm-num" onmousedown="userNmDown(this,'7')" onmouseup="userNmUp(this)" onmouseleave="userNmUp(this)" ontouchstart="userNmDown(this,'7');event.preventDefault()" ontouchend="userNmUp(this)">7</button>
-        <button class="lm-num" onmousedown="userNmDown(this,'8')" onmouseup="userNmUp(this)" onmouseleave="userNmUp(this)" ontouchstart="userNmDown(this,'8');event.preventDefault()" ontouchend="userNmUp(this)">8</button>
-        <button class="lm-num" onmousedown="userNmDown(this,'9')" onmouseup="userNmUp(this)" onmouseleave="userNmUp(this)" ontouchstart="userNmDown(this,'9');event.preventDefault()" ontouchend="userNmUp(this)">9</button>
-        <button class="lm-num lm-num-s" onmousedown="userNmDown(this,null,'c')" onmouseup="userNmUp(this)" onmouseleave="userNmUp(this)" ontouchstart="userNmDown(this,null,'c');event.preventDefault()" ontouchend="userNmUp(this)">ล้าง</button>
-        <button class="lm-num" onmousedown="userNmDown(this,'0')" onmouseup="userNmUp(this)" onmouseleave="userNmUp(this)" ontouchstart="userNmDown(this,'0');event.preventDefault()" ontouchend="userNmUp(this)">0</button>
-        <button class="lm-num lm-num-s" onmousedown="userNmDown(this,null,'d')" onmouseup="userNmUp(this)" onmouseleave="userNmUp(this)" ontouchstart="userNmDown(this,null,'d');event.preventDefault()" ontouchend="userNmUp(this)">&#x232B;</button>
-      </div>
-      <div style="min-height:16px;font-size:11px;color:#dc6060;font-family:var(--m);text-align:center;margin-bottom:14px" id="user-login-err"></div>
-      <button onclick="doUserLogin()" style="width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#1565c0,#388bfd);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;font-family:var(--f)">🔓 เข้าสู่ระบบ</button>
-      <button onclick="closeUserLoginModal()" style="width:100%;padding:10px;border-radius:10px;background:transparent;border:1px solid rgba(56,139,253,.2);color:#445566;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--f)">ยกเลิก</button>
     </div>
   </div>
 </div>
