@@ -19,172 +19,154 @@ body{background:var(--bg);color:var(--tx);font-family:var(--f);min-height:100vh}
 .header{
   background:linear-gradient(135deg,rgba(13,21,37,.98),rgba(8,13,20,.98));
   border-bottom:2px solid rgba(255,214,0,.3);
-  padding:20px 24px;
-  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  padding:16px 20px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
   position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);
 }
-.header-left{display:flex;align-items:center;gap:14px}
-.header-icon{font-size:32px}
-.header-title{font-size:20px;font-weight:800;color:var(--gold)}
-.header-sub{font-size:11px;color:var(--tx3);margin-top:2px;font-family:var(--m)}
-.btn{padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-family:var(--f);font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px;transition:all .2s}
+.header-left{display:flex;align-items:center;gap:12px}
+.header-icon{font-size:28px}
+.header-title{font-size:17px;font-weight:800;color:var(--gold)}
+.header-sub{font-size:10px;color:var(--tx3);margin-top:2px;font-family:var(--m)}
+.btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-family:var(--f);font-weight:700;font-size:12px;display:inline-flex;align-items:center;gap:5px;transition:all .2s}
 .btn:hover{transform:translateY(-1px)}
 .btn-g{background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.4);color:var(--green)}
 .btn-b{background:rgba(56,139,253,.15);border:1px solid rgba(56,139,253,.4);color:var(--blue)}
 .btn-r{background:rgba(255,68,68,.12);border:1px solid rgba(255,68,68,.3);color:var(--red)}
 .btn-gold{background:rgba(255,214,0,.15);border:1px solid rgba(255,214,0,.4);color:var(--gold)}
 .btn-o{background:rgba(255,149,0,.15);border:1px solid rgba(255,149,0,.4);color:var(--orange)}
+.main{max-width:1100px;margin:0 auto;padding:20px 16px}
 
-.main{max-width:1100px;margin:0 auto;padding:28px 20px}
+/* Firebase sync banner */
+.fb-banner{
+  background:linear-gradient(135deg,rgba(8,20,40,.98),rgba(13,25,45,.98));
+  border:1.5px solid rgba(56,139,253,.4);border-radius:14px;
+  padding:16px 18px;margin-bottom:18px;
+}
+.fb-banner-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.fb-status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;transition:background .3s}
+.fb-status-dot.connected{background:var(--green);box-shadow:0 0 8px rgba(0,230,118,.5)}
+.fb-status-dot.disconnected{background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.fb-url-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fb-url-inp{
+  flex:1;min-width:200px;background:rgba(56,139,253,.06);
+  border:1.5px solid rgba(56,139,253,.25);border-radius:8px;
+  padding:9px 12px;color:#e8f0fe;font-size:12px;font-family:var(--m);outline:none;
+  transition:border .2s;
+}
+.fb-url-inp:focus{border-color:rgba(56,139,253,.6)}
+.sync-info{font-size:10px;color:var(--tx3);font-family:var(--m);margin-top:6px}
 
-/* Stats bar */
-.stats-bar{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:28px;
-}
-.stat-card{
-  background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:16px;text-align:center;
-}
-.stat-val{font-size:32px;font-weight:800;font-family:var(--m)}
-.stat-lbl{font-size:10px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-top:4px}
+/* Stats */
+.stats-bar{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.stat-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:14px;text-align:center}
+.stat-val{font-size:28px;font-weight:800;font-family:var(--m)}
+.stat-lbl{font-size:10px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-top:3px}
 
-/* Project cards grid */
-.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:24px}
-.proj-card{
-  background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;overflow:hidden;
-  transition:all .2s;cursor:default;
-}
+/* Cards */
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-bottom:20px}
+.proj-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;overflow:hidden;transition:all .2s}
 .proj-card:hover{border-color:rgba(255,255,255,.15);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.4)}
-.proj-card-header{padding:16px 18px 12px;border-bottom:1px solid var(--bdr)}
-.proj-card-name{font-size:15px;font-weight:800}
-.proj-card-client{font-size:11px;color:var(--tx3);margin-top:3px}
-.proj-card-body{padding:14px 18px}
-.proj-progress-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.proj-card-header{padding:14px 16px 10px;border-bottom:1px solid var(--bdr)}
+.proj-card-name{font-size:14px;font-weight:800}
+.proj-card-client{font-size:10px;color:var(--tx3);margin-top:2px}
+.proj-card-body{padding:12px 16px}
 .proj-pct{font-size:22px;font-weight:800;font-family:var(--m)}
-.proj-bar-bg{height:6px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;margin-bottom:10px}
+.proj-bar-bg{height:6px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;margin:6px 0 8px}
 .proj-bar-fill{height:100%;border-radius:99px;transition:width .6s ease}
-.proj-meta{display:flex;gap:12px;font-size:10px;color:var(--tx3);font-family:var(--m);flex-wrap:wrap}
-.proj-card-footer{padding:12px 18px;border-top:1px solid var(--bdr);display:flex;gap:8px;flex-wrap:wrap}
-.status-badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
+.proj-meta{font-size:10px;color:var(--tx3);font-family:var(--m);line-height:1.8}
+.proj-card-footer{padding:10px 16px;border-top:1px solid var(--bdr);display:flex;gap:7px;flex-wrap:wrap}
+.status-badge{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700}
 
-/* Add project card */
+/* Add card */
 .add-card{
   background:rgba(255,255,255,.02);border:2px dashed rgba(255,255,255,.1);border-radius:14px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
-  padding:40px 20px;cursor:pointer;transition:all .2s;min-height:220px;
+  padding:36px 20px;cursor:pointer;transition:all .2s;min-height:200px;
 }
-.add-card:hover{border-color:rgba(0,230,118,.4);background:rgba(0,230,118,.04)}
-.add-card-icon{font-size:40px;opacity:.5}
-.add-card-text{font-size:14px;font-weight:700;color:var(--tx3)}
+.add-card:hover{border-color:rgba(0,230,118,.4);background:rgba(0,230,118,.03)}
 
 /* Modal */
-.modal-bg{
-  display:none;position:fixed;inset:0;z-index:1000;
-  background:rgba(0,0,0,.85);backdrop-filter:blur(8px);
-  align-items:center;justify-content:center;padding:16px;
-}
-.modal-bg.show{display:flex}
-.modal{
-  background:linear-gradient(135deg,#0a1020,#0d1a2e);
-  border:1px solid rgba(56,139,253,.3);border-radius:18px;
-  padding:28px;width:100%;max-width:520px;
-  max-height:90vh;overflow-y:auto;
-}
-.modal-title{font-size:17px;font-weight:800;color:var(--cyan);margin-bottom:20px;display:flex;align-items:center;gap:8px}
-.form-group{margin-bottom:16px}
-.form-label{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block}
-.form-input{
-  width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
-  border-radius:8px;padding:10px 12px;color:var(--tx);font-size:14px;font-family:var(--f);
-  outline:none;transition:border-color .2s;
-}
-.form-input:focus{border-color:rgba(56,139,253,.5);background:rgba(255,255,255,.07)}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.form-hint{font-size:10px;color:var(--tx3);margin-top:4px}
-.form-section{font-size:12px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:.6px;margin:20px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--bdr)}
-.modal-footer{display:flex;gap:10px;margin-top:24px;justify-content:flex-end}
+.modal-bg{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:16px}
+.modal-bg.show{display:flex!important}
+.modal{background:linear-gradient(135deg,#0a1020,#0d1a2e);border:1px solid rgba(56,139,253,.3);border-radius:18px;padding:24px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:800;color:var(--cyan);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:block}
+.form-input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 12px;color:var(--tx);font-size:13px;font-family:var(--f);outline:none;transition:border-color .2s}
+.form-input:focus{border-color:rgba(56,139,253,.5)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-hint{font-size:10px;color:var(--tx3);margin-top:3px}
+.form-section{font-size:11px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:.6px;margin:18px 0 10px;padding-bottom:5px;border-bottom:1px solid var(--bdr)}
+.modal-footer{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+.color-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:5px}
+.color-opt{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s}
+.color-opt.selected,.color-opt:hover{border-color:#fff;transform:scale(1.15)}
 
-/* Color picker for project */
-.color-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-.color-opt{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s}
-.color-opt.selected,.color-opt:hover{border-color:#fff;transform:scale(1.1)}
-
-/* Delete confirm */
-.del-modal{max-width:380px}
-
-/* Responsive */
 @media(max-width:600px){
   .form-row{grid-template-columns:1fr}
   .proj-grid{grid-template-columns:1fr}
+  .header{padding:12px 14px}
+  .header-title{font-size:14px}
 }
 </style>
 </head>
 <body>
 
-<!-- ═══ HEADER ═══ -->
 <div class="header">
   <div class="header-left">
     <div class="header-icon">🏗️</div>
     <div>
-      <div class="header-title">Admin Portal — จัดการโครงการ</div>
-      <div class="header-sub">Construction Progress Dashboard · Multi-Project</div>
+      <div class="header-title">Admin Portal</div>
+      <div class="header-sub">Construction Dashboard · Multi-Project</div>
     </div>
   </div>
-  <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <button class="btn btn-gold" onclick="openAddModal()">➕ เพิ่มโครงการใหม่</button>
-    <button class="btn btn-b" onclick="exportAll()">📤 Export ทั้งหมด</button>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <div id="sync-indicator" style="font-size:10px;color:var(--tx3);font-family:var(--m)">⏳ กำลังโหลด...</div>
+    <button class="btn btn-b" onclick="manualRefresh()" style="font-size:11px;padding:6px 11px">🔄 รีเฟรช</button>
+    <button class="btn btn-gold" onclick="openAddModal()">➕ เพิ่มโครงการ</button>
   </div>
 </div>
 
-<!-- ═══ MAIN ═══ -->
 <div class="main">
 
-  <!-- Firebase Cloud Panel -->
-  <div id="fb-cloud-panel" style="background:linear-gradient(135deg,rgba(8,20,40,.95),rgba(13,25,45,.95));border:1.5px solid rgba(56,139,253,.35);border-radius:14px;padding:18px 20px;margin-bottom:22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-    <div style="width:40px;height:40px;background:rgba(56,139,253,.15);border:1px solid rgba(56,139,253,.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">☁️</div>
-    <div style="flex:1;min-width:200px">
-      <div style="font-size:13px;font-weight:800;color:#e8f0fe;margin-bottom:2px">Firebase Cloud Sync
-        <span id="fb-panel-status" style="margin-left:8px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:rgba(255,149,0,.15);border:1px solid rgba(255,149,0,.3);color:#ff9500">⚠️ ยังไม่ได้ตั้งค่า</span>
+  <!-- Firebase Setup Banner -->
+  <div class="fb-banner" id="fb-banner">
+    <div class="fb-banner-top">
+      <div class="fb-status-dot disconnected" id="fb-dot"></div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:800;color:#e8f0fe">
+          ☁️ Firebase Admin Sync
+          <span id="fb-status-txt" style="margin-left:8px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:rgba(255,149,0,.15);border:1px solid rgba(255,149,0,.3);color:#ff9500">ยังไม่ได้ตั้งค่า</span>
+        </div>
+        <div style="font-size:10px;color:#6b7a8d;margin-top:2px;font-family:var(--m)">รายการโครงการจะ Sync ทุก device อัตโนมัติ</div>
       </div>
-      <div style="font-size:10px;color:#6b7a8d;font-family:var(--m)">ใส่ Firebase URL เพื่อซิงค์ข้อมูลโครงการแบบ Real-time</div>
+      <button onclick="toggleFbPanel()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#8899aa;border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:var(--f)" id="fb-toggle-btn">⚙️ ตั้งค่า</button>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex:2;min-width:280px">
-      <input id="fb-panel-url" type="url"
-        placeholder="https://your-project-default-rtdb.firebaseio.com"
-        style="flex:1;min-width:200px;background:rgba(56,139,253,.06);border:1.5px solid rgba(56,139,253,.2);border-radius:8px;padding:9px 12px;color:#e8f0fe;font-size:12px;font-family:var(--m);outline:none;transition:border .2s"
-        onfocus="this.style.borderColor='rgba(56,139,253,.6)'" onblur="this.style.borderColor='rgba(56,139,253,.2)'"
-        onkeydown="if(event.key==='Enter')saveFbPanel()" oninput="onFbPanelInput()">
-      <button onclick="saveFbPanel()" style="background:rgba(56,139,253,.2);border:1px solid rgba(56,139,253,.5);color:#388bfd;border-radius:8px;padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f);white-space:nowrap">💾 บันทึก</button>
-      <button onclick="testFbPanel()" id="fb-panel-test-btn" style="background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:#00e676;border-radius:8px;padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f);white-space:nowrap">🔌 ทดสอบ</button>
-      <button onclick="openFbGuideModal()" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#8899aa;border-radius:8px;padding:9px 10px;font-size:12px;cursor:pointer;font-family:var(--f)" title="คู่มือสร้าง Firebase">📖</button>
-    </div>
-    <div id="fb-panel-result" style="width:100%;font-size:11px;font-family:var(--m);min-height:0;padding-top:2px"></div>
-  </div>
-
-  <!-- Online Hosting Guide -->
-  <div id="host-panel" style="background:linear-gradient(135deg,rgba(0,212,255,.04),rgba(0,230,118,.04));border:1.5px solid rgba(0,212,255,.2);border-radius:14px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-    <div style="font-size:22px;flex-shrink:0">🌐</div>
-    <div style="flex:1;min-width:220px">
-      <div style="font-size:12px;font-weight:800;color:#00d4ff;margin-bottom:3px">วิธีดูออนไลน์ได้ทุกที่ (ฟรี)</div>
-      <div style="font-size:10px;color:#8899aa;line-height:1.7">
-        อัพโหลดไฟล์นี้ขึ้น <strong style="color:#e8f0fe">Netlify Drop</strong> (ลากวางได้เลย) หรือ <strong style="color:#e8f0fe">GitHub Pages</strong> แล้วแชร์ URL ให้ทีมงาน
+    <div id="fb-setup-panel" style="display:none">
+      <div class="fb-url-row">
+        <input class="fb-url-inp" id="fb-admin-url" type="url"
+          placeholder="https://your-admin-rtdb.firebaseio.com  (Firebase URL สำหรับ Admin Portal)"
+          onkeydown="if(event.key==='Enter')saveFbAdminUrl()">
+        <button onclick="saveFbAdminUrl()" style="background:rgba(56,139,253,.2);border:1px solid rgba(56,139,253,.5);color:#388bfd;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f);white-space:nowrap">💾 บันทึก</button>
+        <button onclick="testFbAdminUrl()" id="fb-admin-test-btn" style="background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:#00e676;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f);white-space:nowrap">🔌 ทดสอบ</button>
       </div>
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <a href="https://app.netlify.com/drop" target="_blank" style="background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.4);color:#00d4ff;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;text-decoration:none;font-family:var(--f);white-space:nowrap">🚀 Netlify Drop</a>
-      <a href="https://pages.github.com" target="_blank" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:#e8f0fe;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;text-decoration:none;font-family:var(--f);white-space:nowrap">🐙 GitHub Pages</a>
-      <button onclick="document.getElementById('host-panel').style.display='none'" style="background:none;border:none;color:#445566;cursor:pointer;font-size:16px;padding:0 4px" title="ปิด">✕</button>
+      <div id="fb-admin-result" style="font-size:11px;font-family:var(--m);margin-top:6px;min-height:14px"></div>
+      <div style="font-size:10px;color:#445566;margin-top:5px;line-height:1.6">
+        💡 สร้าง Firebase Project แยกสำหรับ Admin Portal (ไม่ต้องใช้อันเดียวกับ Dashboard โครงการ) — ทุก device ที่ใส่ URL นี้จะเห็นรายการโครงการเหมือนกัน
+      </div>
     </div>
   </div>
 
   <!-- Stats -->
   <div class="stats-bar" id="stats-bar"></div>
 
-  <!-- Project grid -->
+  <!-- Project Grid -->
   <div class="proj-grid" id="proj-grid"></div>
 
 </div>
 
-<!-- ═══ ADD/EDIT MODAL ═══ -->
+<!-- ADD/EDIT MODAL -->
 <div class="modal-bg" id="add-modal">
   <div class="modal">
     <div class="modal-title"><span id="modal-icon">➕</span><span id="modal-title-text">เพิ่มโครงการใหม่</span></div>
@@ -200,11 +182,11 @@ body{background:var(--bg);color:var(--tx);font-family:var(--f);min-height:100vh}
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">วันเริ่มโครงการ *</label>
+        <label class="form-label">วันเริ่มโครงการ</label>
         <input class="form-input" id="f-start" type="date">
       </div>
       <div class="form-group">
-        <label class="form-label">วันส่งมอบ (Deadline) *</label>
+        <label class="form-label">วันส่งมอบ *</label>
         <input class="form-input" id="f-deadline" type="date">
       </div>
     </div>
@@ -213,55 +195,43 @@ body{background:var(--bg);color:var(--tx);font-family:var(--f);min-height:100vh}
       <div class="color-row" id="color-row"></div>
     </div>
 
-    <div class="form-section" style="display:flex;align-items:center;justify-content:space-between">
-      <span>☁️ Firebase Realtime Database</span>
-      <button type="button" onclick="openFbGuideModal()" style="background:rgba(56,139,253,.15);border:1px solid rgba(56,139,253,.4);color:#388bfd;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:var(--f);font-weight:700">📖 คู่มือสร้าง Firebase</button>
-    </div>
+    <div class="form-section">☁️ Firebase ของ Dashboard โครงการนี้</div>
     <div class="form-group">
       <label class="form-label">Firebase URL *</label>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input class="form-input" id="f-fb" placeholder="https://your-project-default-rtdb.firebaseio.com" style="flex:1;margin-bottom:0">
-        <button type="button" id="fb-test-btn" onclick="testFbUrl()" style="white-space:nowrap;background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.35);color:#00e676;border-radius:8px;padding:10px 14px;font-size:12px;cursor:pointer;font-family:var(--f);font-weight:700;flex-shrink:0">🔌 ทดสอบ</button>
+      <div style="display:flex;gap:8px">
+        <input class="form-input" id="f-fb" placeholder="https://project-xyz-rtdb.firebaseio.com" style="margin-bottom:0">
+        <button type="button" id="fb-test-btn" onclick="testFbUrl()" style="white-space:nowrap;background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.35);color:#00e676;border-radius:8px;padding:10px 12px;font-size:11px;cursor:pointer;font-family:var(--f);font-weight:700;flex-shrink:0">🔌 ทดสอบ</button>
       </div>
-      <div id="fb-test-result" style="font-size:11px;margin-top:6px;min-height:16px;font-family:var(--m)"></div>
-      <div class="form-hint">สร้าง Firebase project ใหม่สำหรับแต่ละโครงการ เพื่อให้ข้อมูลแยกกัน</div>
+      <div id="fb-test-result" style="font-size:11px;margin-top:5px;min-height:14px;font-family:var(--m)"></div>
+      <div class="form-hint">Firebase แยกต่างหากสำหรับแต่ละโครงการ เพื่อให้ข้อมูลไม่ปนกัน</div>
     </div>
 
     <div class="form-section">รหัสผ่าน</div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">รหัส Admin (แก้ไขข้อมูล)</label>
-        <input class="form-input" id="f-admin-pw" type="text" placeholder="เช่น 19841984" maxlength="8">
-        <div class="form-hint">ตัวเลข 4-8 หลัก</div>
+        <label class="form-label">รหัส Admin</label>
+        <input class="form-input" id="f-admin-pw" type="text" placeholder="19841984" maxlength="8">
       </div>
       <div class="form-group">
-        <label class="form-label">รหัส ACCT (รายรับ-รายจ่าย)</label>
-        <input class="form-input" id="f-acct-pw" type="text" placeholder="เช่น 30072530" maxlength="8">
-        <div class="form-hint">ตัวเลข 4-8 หลัก</div>
+        <label class="form-label">รหัส ACCT</label>
+        <input class="form-input" id="f-acct-pw" type="text" placeholder="30072530" maxlength="8">
       </div>
-    </div>
-
-    <div class="form-section">ไฟล์ Dashboard</div>
-    <div class="form-group">
-      <label class="form-label">ชื่อไฟล์ Dashboard Template</label>
-      <input class="form-input" id="f-template" placeholder="dashboard_template.html" value="dashboard_template.html">
-      <div class="form-hint">ต้องอยู่ใน folder เดียวกับ admin_portal.html</div>
     </div>
 
     <div class="modal-footer">
       <button class="btn btn-r" onclick="closeAddModal()">ยกเลิก</button>
-      <button class="btn btn-g" onclick="saveProject()">✅ บันทึกโครงการ</button>
+      <button class="btn btn-g" onclick="saveProject()">✅ บันทึก</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ DELETE CONFIRM MODAL ═══ -->
+<!-- DELETE MODAL -->
 <div class="modal-bg" id="del-modal">
-  <div class="modal del-modal">
+  <div class="modal" style="max-width:360px">
     <div class="modal-title">🗑️ ลบโครงการ</div>
-    <div style="font-size:14px;color:var(--tx2);margin-bottom:16px">
-      ต้องการลบโครงการ <strong id="del-proj-name" style="color:var(--red)"></strong> ใช่ไหม?<br>
-      <span style="font-size:12px;color:var(--tx3);margin-top:6px;display:block">ข้อมูลใน Admin Portal จะถูกลบ (Firebase ไม่กระทบ)</span>
+    <div style="font-size:13px;color:var(--tx2);margin-bottom:16px">
+      ต้องการลบ <strong id="del-proj-name" style="color:var(--red)"></strong>?<br>
+      <span style="font-size:11px;color:var(--tx3);margin-top:4px;display:block">ลบออกจาก Admin Portal เท่านั้น (Firebase ไม่กระทบ)</span>
     </div>
     <div class="modal-footer">
       <button class="btn" onclick="closeDelModal()" style="background:rgba(255,255,255,.05);border:1px solid var(--bdr);color:var(--tx2)">ยกเลิก</button>
@@ -271,184 +241,283 @@ body{background:var(--bg);color:var(--tx);font-family:var(--f);min-height:100vh}
 </div>
 
 <script>
-// ════════════════════════════════════════════════════════════════
-// STORAGE
-// ════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+// FIREBASE ADMIN — เก็บรายการโครงการใน Firebase ด้วย
+// ══════════════════════════════════════════════════════════
+var FB_ADMIN_KEY = 'cp_admin_fb_url';
 var STORE_KEY = 'cp_admin_projects';
+var _fbAdminUrl = localStorage.getItem(FB_ADMIN_KEY) || '';
 
-function loadProjects(){
-  try{ return JSON.parse(localStorage.getItem(STORE_KEY)||'[]'); }catch(e){ return []; }
+function fbBase(){ return _fbAdminUrl.replace(/\/+$/,''); }
+function fbConnected(){ return _fbAdminUrl && _fbAdminUrl.startsWith('https://'); }
+
+// ── Cloud read/write ──────────────────────────────────────
+async function cloudGet(node){
+  if(!fbConnected()) return null;
+  try{
+    var r = await fetch(fbBase()+'/'+node+'.json',{signal:AbortSignal.timeout(6000)});
+    if(!r.ok) return null;
+    return await r.json();
+  }catch(e){ return null; }
 }
-function saveProjects(arr){
-  localStorage.setItem(STORE_KEY, JSON.stringify(arr));
-}
-function genId(){
-  return 'proj_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6);
+async function cloudPut(node, data){
+  if(!fbConnected()) return false;
+  try{
+    var r = await fetch(fbBase()+'/'+node+'.json',{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(data),
+      signal:AbortSignal.timeout(8000)
+    });
+    return r.ok;
+  }catch(e){ return false; }
 }
 
-// ════════════════════════════════════════════════════════════════
+// ── Projects: local + cloud ───────────────────────────────
+function loadLocal(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)||'[]'); }catch(e){ return []; } }
+function saveLocal(arr){ localStorage.setItem(STORE_KEY,JSON.stringify(arr)); }
+
+async function loadProjects(){
+  // Priority: cloud > local (merge by id — cloud wins on conflict)
+  var local = loadLocal();
+  if(!fbConnected()) return local;
+  var cloud = await cloudGet('admin_projects');
+  if(!Array.isArray(cloud)) return local;
+  // Merge: use cloud as master, keep local entries not in cloud
+  var cloudIds = cloud.map(function(p){return p.id;});
+  var localOnly = local.filter(function(p){return !cloudIds.includes(p.id);});
+  var merged = cloud.concat(localOnly);
+  saveLocal(merged); // keep local in sync
+  return merged;
+}
+
+async function saveProjects(arr){
+  saveLocal(arr);
+  if(fbConnected()){
+    await cloudPut('admin_projects', arr);
+  }
+}
+
+function genId(){ return 'proj_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,6); }
+
+// ══════════════════════════════════════════════════════════
+// FIREBASE URL PANEL
+// ══════════════════════════════════════════════════════════
+function toggleFbPanel(){
+  var p = document.getElementById('fb-setup-panel');
+  var btn = document.getElementById('fb-toggle-btn');
+  var shown = p.style.display !== 'none';
+  p.style.display = shown ? 'none' : 'block';
+  btn.textContent = shown ? '⚙️ ตั้งค่า' : '✕ ปิด';
+  if(!shown){
+    var inp = document.getElementById('fb-admin-url');
+    if(inp){ inp.value = _fbAdminUrl; setTimeout(function(){inp.focus();},80); }
+  }
+}
+
+function updateFbStatus(){
+  var dot = document.getElementById('fb-dot');
+  var txt = document.getElementById('fb-status-txt');
+  if(!dot||!txt) return;
+  if(fbConnected()){
+    dot.className = 'fb-status-dot connected';
+    var short = _fbAdminUrl.replace('https://','').split('.')[0];
+    txt.textContent = '✅ '+short;
+    txt.style.background = 'rgba(0,230,118,.12)';
+    txt.style.borderColor = 'rgba(0,230,118,.3)';
+    txt.style.color = '#00e676';
+  } else {
+    dot.className = 'fb-status-dot disconnected';
+    txt.textContent = '⚠️ ยังไม่ได้ตั้งค่า';
+    txt.style.background = 'rgba(255,149,0,.15)';
+    txt.style.borderColor = 'rgba(255,149,0,.3)';
+    txt.style.color = '#ff9500';
+  }
+}
+
+function saveFbAdminUrl(){
+  var url = (document.getElementById('fb-admin-url').value||'').trim();
+  var res = document.getElementById('fb-admin-result');
+  if(!url){
+    _fbAdminUrl=''; localStorage.removeItem(FB_ADMIN_KEY);
+    updateFbStatus();
+    if(res) res.innerHTML='<span style="color:#8899aa">ลบ URL แล้ว</span>';
+    return;
+  }
+  if(!url.startsWith('https://')){
+    if(res) res.innerHTML='<span style="color:var(--red)">❌ URL ต้องขึ้นต้นด้วย https://</span>';
+    return;
+  }
+  _fbAdminUrl = url;
+  localStorage.setItem(FB_ADMIN_KEY, url);
+  updateFbStatus();
+  if(res) res.innerHTML='<span style="color:var(--green)">✅ บันทึกแล้ว — กำลัง Sync รายการโครงการ...</span>';
+  // Sync immediately
+  setTimeout(function(){ initAndRender(); },300);
+}
+
+async function testFbAdminUrl(){
+  var url = (document.getElementById('fb-admin-url').value||'').trim();
+  var res = document.getElementById('fb-admin-result');
+  var btn = document.getElementById('fb-admin-test-btn');
+  if(!url||!url.startsWith('https://')){
+    if(res) res.innerHTML='<span style="color:var(--orange)">กรุณาใส่ URL ก่อน</span>';
+    return;
+  }
+  if(btn){btn.textContent='⏳...';btn.disabled=true;}
+  try{
+    var r = await fetch(url.replace(/\/+$/,'')+'/.json',{method:'GET',signal:AbortSignal.timeout(6000)});
+    if(r.ok||r.status===404||r.status===401){
+      if(res) res.innerHTML='<span style="color:var(--green)">✅ เชื่อมต่อสำเร็จ!</span>';
+      if(btn) btn.textContent='✅';
+    } else throw new Error('HTTP '+r.status);
+  }catch(e){
+    if(res) res.innerHTML='<span style="color:var(--red)">❌ '+e.message+'</span>';
+    if(btn) btn.textContent='❌';
+  }
+  setTimeout(function(){if(btn){btn.textContent='🔌 ทดสอบ';btn.disabled=false;}},3000);
+}
+
+// ══════════════════════════════════════════════════════════
 // COLORS
-// ════════════════════════════════════════════════════════════════
-var COLORS = [
-  '#00e676','#00d4ff','#ffd600','#ff9500','#ce93d8','#388bfd',
-  '#f48fb1','#80cbc4','#ffcc02','#ff6b6b','#69f0ae','#40c4ff',
-];
-var _selectedColor = COLORS[0];
+// ══════════════════════════════════════════════════════════
+var COLORS=['#00e676','#00d4ff','#ffd600','#ff9500','#ce93d8','#388bfd','#f48fb1','#80cbc4','#ffcc02','#ff6b6b','#69f0ae','#40c4ff'];
+var _selectedColor=COLORS[0];
 
 function renderColorPicker(){
-  var row = document.getElementById('color-row');
-  row.innerHTML = COLORS.map(function(c){
-    return '<div class="color-opt'+(c===_selectedColor?' selected':'')+'" '
-      +'style="background:'+c+'" onclick="selectColor(\''+c+'\')" title="'+c+'"></div>';
+  var row=document.getElementById('color-row');
+  row.innerHTML=COLORS.map(function(c){
+    return '<div class="color-opt'+(c===_selectedColor?' selected':'')+'" style="background:'+c+'" onclick="selectColor(\''+c+'\')" title="'+c+'"></div>';
   }).join('');
 }
-function selectColor(c){
-  _selectedColor=c;
-  renderColorPicker();
+function selectColor(c){_selectedColor=c;renderColorPicker();}
+
+// ══════════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════════
+function fmtDate(str){
+  if(!str) return '—';
+  return new Date(str+'T00:00:00').toLocaleDateString('th-TH',{year:'numeric',month:'short',day:'numeric'});
+}
+function daysLeft(str){
+  if(!str) return null;
+  return Math.ceil((new Date(str)-new Date())/86400000);
+}
+function statusBadge(p){
+  var dl=daysLeft(p.deadline);
+  if(p.status==='done') return '<span class="status-badge" style="background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.3);color:var(--green)">✅ เสร็จแล้ว</span>';
+  if(dl!==null&&dl<0) return '<span class="status-badge" style="background:rgba(255,68,68,.15);border:1px solid rgba(255,68,68,.3);color:var(--red)">🔴 เลยกำหนด '+Math.abs(dl)+' วัน</span>';
+  if(dl!==null&&dl<=7) return '<span class="status-badge" style="background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.2);color:var(--orange)">⚠️ เหลือ '+dl+' วัน</span>';
+  if(dl!==null&&dl<=14) return '<span class="status-badge" style="background:rgba(255,149,0,.1);border:1px solid rgba(255,149,0,.2);color:var(--gold)">🟡 เหลือ '+dl+' วัน</span>';
+  return '<span class="status-badge" style="background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.15);color:var(--green)">🟢 เหลือ '+(dl!==null?dl+'':'—')+' วัน</span>';
 }
 
-// ════════════════════════════════════════════════════════════════
-// STATS
-// ════════════════════════════════════════════════════════════════
 function renderStats(projects){
   var el=document.getElementById('stats-bar');
   var active=projects.filter(function(p){return p.status!=='done';}).length;
   var done=projects.filter(function(p){return p.status==='done';}).length;
   var today=new Date();
-  var overdue=projects.filter(function(p){
-    return p.deadline&&new Date(p.deadline)<today&&p.status!=='done';
-  }).length;
+  var overdue=projects.filter(function(p){return p.deadline&&new Date(p.deadline)<today&&p.status!=='done';}).length;
   var avgPct=projects.length?Math.round(projects.reduce(function(a,p){return a+(p.lastPct||0);},0)/projects.length):0;
-
   el.innerHTML=
-    '<div class="stat-card"><div class="stat-val" style="color:var(--cyan)">'+projects.length+'</div><div class="stat-lbl">โครงการทั้งหมด</div></div>'+
-    '<div class="stat-card"><div class="stat-val" style="color:var(--green)">'+active+'</div><div class="stat-lbl">กำลังดำเนินการ</div></div>'+
+    '<div class="stat-card"><div class="stat-val" style="color:var(--cyan)">'+projects.length+'</div><div class="stat-lbl">ทั้งหมด</div></div>'+
+    '<div class="stat-card"><div class="stat-val" style="color:var(--green)">'+active+'</div><div class="stat-lbl">ดำเนินการ</div></div>'+
     '<div class="stat-card"><div class="stat-val" style="color:var(--gold)">'+done+'</div><div class="stat-lbl">เสร็จแล้ว</div></div>'+
     '<div class="stat-card"><div class="stat-val" style="color:'+(overdue?'var(--red)':'var(--green)')+'">'+overdue+'</div><div class="stat-lbl">เลยกำหนด</div></div>'+
-    '<div class="stat-card"><div class="stat-val" style="color:var(--blue)">'+avgPct+'%</div><div class="stat-lbl">ความคืบหน้าเฉลี่ย</div></div>';
+    '<div class="stat-card"><div class="stat-val" style="color:var(--blue)">'+avgPct+'%</div><div class="stat-lbl">คืบหน้าเฉลี่ย</div></div>';
 }
 
-// ════════════════════════════════════════════════════════════════
-// PROJECT CARDS
-// ════════════════════════════════════════════════════════════════
-function daysLeft(deadlineStr){
-  if(!deadlineStr) return null;
-  var d=Math.ceil((new Date(deadlineStr)-new Date())/(86400000));
-  return d;
-}
-function fmtDate(str){
-  if(!str) return '—';
-  var d=new Date(str+'T00:00:00');
-  return d.toLocaleDateString('th-TH',{year:'numeric',month:'short',day:'numeric'});
-}
-function statusBadge(project){
-  var dl=daysLeft(project.deadline);
-  if(project.status==='done') return '<span class="status-badge" style="background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.3);color:var(--green)">✅ เสร็จแล้ว</span>';
-  if(dl!==null&&dl<0) return '<span class="status-badge" style="background:rgba(255,68,68,.15);border:1px solid rgba(255,68,68,.3);color:var(--red)">🔴 เลยกำหนด '+Math.abs(dl)+' วัน</span>';
-  if(dl!==null&&dl<=7) return '<span class="status-badge" style="background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.2);color:var(--orange)">⚠️ ใกล้ครบ '+dl+' วัน</span>';
-  if(dl!==null&&dl<=14) return '<span class="status-badge" style="background:rgba(255,149,0,.1);border:1px solid rgba(255,149,0,.2);color:var(--gold)">🟡 เหลือ '+dl+' วัน</span>';
-  var txt=dl!==null?'🟢 เหลือ '+dl+' วัน':'🔵 ดำเนินการ';
-  return '<span class="status-badge" style="background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.15);color:var(--green)">'+txt+'</span>';
-}
-
-function renderProjects(){
-  var projects=loadProjects();
-  renderStats(projects);
+function renderProjectCards(projects){
   var grid=document.getElementById('proj-grid');
   var html='';
-
   projects.forEach(function(p,idx){
     var col=p.color||'#00d4ff';
     var pct=p.lastPct||0;
-    var barW=Math.min(100,pct).toFixed(1);
     var dl=daysLeft(p.deadline);
-    var dlTxt=dl!==null?(dl>=0?dl+' วัน':'เลยกำหนด '+Math.abs(dl)+' วัน'):'—';
     var dlCol=dl!==null?(dl<0?'var(--red)':dl<=7?'var(--orange)':'var(--tx3)'):'var(--tx3)';
-
+    var syncAgo='';
+    if(p.lastSync){
+      var mins=Math.round((Date.now()-new Date(p.lastSync).getTime())/60000);
+      syncAgo=mins<1?'เมื่อกี้':mins<60?mins+' นาทีที่แล้ว':Math.floor(mins/60)+' ชม.ที่แล้ว';
+    }
     html+='<div class="proj-card" style="border-color:'+col+'33;border-top:3px solid '+col+'">';
     html+='<div class="proj-card-header">';
     html+='<div class="proj-card-name" style="color:'+col+'">🏗️ '+p.name+'</div>';
-    html+='<div class="proj-card-client" style="color:var(--tx3)">'+(p.clientName?'👤 '+p.clientName:'')+'</div>';
+    if(p.clientName) html+='<div class="proj-card-client">👤 '+p.clientName+'</div>';
     html+='</div>';
     html+='<div class="proj-card-body">';
-    html+='<div class="proj-progress-row">';
-    html+='<span style="font-size:12px;color:var(--tx3)">ความคืบหน้า</span>';
-    var syncAgo='';
-    if(p.lastSync){var d=Math.round((Date.now()-new Date(p.lastSync).getTime())/60000);syncAgo=d<1?'เมื่อกี้':d<60?d+' นาทีที่แล้ว':Math.floor(d/60)+' ชม.ที่แล้ว';}
-    html+='<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">';
-    html+='<span class="proj-pct" style="color:'+col+'">'+pct.toFixed(1)+'%</span>';
-    html+='<span style="font-size:10px;color:#445566;font-family:var(--m)" id="pct-sync-'+idx+'">'+(syncAgo?'🔄 '+syncAgo:'⏳ ยังไม่ซิงค์')+'</span>';
+    html+='<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px">';
+    html+='<span style="font-size:11px;color:var(--tx3)">ความคืบหน้า (weighted)</span>';
+    html+='<span style="font-size:9px;color:#445566;font-family:var(--m)">'+(syncAgo?'🔄 '+syncAgo:'')+'</span>';
     html+='</div>';
-    html+='</div>';
-    html+='<div class="proj-bar-bg"><div class="proj-bar-fill" style="width:'+barW+'%;background:'+col+'"></div></div>';
+    html+='<div class="proj-pct" style="color:'+col+'">'+pct.toFixed(1)+'%</div>';
+    html+='<div class="proj-bar-bg"><div class="proj-bar-fill" style="width:'+Math.min(100,pct).toFixed(1)+'%;background:'+col+'"></div></div>';
     html+='<div class="proj-meta">';
-    html+='<span>📅 เริ่ม: '+fmtDate(p.startDate)+'</span>';
-    html+='<span style="color:'+dlCol+'">🎯 กำหนดส่ง: '+fmtDate(p.deadline)+' ('+dlTxt+')</span>';
+    html+='<div>📅 เริ่ม: '+fmtDate(p.startDate)+'</div>';
+    html+='<div style="color:'+dlCol+'">🎯 ส่งมอบ: '+fmtDate(p.deadline)+(dl!==null?' ('+(dl>=0?dl+' วัน':'เลยกำหนด '+Math.abs(dl)+' วัน')+')':'')+'</div>';
     html+='</div>';
-    html+='<div style="margin-top:10px">'+statusBadge(p)+'</div>';
+    html+='<div style="margin-top:8px">'+statusBadge(p)+'</div>';
     html+='</div>';
     html+='<div class="proj-card-footer">';
-    html+='<button class="btn btn-g" onclick="openDashboard(\''+idx+'\')" style="flex:1;font-size:12px">🚀 เปิด Dashboard</button>';
-    if(p.fbUrl) html+='<button class="btn" onclick="refreshProjectPct(\''+p.id+'\');this.textContent=\'⏳\';setTimeout(()=>this.textContent=\'🔄\',3000)" style="font-size:12px;background:rgba(56,139,253,.12);border:1px solid rgba(56,139,253,.3);color:#388bfd;padding:9px 12px" title="ซิงค์จาก Firebase">🔄</button>';
-    html+='<button class="btn btn-b" onclick="openEdit(\''+idx+'\')" style="font-size:12px">✏️ แก้ไข</button>';
-    html+='<button class="btn btn-o" onclick="toggleDone(\''+idx+'\')" style="font-size:12px">'+(p.status==='done'?'🔄 เปิดใหม่':'✅ ปิดงาน')+'</button>';
-    html+='<button class="btn btn-r" onclick="openDelete(\''+idx+'\')" style="font-size:12px">🗑️</button>';
+    html+='<button class="btn btn-g" onclick="openDashboard(\''+idx+'\')" style="flex:1;font-size:11px">🚀 เปิด Dashboard</button>';
+    if(p.fbUrl) html+='<button class="btn" onclick="refreshOnePct(\''+p.id+'\',this)" style="font-size:11px;background:rgba(56,139,253,.1);border:1px solid rgba(56,139,253,.3);color:#388bfd;padding:7px 10px" title="ซิงค์จาก Firebase">🔄</button>';
+    html+='<button class="btn btn-b" onclick="openEdit(\''+idx+'\')" style="font-size:11px">✏️</button>';
+    html+='<button class="btn btn-o" onclick="toggleDone(\''+idx+'\')" style="font-size:11px">'+(p.status==='done'?'↩️':'✅')+'</button>';
+    html+='<button class="btn btn-r" onclick="openDelete(\''+idx+'\')" style="font-size:11px">🗑️</button>';
     html+='</div>';
     html+='</div>';
   });
-
   // Add new card
-  html+='<div class="add-card" onclick="openAddModal()">';
-  html+='<div class="add-card-icon">➕</div>';
-  html+='<div class="add-card-text">เพิ่มโครงการใหม่</div>';
-  html+='</div>';
-
+  html+='<div class="add-card" onclick="openAddModal()"><div style="font-size:36px;opacity:.4">➕</div><div style="font-size:13px;font-weight:700;color:var(--tx3)">เพิ่มโครงการใหม่</div></div>';
   grid.innerHTML=html;
 }
 
-// ════════════════════════════════════════════════════════════════
-// OPEN DASHBOARD
-// ════════════════════════════════════════════════════════════════
-function openDashboard(idx){
-  var projects=loadProjects();
-  var p=projects[parseInt(idx)];
-  if(!p){ alert('ไม่พบโครงการ'); return; }
+async function renderAll(){
+  setSyncIndicator('loading');
+  var projects = await loadProjects();
+  renderStats(projects);
+  renderProjectCards(projects);
+  setSyncIndicator('done');
+}
 
-  // Write config to localStorage
-  var cfg={
-    projectId:  p.id,
-    projectName:p.name,
-    clientName: p.clientName||'',
-    startDate:  p.startDate||'2026-03-17',
-    deadline:   p.deadline||'2026-04-22',
-    fastDeadline: p.fastDeadline||p.deadline||'2026-04-22',
-    fbUrl:      p.fbUrl||'',
-    adminHash:  p.adminHash||'',
-    acctHash:   p.acctHash||'',
-  };
-  localStorage.setItem('cp_project_config', JSON.stringify(cfg));
-  if(cfg.fbUrl) localStorage.setItem('cp_fb_url', cfg.fbUrl);
-  // Sync project dates into dashboard's own key
-  var projDates = {
-    startDate: cfg.startDate,
-    fastDeadlineDate: cfg.fastDeadline,
-    deadlineDate: cfg.deadline,
-  };
-  localStorage.setItem('cp_project_dates', JSON.stringify(projDates));
-
-  // Open dashboard template
-  var template=p.template||'dashboard_template.html';
-  var win=window.open(template+'?pid='+encodeURIComponent(p.id),'dashboard_'+p.id);
-  if(!win || win.closed){
-    showToast('⚠️ กรุณาอนุญาต Popup หรือตรวจสอบว่าไฟล์ dashboard_template.html อยู่ใน folder เดียวกัน');
+// ══════════════════════════════════════════════════════════
+// SYNC INDICATOR
+// ══════════════════════════════════════════════════════════
+function setSyncIndicator(state){
+  var el=document.getElementById('sync-indicator');
+  if(!el) return;
+  var now=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  if(state==='loading'){
+    el.innerHTML='<span style="display:inline-flex;align-items:center;gap:5px;color:var(--cyan)"><div style="width:8px;height:8px;border:2px solid var(--cyan);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite"></div>ซิงค์...</span>';
+  } else {
+    el.innerHTML='<span style="font-size:10px;color:var(--tx3);font-family:var(--m)">🔄 '+now+'</span>';
   }
 }
 
-// ════════════════════════════════════════════════════════════════
-// ADD / EDIT MODAL
-// ════════════════════════════════════════════════════════════════
-var _editIdx = -1;
+// ══════════════════════════════════════════════════════════
+// OPEN DASHBOARD
+// ══════════════════════════════════════════════════════════
+function openDashboard(idx){
+  var projects=loadLocal();
+  var p=projects[parseInt(idx)];
+  if(!p){alert('ไม่พบโครงการ');return;}
+  var cfg={projectId:p.id,projectName:p.name,clientName:p.clientName||'',
+    startDate:p.startDate||'',deadline:p.deadline||'',
+    fastDeadline:p.fastDeadline||p.deadline||'',
+    fbUrl:p.fbUrl||'',adminHash:p.adminHash||'',acctHash:p.acctHash||''};
+  localStorage.setItem('cp_project_config',JSON.stringify(cfg));
+  if(cfg.fbUrl) localStorage.setItem('cp_fb_url',cfg.fbUrl);
+  localStorage.setItem('cp_project_dates',JSON.stringify({
+    startDate:cfg.startDate, fastDeadlineDate:cfg.fastDeadline, deadlineDate:cfg.deadline}));
+  var template=p.template||'dashboard_template.html';
+  var win=window.open(template+'?pid='+encodeURIComponent(p.id),'dashboard_'+p.id);
+  if(!win||win.closed) showToast('⚠️ กรุณาอนุญาต Popup หรือตรวจสอบว่าไฟล์ dashboard อยู่ใน folder เดียวกัน');
+}
 
+// ══════════════════════════════════════════════════════════
+// ADD / EDIT
+// ══════════════════════════════════════════════════════════
+var _editIdx=-1;
 function openAddModal(){
   _editIdx=-1;
   document.getElementById('modal-icon').textContent='➕';
@@ -460,14 +529,15 @@ function openAddModal(){
   document.getElementById('f-fb').value='';
   document.getElementById('f-admin-pw').value='19841984';
   document.getElementById('f-acct-pw').value='30072530';
-  document.getElementById('f-template').value='dashboard_template.html';
-  _selectedColor=COLORS[loadProjects().length%COLORS.length];
+  document.getElementById('fb-test-result').innerHTML='';
+  var projects=loadLocal();
+  _selectedColor=COLORS[projects.length%COLORS.length];
   renderColorPicker();
   document.getElementById('add-modal').classList.add('show');
   setTimeout(function(){document.getElementById('f-name').focus();},100);
 }
 function openEdit(idx){
-  var projects=loadProjects();
+  var projects=loadLocal();
   var p=projects[parseInt(idx)];
   if(!p) return;
   _editIdx=parseInt(idx);
@@ -478,25 +548,24 @@ function openEdit(idx){
   document.getElementById('f-start').value=p.startDate||'';
   document.getElementById('f-deadline').value=p.deadline||'';
   document.getElementById('f-fb').value=p.fbUrl||'';
-  document.getElementById('f-admin-pw').value=p.adminHash||'19841984';
-  document.getElementById('f-acct-pw').value=p.acctHash||'30072530';
-  document.getElementById('f-template').value=p.template||'dashboard_template.html';
+  document.getElementById('f-admin-pw').value=p.adminHash||'';
+  document.getElementById('f-acct-pw').value=p.acctHash||'';
+  document.getElementById('fb-test-result').innerHTML='';
   _selectedColor=p.color||COLORS[0];
   renderColorPicker();
   document.getElementById('add-modal').classList.add('show');
 }
-function closeAddModal(){
-  document.getElementById('add-modal').classList.remove('show');
-}
-function saveProject(){
-  var name=(document.getElementById('f-name').value||'').trim();
-  if(!name){ alert('กรุณาใส่ชื่อโครงการ'); return; }
-  var fb=(document.getElementById('f-fb').value||'').trim();
-  if(!fb){ alert('กรุณาใส่ Firebase URL'); return; }
-  var deadline=(document.getElementById('f-deadline').value||'').trim();
-  if(!deadline){ alert('กรุณาระบุวันส่งมอบ'); return; }
+function closeAddModal(){ document.getElementById('add-modal').classList.remove('show'); }
 
-  var projects=loadProjects();
+async function saveProject(){
+  var name=(document.getElementById('f-name').value||'').trim();
+  if(!name){alert('กรุณาใส่ชื่อโครงการ');return;}
+  var fb=(document.getElementById('f-fb').value||'').trim();
+  if(!fb){alert('กรุณาใส่ Firebase URL ของ Dashboard');return;}
+  var deadline=(document.getElementById('f-deadline').value||'').trim();
+  if(!deadline){alert('กรุณาระบุวันส่งมอบ');return;}
+
+  var projects=loadLocal();
   var proj={
     id:       _editIdx>=0?projects[_editIdx].id:genId(),
     name:     name,
@@ -506,72 +575,151 @@ function saveProject(){
     fbUrl:     fb,
     adminHash: document.getElementById('f-admin-pw').value||'19841984',
     acctHash:  document.getElementById('f-acct-pw').value||'30072530',
-    template:  document.getElementById('f-template').value||'dashboard_template.html',
+    template:  'dashboard_template.html',
     color:     _selectedColor,
     status:    'active',
-    lastPct:   0,
+    lastPct:   _editIdx>=0?(projects[_editIdx].lastPct||0):0,
+    lastSync:  _editIdx>=0?(projects[_editIdx].lastSync||null):null,
     createdAt: _editIdx>=0?(projects[_editIdx].createdAt||new Date().toISOString()):new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-  if(_editIdx>=0){
-    proj.status=projects[_editIdx].status||'active';
-    proj.lastPct=projects[_editIdx].lastPct||0;
-    projects[_editIdx]=proj;
-  } else {
-    projects.push(proj);
-  }
-  saveProjects(projects);
+  if(_editIdx>=0){ proj.status=projects[_editIdx].status||'active'; projects[_editIdx]=proj; }
+  else projects.push(proj);
+
+  await saveProjects(projects);
   closeAddModal();
-  renderProjects();
+  renderAll();
   showToast(_editIdx>=0?'แก้ไขโครงการแล้ว ✓':'เพิ่มโครงการใหม่แล้ว ✓');
 }
 
-// ════════════════════════════════════════════════════════════════
+async function testFbUrl(){
+  var url=(document.getElementById('f-fb').value||'').trim();
+  var res=document.getElementById('fb-test-result');
+  var btn=document.getElementById('fb-test-btn');
+  if(!url){res.innerHTML='<span style="color:var(--orange)">กรุณาใส่ Firebase URL ก่อน</span>';return;}
+  if(!url.startsWith('https://')){res.innerHTML='<span style="color:var(--red)">❌ URL ต้องขึ้นต้นด้วย https://</span>';return;}
+  btn.textContent='⏳...';btn.disabled=true;
+  try{
+    var r=await fetch(url.replace(/\/+$/,'')+'/.json',{method:'GET',signal:AbortSignal.timeout(6000)});
+    if(r.ok||r.status===404||r.status===401){
+      res.innerHTML='<span style="color:var(--green)">✅ เชื่อมต่อสำเร็จ!</span>';
+      btn.textContent='✅';
+    } else throw new Error('HTTP '+r.status);
+  }catch(e){
+    res.innerHTML='<span style="color:var(--red)">❌ '+e.message+'</span>';
+    btn.textContent='❌';
+  }
+  setTimeout(function(){btn.textContent='🔌 ทดสอบ';btn.disabled=false;},3000);
+}
+
+// ══════════════════════════════════════════════════════════
 // DELETE
-// ════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 var _delIdx=-1;
 function openDelete(idx){
-  var projects=loadProjects();
+  var projects=loadLocal();
   _delIdx=parseInt(idx);
   document.getElementById('del-proj-name').textContent=projects[_delIdx]?.name||'';
   document.getElementById('del-modal').classList.add('show');
 }
 function closeDelModal(){ document.getElementById('del-modal').classList.remove('show'); }
-function confirmDelete(){
-  var projects=loadProjects();
+async function confirmDelete(){
+  var projects=loadLocal();
   projects.splice(_delIdx,1);
-  saveProjects(projects);
+  await saveProjects(projects);
   closeDelModal();
-  renderProjects();
+  renderAll();
   showToast('ลบโครงการแล้ว');
 }
-function toggleDone(idx){
-  var projects=loadProjects();
+async function toggleDone(idx){
+  var projects=loadLocal();
   var p=projects[parseInt(idx)];
   if(!p) return;
   p.status=p.status==='done'?'active':'done';
   p.updatedAt=new Date().toISOString();
-  saveProjects(projects);
-  renderProjects();
+  await saveProjects(projects);
+  renderAll();
   showToast(p.status==='done'?'✅ ปิดงานแล้ว':'🔄 เปิดโครงการใหม่');
 }
 
-// ════════════════════════════════════════════════════════════════
-// EXPORT
-// ════════════════════════════════════════════════════════════════
-function exportAll(){
-  var projects=loadProjects();
-  var json=JSON.stringify(projects,null,2);
-  var blob=new Blob([json],{type:'application/json'});
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='admin_portal_backup_'+new Date().toISOString().slice(0,10)+'.json';
-  a.click();
+// ══════════════════════════════════════════════════════════
+// FIREBASE SYNC — PULL DASHBOARD PCT
+// ══════════════════════════════════════════════════════════
+async function fetchDashboardPct(fbUrl){
+  if(!fbUrl||!fbUrl.startsWith('https://')) return null;
+  var base=fbUrl.replace(/\/+$/,'');
+  try{
+    var r=await fetch(base+'/overall_pct.json',{signal:AbortSignal.timeout(5000)});
+    if(r.ok){ var d=await r.json(); if(d&&typeof d.pct==='number') return d.pct; }
+  }catch(e){}
+  return null;
+}
+async function fetchDashboardDates(fbUrl){
+  if(!fbUrl||!fbUrl.startsWith('https://')) return null;
+  var base=fbUrl.replace(/\/+$/,'');
+  try{
+    var r=await fetch(base+'/project_dates.json',{signal:AbortSignal.timeout(5000)});
+    if(r.ok){ var d=await r.json(); if(d&&d.deadlineDate) return d; }
+  }catch(e){}
+  return null;
 }
 
-// ════════════════════════════════════════════════════════════════
+async function refreshOnePct(projId, btn){
+  if(btn){ btn.textContent='⏳'; btn.disabled=true; }
+  var projects=loadLocal();
+  var p=projects.find(function(x){return x.id===projId;});
+  if(!p||!p.fbUrl){ if(btn){btn.textContent='🔄';btn.disabled=false;} return; }
+  var pct=await fetchDashboardPct(p.fbUrl);
+  var dates=await fetchDashboardDates(p.fbUrl);
+  var changed=false;
+  if(pct!==null&&Math.abs((p.lastPct||0)-pct)>0.01){ p.lastPct=pct; p.lastSync=new Date().toISOString(); changed=true; }
+  if(dates){
+    if(dates.deadlineDate&&dates.deadlineDate!==p.deadline){ p.deadline=dates.deadlineDate; changed=true; }
+    if(dates.startDate&&dates.startDate!==p.startDate){ p.startDate=dates.startDate; changed=true; }
+  }
+  if(changed){ await saveProjects(projects); renderAll(); }
+  if(btn){btn.textContent='🔄';btn.disabled=false;}
+}
+
+async function refreshAllPcts(){
+  var projects=loadLocal();
+  var changed=false;
+  for(var i=0;i<projects.length;i++){
+    var p=projects[i];
+    if(!p.fbUrl||p.status==='done') continue;
+    var pct=await fetchDashboardPct(p.fbUrl);
+    var dates=await fetchDashboardDates(p.fbUrl);
+    if(pct!==null&&Math.abs((p.lastPct||0)-pct)>0.01){ p.lastPct=pct; p.lastSync=new Date().toISOString(); changed=true; }
+    if(dates){
+      if(dates.deadlineDate&&dates.deadlineDate!==p.deadline){ p.deadline=dates.deadlineDate; changed=true; }
+      if(dates.startDate&&dates.startDate!==p.startDate){ p.startDate=dates.startDate; changed=true; }
+    }
+  }
+  if(changed){ await saveProjects(projects); renderAll(); }
+}
+
+// ══════════════════════════════════════════════════════════
+// AUTO REFRESH LOOP (every 30s)
+// ══════════════════════════════════════════════════════════
+var _refreshTimer=null;
+async function autoRefreshLoop(){
+  setSyncIndicator('loading');
+  // 1. Pull project list from cloud first
+  await renderAll();
+  // 2. Pull dashboard pcts
+  await refreshAllPcts();
+  setSyncIndicator('done');
+  _refreshTimer=setTimeout(autoRefreshLoop,30000);
+}
+
+function manualRefresh(){
+  clearTimeout(_refreshTimer);
+  autoRefreshLoop();
+}
+
+// ══════════════════════════════════════════════════════════
 // TOAST
-// ════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 function showToast(msg){
   var t=document.createElement('div');
   t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.4);color:#00e676;border-radius:10px;padding:12px 24px;font-weight:700;font-size:13px;z-index:9999;font-family:var(--f);white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.4)';
@@ -580,362 +728,29 @@ function showToast(msg){
   setTimeout(function(){t.remove();},3000);
 }
 
-// ════════════════════════════════════════════════════════════════
-// KEYBOARD
-// ════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+// KEYBOARD + INIT
+// ══════════════════════════════════════════════════════════
 document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'){
-    closeAddModal();
-    closeDelModal();
-  }
+  if(e.key==='Escape'){closeAddModal();closeDelModal();}
 });
 
-// ════════════════════════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════════════════════════
-renderColorPicker();
-renderProjects();
-
-// ════════════════════════════════════════════════════════════════
-// REAL-TIME FIREBASE SYNC
-// ════════════════════════════════════════════════════════════════
-
-// Fetch overall% from a project's Firebase
-// Read overall% directly from Dashboard's pre-computed overall_pct node
-async function fetchProjectPct(fbUrl) {
-  if (!fbUrl || !fbUrl.startsWith('https://')) return null;
-  var base = fbUrl.replace(/\/+$/, '');
-  try {
-    var r = await fetch(base + '/overall_pct.json');
-    if (r.ok) {
-      var op = await r.json();
-      if (op && typeof op.pct === 'number') return op.pct;
-    }
-  } catch(e) {}
-  return null;
-}
-
-// Fetch project_dates from Firebase (set by Dev mode)
-async function fetchProjectDates(fbUrl) {
-  if (!fbUrl || !fbUrl.startsWith('https://')) return null;
-  var base = fbUrl.replace(/\/+$/, '');
-  try {
-    var r = await fetch(base + '/project_dates.json');
-    if (r.ok) {
-      var d = await r.json();
-      if (d && d.deadlineDate) return d;
-    }
-  } catch(e) {}
-  return null;
-}
-
-// Refresh a single project card's pct live
-var _refreshTimers = {};
-async function refreshProjectPct(projId) {
-  var projects = loadProjects();
-  var p = projects.find(function(x){ return x.id === projId; });
-  if (!p || !p.fbUrl) return;
-  var pct = await fetchProjectPct(p.fbUrl);
-  var dates = await fetchProjectDates(p.fbUrl);
-  if (pct === null && dates === null) return;
-  var changed = false;
-  if (pct !== null && Math.abs((p.lastPct||0) - pct) > 0.01) {
-    p.lastPct = pct;
-    p.lastSync = new Date().toISOString();
-    changed = true;
-  }
-  if (dates) {
-    if (dates.deadlineDate && dates.deadlineDate !== p.deadline) {
-      p.deadline = dates.deadlineDate;
-      changed = true;
-    }
-    if (dates.startDate && dates.startDate !== p.startDate) {
-      p.startDate = dates.startDate;
-      changed = true;
-    }
-  }
-  if (changed) {
-    saveProjects(projects);
-    renderProjects();
-  }
-}
-
-// Auto-refresh every 30s (handled by liveRefreshLoop below)
-function startAutoRefresh(){
-  // handled by liveRefreshLoop
-}
-
-// Refresh all projects
-async function refreshAllProjects() {
-  var projects = loadProjects();
-  for (var i = 0; i < projects.length; i++) {
-    if (projects[i].fbUrl && projects[i].status !== 'done') {
-      await refreshProjectPct(projects[i].id);
-    }
-  }
-}
-
-// Show live sync indicator on header
-function updateSyncStatus(syncing) {
-  var el = document.getElementById('sync-status');
-  if (!el) return;
-  if (syncing) {
-    el.innerHTML = '<span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--cyan);font-family:var(--m)"><div style="width:8px;height:8px;border:2px solid var(--cyan);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite"></div>ซิงค์...</span>';
-  } else {
-    var now = new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    el.innerHTML = '<span style="font-size:10px;color:var(--tx3);font-family:var(--m)">🔄 อัพเดท: ' + now + '</span>';
-  }
-}
-
-// Add sync status + live badge to header
-(function addSyncUI(){
-  var header = document.querySelector('.header > div:last-child');
-  if (!header) return;
-  var div = document.createElement('div');
-  div.id = 'sync-status';
-  div.style.cssText = 'display:flex;align-items:center;gap:6px;padding:0 4px;';
-  div.innerHTML = '<span style="font-size:10px;color:var(--tx3);font-family:var(--m)">🔄 รอซิงค์...</span>';
-  header.appendChild(div);
-})();
-
-// Spin animation
-var spinStyle = document.createElement('style');
-spinStyle.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+var spinStyle=document.createElement('style');
+spinStyle.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
 document.head.appendChild(spinStyle);
 
-// ── Add lastSync display to project cards ──────────────────────────────────
-var _origRenderProjects = renderProjects;
-renderProjects = function() {
-  _origRenderProjects();
-  // After render, patch each card with sync time
-  var projects = loadProjects();
-  projects.forEach(function(p, idx) {
-    var card = document.querySelectorAll('.proj-card')[idx];
-    if (!card || !p.lastSync) return;
-    var syncEl = card.querySelector('.proj-sync-time');
-    if (!syncEl) {
-      var foot = card.querySelector('.proj-card-footer');
-      if (foot) {
-        var st = document.createElement('div');
-        st.className = 'proj-sync-time';
-        st.style.cssText = 'width:100%;padding:4px 0 0;font-size:9px;color:var(--tx3);font-family:var(--m);text-align:right';
-        var d = new Date(p.lastSync);
-        st.textContent = 'ซิงค์: ' + d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-        foot.parentElement.insertBefore(st, foot);
-      }
-    }
-  });
-};
-
-// ── LIVE REFRESH LOOP ──────────────────────────────────────────────────────
-var REFRESH_INTERVAL = 15000; // 15 seconds
-var _liveTimer = null;
-
-async function liveRefreshLoop() {
-  updateSyncStatus(true);
-  await refreshAllProjects();
-  updateSyncStatus(false);
-  _liveTimer = setTimeout(liveRefreshLoop, REFRESH_INTERVAL);
+function initAndRender(){
+  updateFbStatus();
+  renderColorPicker();
+  autoRefreshLoop();
 }
 
-// Start immediately
-setTimeout(liveRefreshLoop, 500);
-
-// Manual refresh button
-document.querySelector('.header > div:last-child').insertAdjacentHTML('beforeend',
-  '<button class="btn btn-b" onclick="liveRefreshLoop()" style="font-size:11px;padding:7px 12px">🔄 รีเฟรช</button>'
-);
-
-</script>
-
-<!-- ═══ FIREBASE GUIDE MODAL ═══ -->
-<div id="fb-guide-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(4,8,16,.92);backdrop-filter:blur(16px);align-items:center;justify-content:center;padding:16px;overflow-y:auto;flex-direction:column">
-  <div style="width:100%;max-width:540px;margin:auto;background:#0a1020;border:1px solid rgba(56,139,253,.35);border-radius:20px;overflow:hidden;box-shadow:0 16px 64px rgba(0,0,0,.7)">
-    <div style="height:2px;background:linear-gradient(90deg,transparent,#388bfd,#00d4ff,transparent)"></div>
-    <div style="padding:24px">
-
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:44px;height:44px;background:rgba(56,139,253,.12);border:1px solid rgba(56,139,253,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">☁️</div>
-          <div>
-            <div style="font-size:16px;font-weight:800;color:#e8f0fe">สร้าง Firebase ฟรี</div>
-            <div style="font-size:10px;color:#6b7a8d;font-family:var(--m);margin-top:2px">Real-time Sync สำหรับโครงการ</div>
-          </div>
-        </div>
-        <button onclick="closeFbGuideModal()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#8899aa;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:var(--f)">✕ ปิด</button>
-      </div>
-
-      <!-- Steps -->
-      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
-        <div style="display:flex;gap:12px;padding:12px 14px;background:rgba(56,139,253,.06);border:1px solid rgba(56,139,253,.15);border-radius:10px">
-          <div style="width:26px;height:26px;background:rgba(56,139,253,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#388bfd;flex-shrink:0">1</div>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:#e8f0fe;margin-bottom:3px">เปิด Firebase Console</div>
-            <div style="font-size:12px;color:#8899aa">ไปที่ <a href="https://console.firebase.google.com" target="_blank" style="color:#388bfd;font-weight:700">console.firebase.google.com</a> → <strong style="color:#e8f0fe">Add project</strong> → ตั้งชื่อโครงการ</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:12px;padding:12px 14px;background:rgba(56,139,253,.06);border:1px solid rgba(56,139,253,.15);border-radius:10px">
-          <div style="width:26px;height:26px;background:rgba(56,139,253,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#388bfd;flex-shrink:0">2</div>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:#e8f0fe;margin-bottom:3px">สร้าง Realtime Database</div>
-            <div style="font-size:12px;color:#8899aa">เมนูซ้าย → <strong style="color:#e8f0fe">Build → Realtime Database</strong> → <strong style="color:#e8f0fe">Create Database</strong> → เลือก Location (asia-southeast1 สำหรับไทย)</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:12px;padding:12px 14px;background:rgba(56,139,253,.06);border:1px solid rgba(56,139,253,.15);border-radius:10px">
-          <div style="width:26px;height:26px;background:rgba(56,139,253,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#388bfd;flex-shrink:0">3</div>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:#e8f0fe;margin-bottom:3px">เลือก Test Mode</div>
-            <div style="font-size:12px;color:#8899aa">เลือก <strong style="color:#00e676">Start in test mode</strong> → Enable — ข้อมูลจะ Public อ่าน/เขียนได้ 30 วัน (ต่ออายุได้)</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:12px;padding:12px 14px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2);border-radius:10px">
-          <div style="width:26px;height:26px;background:rgba(0,230,118,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#00e676;flex-shrink:0">4</div>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:#e8f0fe;margin-bottom:3px">คัดลอก Database URL</div>
-            <div style="font-size:12px;color:#8899aa">หลัง Create เสร็จ จะเห็น URL ในรูปแบบ:</div>
-            <div style="margin-top:6px;padding:7px 10px;background:rgba(0,0,0,.3);border-radius:6px;font-family:var(--m);font-size:11px;color:#00d4ff;word-break:break-all">https://your-project-default-rtdb.asia-southeast1.firebasedatabase.app</div>
-            <div style="font-size:11px;color:#8899aa;margin-top:5px">คัดลอก URL นี้ → วางในช่อง Firebase URL ในฟอร์ม</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:12px;padding:12px 14px;background:rgba(255,214,0,.05);border:1px solid rgba(255,214,0,.2);border-radius:10px">
-          <div style="width:26px;height:26px;background:rgba(255,214,0,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#ffd600;flex-shrink:0">5</div>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:#e8f0fe;margin-bottom:3px">ทดสอบและบันทึก</div>
-            <div style="font-size:12px;color:#8899aa">วาง URL แล้วกด <strong style="color:#00e676">🔌 ทดสอบ</strong> เพื่อยืนยันการเชื่อมต่อ → กด <strong style="color:#00e676">✅ บันทึกโครงการ</strong></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Note -->
-      <div style="padding:12px 14px;background:rgba(255,214,0,.05);border:1px solid rgba(255,214,0,.2);border-radius:8px;font-size:11px;color:#8899aa;line-height:1.7">
-        💡 <strong style="color:#ffd600">เคล็ดลับ:</strong> สร้าง Firebase Project แยกสำหรับแต่ละโครงการก่อสร้าง เพื่อให้ข้อมูลไม่ปนกัน และทุกเครื่องที่ใส่ URL เดียวกันจะ Sync ข้อมูล Real-time
-      </div>
-
-      <div style="margin-top:16px;text-align:right">
-        <button onclick="closeFbGuideModal()" style="background:rgba(56,139,253,.15);border:1px solid rgba(56,139,253,.4);color:#388bfd;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f)">✅ เข้าใจแล้ว</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-function openFbGuideModal(){
-  var m=document.getElementById('fb-guide-modal');
-  m.style.display='flex';
-  m.style.flexDirection='column';
-}
-function closeFbGuideModal(){
-  document.getElementById('fb-guide-modal').style.display='none';
-}
-
-async function testFbUrl(){
-  var url=(document.getElementById('f-fb').value||'').trim();
-  var res=document.getElementById('fb-test-result');
-  var btn=document.getElementById('fb-test-btn');
-  if(!url){res.innerHTML='<span style="color:#ff9500">กรุณาใส่ Firebase URL ก่อน</span>';return;}
-  if(!url.startsWith('https://')){res.innerHTML='<span style="color:#ff4444">URL ต้องขึ้นต้นด้วย https://</span>';return;}
-  btn.textContent='⏳ กำลังทดสอบ...';btn.disabled=true;
-  res.innerHTML='<span style="color:#8899aa">กำลังเชื่อมต่อ...</span>';
-  try{
-    var testUrl=url.replace(/\/+$/,'')+'/.json';
-    var r=await fetch(testUrl,{method:'GET',signal:AbortSignal.timeout(6000)});
-    if(r.ok||r.status===404||r.status===401){
-      res.innerHTML='<span style="color:#00e676">✅ เชื่อมต่อสำเร็จ! Firebase URL ใช้งานได้</span>';
-      btn.textContent='✅ สำเร็จ';
-    } else {
-      throw new Error('HTTP '+r.status);
-    }
-  }catch(e){
-    res.innerHTML='<span style="color:#ff4444">❌ เชื่อมต่อไม่ได้: '+e.message+' — ตรวจสอบ URL อีกครั้ง</span>';
-    btn.textContent='❌ ล้มเหลว';
-  }
-  setTimeout(function(){btn.textContent='🔌 ทดสอบ';btn.disabled=false;},3000);
-}
-</script>
-
-
-<script>
-// ── Firebase Panel (main page) ───────────────────────────────────────────
-var _panelFbUrl = localStorage.getItem('cp_fb_url') || '';
-
-function initFbPanel() {
-  var inp = document.getElementById('fb-panel-url');
-  if(inp && _panelFbUrl) inp.value = _panelFbUrl;
-  updateFbPanelStatus();
-}
-
-function updateFbPanelStatus() {
-  var st = document.getElementById('fb-panel-status');
-  if(!st) return;
-  _panelFbUrl = localStorage.getItem('cp_fb_url') || '';
-  if(_panelFbUrl && _panelFbUrl.startsWith('https://')) {
-    var short = _panelFbUrl.replace('https://','').split('.')[0];
-    st.innerHTML = '✅ เชื่อมต่อแล้ว: ' + short;
-    st.style.background = 'rgba(0,230,118,.12)';
-    st.style.borderColor = 'rgba(0,230,118,.3)';
-    st.style.color = '#00e676';
-  } else {
-    st.innerHTML = '⚠️ ยังไม่ได้ตั้งค่า';
-    st.style.background = 'rgba(255,149,0,.15)';
-    st.style.borderColor = 'rgba(255,149,0,.3)';
-    st.style.color = '#ff9500';
-  }
-}
-
-function onFbPanelInput() {
-  var res = document.getElementById('fb-panel-result');
-  if(res) res.innerHTML = '';
-}
-
-function saveFbPanel() {
-  var url = (document.getElementById('fb-panel-url').value || '').trim();
-  var res = document.getElementById('fb-panel-result');
-  if(!url) {
-    localStorage.removeItem('cp_fb_url');
-    _panelFbUrl = '';
-    updateFbPanelStatus();
-    if(res) res.innerHTML = '<span style="color:#8899aa">ลบ URL แล้ว</span>';
-    return;
-  }
-  if(!url.startsWith('https://')) {
-    if(res) res.innerHTML = '<span style="color:#ff4444">❌ URL ต้องขึ้นต้นด้วย https://</span>';
-    return;
-  }
-  _panelFbUrl = url;
-  localStorage.setItem('cp_fb_url', url);
-  updateFbPanelStatus();
-  if(res) res.innerHTML = '<span style="color:#00e676">✅ บันทึก Firebase URL สำเร็จแล้ว — ข้อมูลโครงการจะ Sync อัตโนมัติ</span>';
-}
-
-async function testFbPanel() {
-  var url = (document.getElementById('fb-panel-url').value || '').trim();
-  var res = document.getElementById('fb-panel-result');
-  var btn = document.getElementById('fb-panel-test-btn');
-  if(!url || !url.startsWith('https://')) {
-    if(res) res.innerHTML = '<span style="color:#ff9500">กรุณาใส่ Firebase URL ก่อนทดสอบ</span>';
-    return;
-  }
-  if(btn) { btn.textContent = '⏳ กำลังทดสอบ...'; btn.disabled = true; }
-  if(res) res.innerHTML = '<span style="color:#8899aa">กำลังเชื่อมต่อ Firebase...</span>';
-  try {
-    var r = await fetch(url.replace(/\/+$/, '') + '/.json', { method:'GET', signal: AbortSignal.timeout(6000) });
-    if(r.ok || r.status === 404 || r.status === 401) {
-      if(res) res.innerHTML = '<span style="color:#00e676">✅ เชื่อมต่อ Firebase สำเร็จ! URL ใช้งานได้</span>';
-      if(btn) btn.textContent = '✅ สำเร็จ';
-    } else throw new Error('HTTP ' + r.status);
-  } catch(e) {
-    if(res) res.innerHTML = '<span style="color:#ff4444">❌ เชื่อมต่อไม่ได้: ' + e.message + ' — ตรวจสอบ URL อีกครั้ง</span>';
-    if(btn) btn.textContent = '❌ ล้มเหลว';
-  }
-  setTimeout(function() { if(btn) { btn.textContent = '🔌 ทดสอบ'; btn.disabled = false; } }, 3000);
-}
-
-// Init on load
-document.addEventListener('DOMContentLoaded', function(){
-  initFbPanel();
-  // liveRefreshLoop starts automatically via setTimeout(liveRefreshLoop, 500) below
+document.addEventListener('DOMContentLoaded',function(){
+  // Restore saved admin FB URL
+  var saved=localStorage.getItem(FB_ADMIN_KEY)||'';
+  if(saved){ _fbAdminUrl=saved; }
+  initAndRender();
 });
 </script>
-
 </body>
 </html>
