@@ -990,32 +990,51 @@ function updateFbStatus(){
   const st = document.getElementById('fb-status-badge');
   if(!st) return;
   if(_fbUrl && _fbUrl.startsWith('https://')){
-    st.innerHTML = '<span style="color:var(--green)">✅ เชื่อมต่อแล้ว</span> <span style="font-size:10px;color:var(--tx3);font-family:var(--m)">'+_fbUrl.replace('https://','').split('.')[0]+'</span>';
+    st.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">'
+      +'<div>'
+      +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
+      +'<span style="color:var(--green);font-size:13px">✅ เชื่อมต่อแล้ว</span>'
+      +'</div>'
+      +'<div style="font-size:10px;color:var(--tx3);font-family:var(--m);word-break:break-all;line-height:1.5">'
+      +_fbUrl
+      +'</div>'
+      +'</div>'
+      +'<button onclick="clearFirebaseUrl()" style="padding:5px 10px;background:rgba(255,68,68,.12);border:1px solid rgba(255,68,68,.3);color:#ff6b6b;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--f);font-weight:700;white-space:nowrap;flex-shrink:0">🗑️ ลบ URL</button>'
+      +'</div>';
   } else {
-    st.innerHTML = '<span style="color:var(--orange)">⚠️ ยังไม่ได้ตั้งค่า</span>';
+    st.innerHTML = '<span style="color:var(--orange)">⚠️ ยังไม่ได้ตั้งค่า — กรอก URL ด้านล่างแล้วกด บันทึก</span>';
   }
 }
 function saveFirebaseUrl(){
   const url = (document.getElementById('fb-url-input')?.value || '').trim();
-  if(!url){ _fbUrl=''; localStorage.removeItem('cp_fb_url'); updateFbStatus(); showToast('ลบ Firebase URL แล้ว','info'); return; }
+  if(!url){
+    // ช่องว่าง = ลบ URL
+    if(!confirm('ช่อง URL ว่าง — ต้องการลบ Firebase URL ออกใช่ไหม?')) return;
+    _fbUrl=''; localStorage.removeItem('cp_fb_url');
+    updateFbStatus();
+    showToast('ลบ Firebase URL แล้ว','info');
+    return;
+  }
   if(!url.startsWith('https://')){ showToast('URL ต้องขึ้นต้นด้วย https://','err'); return; }
   _fbUrl = url;
   localStorage.setItem('cp_fb_url', _fbUrl);
   updateFbStatus();
   showToast('✅ บันทึก Firebase URL สำเร็จ!','ok',4000);
   closeFirebaseModal();
-  // Auto-load if already have session
+  // Auto-load data
   if(isAdminMode() || sessionStorage.getItem('cp_edit_session')==='1'){
     setTimeout(loadData, 500);
   }
 }
 function clearFirebaseUrl(){
-  if(!confirm('ยืนยันลบ Firebase URL?')) return;
+  if(!confirm('ยืนยันการลบ Firebase URL?\nระบบจะหยุดซิงค์ข้อมูลจนกว่าจะตั้งค่าใหม่')) return;
   _fbUrl=''; localStorage.removeItem('cp_fb_url');
   const inp = document.getElementById('fb-url-input');
   if(inp) inp.value='';
   updateFbStatus();
   showToast('ลบ Firebase URL แล้ว','info');
+  // ไม่ปิด modal ให้ user กรอกใหม่ได้เลย
 }
 async function testFirebaseConnection(){
   const url = (document.getElementById('fb-url-input')?.value || '').trim();
@@ -5887,9 +5906,14 @@ document.addEventListener('DOMContentLoaded', function() {
       <div style="margin-bottom:14px">
         <div style="font-size:11px;font-weight:700;color:#8899aa;text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px">Firebase Realtime Database URL *</div>
         <input id="fb-url-input" type="url" placeholder="https://your-project-default-rtdb.firebaseio.com"
-          style="width:100%;background:rgba(56,139,253,.05);border:1.5px solid rgba(56,139,253,.25);border-radius:10px;padding:12px 14px;color:#e8f0fe;font-size:13px;font-family:var(--m);outline:none;transition:border .2s;box-sizing:border-box"
-          onfocus="this.style.borderColor='rgba(56,139,253,.6)'" onblur="this.style.borderColor='rgba(56,139,253,.25)'"
+          style="width:100%;background:rgba(56,139,253,.06);border:1.5px solid rgba(56,139,253,.3);border-radius:10px;padding:12px 14px;color:#e8f0fe;font-size:12px;font-family:var(--m);outline:none;transition:border .2s;box-sizing:border-box"
+          onfocus="this.style.borderColor='rgba(56,139,253,.7)'" onblur="this.style.borderColor='rgba(56,139,253,.3)'"
+          oninput="document.getElementById('fb-clear-btn').style.display=this.value?'flex':'none'"
           onkeydown="if(event.key==='Enter')saveFirebaseUrl()">
+        <div style="position:relative">
+          <button id="fb-clear-btn" onclick="document.getElementById('fb-url-input').value='';this.style.display='none';document.getElementById('fb-url-input').focus()"
+            style="display:none;position:absolute;right:10px;top:-36px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#8899aa;border-radius:5px;padding:3px 8px;font-size:10px;cursor:pointer;font-family:var(--f)">✕ ล้าง</button>
+        </div>
         <div style="font-size:10px;color:#445566;margin-top:5px;font-family:var(--m)">
           ตัวอย่าง: <span style="color:#388bfd">https://my-project-rtdb.asia-southeast1.firebasedatabase.app</span>
         </div>
@@ -5897,9 +5921,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
       <!-- Action Buttons Row -->
       <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
-        <button onclick="saveFirebaseUrl()" style="flex:1;min-width:120px;padding:11px;background:linear-gradient(135deg,rgba(56,139,253,.3),rgba(0,212,255,.15));border:1px solid rgba(56,139,253,.5);color:#e8f0fe;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f);transition:filter .15s" onmouseover="this.style.filter='brightness(1.15)'" onmouseout="this.style.filter=''">💾 บันทึก URL</button>
-        <button id="fb-test-btn" onclick="testFirebaseConnection()" style="padding:11px 16px;background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:var(--green);border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)">🔌 ทดสอบ</button>
-        <button onclick="clearFirebaseUrl()" style="padding:11px 14px;background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.25);color:#ff6b6b;border-radius:10px;font-size:12px;cursor:pointer;font-family:var(--f)">🗑️</button>
+        <button onclick="saveFirebaseUrl()" style="flex:2;min-width:140px;padding:12px;background:linear-gradient(135deg,rgba(56,139,253,.3),rgba(0,212,255,.15));border:1px solid rgba(56,139,253,.5);color:#e8f0fe;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f);transition:filter .15s" onmouseover="this.style.filter='brightness(1.15)'" onmouseout="this.style.filter=''">💾 บันทึก URL</button>
+        <button id="fb-test-btn" onclick="testFirebaseConnection()" style="flex:1;min-width:90px;padding:12px;background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:var(--green);border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)">🔌 ทดสอบ</button>
+        <button onclick="clearFirebaseUrl()" style="flex:1;min-width:90px;padding:12px;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.35);color:#ff6b6b;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--f)" title="ลบ Firebase URL">🗑️ ลบ URL</button>
       </div>
 
       <!-- Divider -->
