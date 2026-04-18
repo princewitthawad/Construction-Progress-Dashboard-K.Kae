@@ -6174,6 +6174,10 @@ function sCSS(){
   s+='#sched-ov .sdsel{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:11px 8px;color:#e8f0fe;font-size:15px;font-family:inherit;outline:none;-webkit-appearance:none;appearance:none;text-align:center;cursor:pointer;color-scheme:dark}';
   s+='#sched-ov .sdsel:focus{border-color:rgba(56,139,253,.6);background:rgba(56,139,253,.07)}';
   s+='#sched-ov .sfi:focus{border-color:rgba(56,139,253,.6);background:rgba(56,139,253,.07)}';
+  s+='#sched-ov .sdp{display:grid;grid-template-columns:1fr 1.6fr 1.2fr;gap:5px}';
+  s+='#sched-ov .sdp select{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:12px 8px;color:#e8f0fe;font-size:15px;font-family:inherit;outline:none;-webkit-appearance:none;appearance:none;text-align:center;cursor:pointer;color-scheme:dark;-webkit-tap-highlight-color:transparent}';
+  s+='#sched-ov .sdp select:focus{border-color:rgba(56,139,253,.6);background:rgba(56,139,253,.07)}';
+  s+='#sched-ov .sdp select option{background:#0d1a2e;color:#e8f0fe}';
   s+='#sched-ov .sfi-date{font-family:var(--m,"IBM Plex Mono",monospace);letter-spacing:.5px}';
   s+='#sched-ov .sfi-date::-webkit-calendar-picker-indicator{filter:invert(.7);opacity:.8;cursor:pointer;width:20px;height:20px}';
   s+='#sched-ov .sfi-date::-webkit-inner-spin-button{display:none}';
@@ -6249,8 +6253,8 @@ function sHTML(){
   h+='<input type="hidden" id="s-eid"><input type="hidden" id="s-epar">';
   h+='<div class="sf"><div class="sfl">ชื่องาน</div><input type="text" id="s-enm" class="sfi" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off"></div>';
   h+='<div class="sfg">';
-  h+='<div class="sf"><div class="sfl">วันเริ่ม (แผน)</div><input type="date" id="s-est" class="sfi sfi-date" style="width:100%;font-size:16px;cursor:pointer;color-scheme:dark" onchange="sDatePick(this,null,null)"></div>';
-  h+='<div class="sf"><div class="sfl">วันเสร็จ (แผน)</div><input type="date" id="s-een" class="sfi sfi-date" style="width:100%;font-size:16px;cursor:pointer;color-scheme:dark" onchange="sDatePick(this,null,null)"></div>';
+  h+=sBuildDatePicker('s-est','วันเริ่ม (แผน)');
+  h+=sBuildDatePicker('s-een','วันเสร็จ (แผน)');
 
 
   h+='<div class="sf"><div class="sfl">% แผน</div><input type="number" id="s-epp" class="sfi" min="0" max="100" inputmode="numeric" style="width:100%"></div>';
@@ -6406,6 +6410,69 @@ function sDatePick(dateEl,valId,hidId){
   }
   var hid=document.getElementById(hidId);
   if(hid)hid.value=iso||'';
+}
+
+// ════ Date Picker Helpers ════
+var _MONTHS_TH=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+function sBuildDatePicker(id,label){
+  var h='<div class="sf">';
+  h+='<div class="sfl">'+label+'</div>';
+  h+='<div class="sdp" id="sdp-'+id+'">';
+  // วัน
+  h+='<select id="'+id+'-d" onchange="sPickChange(\''+id+'\')" aria-label="วัน"><option value="">วัน</option>';
+  for(var d=1;d<=31;d++) h+='<option value="'+d+'">'+(d<10?'0':'')+d+'</option>';
+  h+='</select>';
+  // เดือน
+  h+='<select id="'+id+'-m" onchange="sPickChange(\''+id+'\')" aria-label="เดือน"><option value="">เดือน</option>';
+  for(var m=1;m<=12;m++) h+='<option value="'+m+'">'+(m<10?'0':'')+m+' '+_MONTHS_TH[m-1]+'</option>';
+  h+='</select>';
+  // ปี ค.ศ. แสดงเป็น ค.ศ. (browser เก็บ ISO yyyy-mm-dd)
+  h+='<select id="'+id+'-y" onchange="sPickChange(\''+id+'\')" aria-label="ปี"><option value="">ปี</option>';
+  var yr=new Date().getFullYear();
+  for(var y=yr-2;y<=yr+6;y++) h+='<option value="'+y+'">'+y+'</option>';
+  h+='</select>';
+  h+='</div>';
+  // hidden เก็บ ISO
+  h+='<input type="hidden" id="'+id+'">';
+  h+='</div>';
+  return h;
+}
+
+window.sPickChange=function(id){
+  var d=document.getElementById(id+'-d');
+  var m=document.getElementById(id+'-m');
+  var y=document.getElementById(id+'-y');
+  var hid=document.getElementById(id);
+  if(!d||!m||!y||!hid)return;
+  if(d.value&&m.value&&y.value){
+    hid.value=y.value+'-'+String(m.value).padStart(2,'0')+'-'+String(d.value).padStart(2,'0');
+  }else{
+    hid.value='';
+  }
+};
+
+function sSetDateField(dateId,txtId,iso){
+  // set hidden
+  var hid=document.getElementById(dateId);
+  if(hid)hid.value=iso||'';
+  if(!iso){
+    // clear selects
+    ['d','m','y'].forEach(function(k){
+      var el=document.getElementById(dateId+'-'+k);
+      if(el)el.value='';
+    });
+    return;
+  }
+  // parse ISO yyyy-mm-dd
+  var parts=iso.split('-');
+  if(parts.length!==3)return;
+  var yEl=document.getElementById(dateId+'-y');
+  var mEl=document.getElementById(dateId+'-m');
+  var dEl=document.getElementById(dateId+'-d');
+  if(yEl)yEl.value=parseInt(parts[0],10);
+  if(mEl)mEl.value=parseInt(parts[1],10);
+  if(dEl)dEl.value=parseInt(parts[2],10);
 }
 
 function sFmtD(s){if(!s)return'—';try{var d=new Date(s+'T00:00:00');var dd=String(d.getDate()).padStart(2,'0');var mm=String(d.getMonth()+1).padStart(2,'0');var yy=String(d.getFullYear()).slice(2);return dd+'/'+mm+'/'+yy;}catch(e){return s;}}
@@ -6629,6 +6696,12 @@ function sGnt(){
       if(!hasSched&&projStart&&projDeadline){
         ps=posDate(projStart);pe=posDate(projDeadline);hasSched=pe>ps;
       }
+      // ── clamp: bar ต้องอยู่ใน 0–100% เสมอ ──
+      if(hasSched){
+        ps=Math.max(0,Math.min(100,ps));
+        pe=Math.max(0,Math.min(100,pe));
+        if(pe<=ps) hasSched=false; // ถ้าหลัง clamp แล้วไม่มีพื้นที่ → ไม่วาด
+      }
 
       var rowH=ROW_H;
       h+='<div style="display:flex;align-items:center;border-bottom:1px solid rgba(255,255,255,.04);min-height:'+rowH+'px">';
@@ -6653,13 +6726,13 @@ function sGnt(){
       h+=overlayLines();
 
       if(hasSched){
-        var bw=Math.max(0.5,pe-ps);
+        var bw=Math.max(0.5,Math.min(100-ps, pe-ps)); // ไม่ให้ bar ล้นเกิน 100%
         // plan outline
         h+='<div style="position:absolute;top:'+BAR_T+'px;left:'+ps+'%;width:'+bw+'%;height:'+BAR_H+'px;border:1px solid '+m.col+';opacity:.35;border-radius:5px"></div>';
         // plan fill bg
         h+='<div style="position:absolute;top:'+BAR_T+'px;left:'+ps+'%;width:'+bw+'%;height:'+BAR_H+'px;background:'+m.col+';opacity:.15;border-radius:5px"></div>';
         // actual fill
-        var aw=bw*(ap/100);
+        var aw=Math.min(bw, bw*(ap/100)); // actual ไม่เกิน plan bar
         h+='<div style="position:absolute;top:'+BAR_T+'px;left:'+ps+'%;width:'+aw+'%;height:'+BAR_H+'px;background:'+barCol+';border-radius:5px;z-index:2;transition:width .3s"></div>';
         // % label
         if(bw>6){
@@ -6881,29 +6954,103 @@ window.sLine=function(){
     });
     bodyHtml='<table><thead><tr><th>ID</th><th>ชื่องาน</th><th>เริ่ม</th><th>เสร็จ</th><th>แผน→จริง</th><th>สถานะ</th></tr></thead><tbody>'+tRows+'</tbody></table>';
   } else {
-    // GANTT view — สร้าง SVG Gantt แบบ inline
-    bodyHtml='<h3 style="font-size:13px;font-weight:700;margin-bottom:10px">📊 Gantt Chart</h3>';
+    // GANTT view — สร้าง HTML Gantt ที่สวยงามสำหรับ share
+    var today2=new Date();today2.setHours(0,0,0,0);
+    // หา date range
+    var gAllD=[];
+    if(typeof getProjectDates==='function'){
+      var gpd=getProjectDates();
+      if(gpd.startDate)gAllD.push(new Date(gpd.startDate+'T00:00:00'));
+      if(gpd.deadlineDate)gAllD.push(new Date(gpd.deadlineDate+'T00:00:00'));
+    }
+    S_CATS.forEach(function(cat){
+      sItems(cat).forEach(function(item){
+        var d=sD(item.id);
+        if(d.planStart)gAllD.push(new Date(d.planStart+'T00:00:00'));
+        if(d.planEnd)gAllD.push(new Date(d.planEnd+'T00:00:00'));
+      });
+    });
+    if(!gAllD.length){
+      var n2=new Date();
+      gAllD.push(new Date(n2.getFullYear(),n2.getMonth()-1,1));
+      gAllD.push(new Date(n2.getFullYear(),n2.getMonth()+4,1));
+    }
+    var gMin=new Date(Math.min.apply(null,gAllD));
+    var gMax=new Date(Math.max.apply(null,gAllD));
+    gMin=new Date(gMin.getFullYear(),gMin.getMonth(),1);
+    gMax=new Date(gMax.getFullYear(),gMax.getMonth()+1,0);
+    var gTot=Math.max(1,Math.ceil((gMax-gMin)/86400000));
+    function gPos(iso){
+      if(!iso)return null;
+      return Math.max(0,Math.min(100,(new Date(iso+'T00:00:00')-gMin)/86400000/gTot*100));
+    }
+    var tPct2=Math.max(0,Math.min(100,(today2-gMin)/86400000/gTot*100));
+    // months
+    var gMonths=[],gc=new Date(gMin.getFullYear(),gMin.getMonth(),1);
+    while(gc<=gMax){
+      var gme=new Date(gc.getFullYear(),gc.getMonth()+1,0);
+      var gs=Math.max(0,(gc-gMin)/86400000),ge=Math.min(gTot,(gme-gMin)/86400000+1);
+      gMonths.push({label:gc.toLocaleDateString('th-TH',{month:'short',year:'2-digit'}),w:(ge-gs)/gTot*100});
+      gc=new Date(gc.getFullYear(),gc.getMonth()+1,1);
+    }
+    // build gantt HTML
+    var gRows='';
+    // month header
+    gRows+='<div style="display:flex;background:#1e293b;border-bottom:2px solid #334155">';
+    gRows+='<div style="width:180px;flex-shrink:0;padding:6px 10px;font-size:10px;font-weight:700;color:#64748b">งาน</div>';
+    gRows+='<div style="flex:1;display:flex;position:relative">';
+    gMonths.forEach(function(m){
+      gRows+='<div style="flex:0 0 '+m.w+'%;text-align:center;padding:5px 2px;font-size:9px;font-weight:700;color:#94a3b8;border-right:1px solid #1e293b">'+m.label+'</div>';
+    });
+    gRows+='</div></div>';
     S_CATS.forEach(function(cat){
       var m=S_CAT[cat],items=sItems(cat);if(!items.length)return;
       var ca=typeof calcCatOverall==='function'?calcCatOverall(cat):0;
-      bodyHtml+='<div style="margin-bottom:12px">';
-      bodyHtml+='<div style="font-size:12px;font-weight:700;color:'+m.col+';margin-bottom:6px">'+m.icon+' '+m.name+' ('+ca.toFixed(1)+'%)</div>';
+      // cat header
+      gRows+='<div style="display:flex;align-items:center;background:#0f172a;border-bottom:1px solid #1e293b;min-height:26px">';
+      gRows+='<div style="width:180px;flex-shrink:0;padding:4px 10px;display:flex;align-items:center;gap:6px">';
+      gRows+='<div style="width:9px;height:9px;border-radius:2px;background:'+m.col+'"></div>';
+      gRows+='<span style="font-size:11px;font-weight:800;color:'+m.col+'">'+m.icon+' '+m.name+'</span>';
+      gRows+='<span style="font-size:9px;font-family:monospace;color:'+(ca>=50?'#22c55e':'#f97316')+'">'+ca.toFixed(1)+'%</span>';
+      gRows+='</div>';
+      gRows+='<div style="flex:1;position:relative;height:26px">';
+      gRows+='<div style="position:absolute;top:0;bottom:0;left:'+tPct2+'%;width:2px;background:rgba(250,204,21,.6);z-index:4"></div>';
+      gRows+='</div></div>';
       items.forEach(function(item){
-        var d=sD(item.id),ap=sActual(item.id),pp=parseFloat(d.planPct)||0,g=ap-pp;
-        var gc=g>=0?'#059669':'#dc2626';
-        bodyHtml+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:11px">';
-        bodyHtml+='<span style="width:90px;flex-shrink:0;font-family:monospace;font-size:10px;color:'+m.col+'">'+item.label+'</span>';
-        bodyHtml+='<span style="width:120px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+sName(item)+'</span>';
-        bodyHtml+='<div style="flex:1;height:10px;background:#e5e7eb;border-radius:5px;overflow:hidden">';
-        bodyHtml+='<div style="height:100%;width:'+ap+'%;background:'+(ap>=pp?'#059669':'#f97316')+';border-radius:5px"></div>';
-        bodyHtml+='</div>';
-        bodyHtml+='<span style="width:60px;flex-shrink:0;text-align:right;font-family:monospace;font-size:10px;color:'+gc+'">'+(g>=0?'+':'')+g.toFixed(0)+'%</span>';
-        bodyHtml+='</div>';
+        var d=sD(item.id),ap=sActual(item.id),pp=parseFloat(d.planPct)||0;
+        var ps=gPos(d.planStart),pe=gPos(d.planEnd);
+        var hasSched=(ps!==null&&pe!==null&&pe>ps);
+        var barCol=ap>=pp?'#22c55e':'#f97316';
+        if(ap===0)barCol='rgba(255,255,255,.2)';
+        gRows+='<div style="display:flex;align-items:center;border-bottom:1px solid #1e293b;min-height:32px">';
+        gRows+='<div style="width:180px;flex-shrink:0;padding:3px 10px">';
+        gRows+='<div style="font-size:10px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#e2e8f0">';
+        gRows+='<span style="font-family:monospace;color:'+m.col+';font-size:9px;margin-right:3px">'+item.label+'</span>'+sName(item);
+        gRows+='</div>';
+        gRows+='<div style="font-size:9px;font-family:monospace"><span style="color:'+m.col+';opacity:.7">'+pp.toFixed(0)+'%</span> <span style="color:'+barCol+'">→'+ap.toFixed(0)+'%</span></div>';
+        gRows+='</div>';
+        gRows+='<div style="flex:1;position:relative;height:32px">';
+        gRows+='<div style="position:absolute;top:0;bottom:0;left:'+tPct2+'%;width:2px;background:rgba(250,204,21,.6);z-index:4"></div>';
+        if(hasSched){
+          var bw=pe-ps;
+          gRows+='<div style="position:absolute;top:10px;left:'+ps+'%;width:'+bw+'%;height:10px;border:1px solid '+m.col+';opacity:.3;border-radius:4px"></div>';
+          gRows+='<div style="position:absolute;top:10px;left:'+ps+'%;width:'+bw+'%;height:10px;background:'+m.col+';opacity:.12;border-radius:4px"></div>';
+          gRows+='<div style="position:absolute;top:10px;left:'+ps+'%;width:'+bw*ap/100+'%;height:10px;background:'+barCol+';border-radius:4px;z-index:2"></div>';
+          if(bw>8)gRows+='<div style="position:absolute;top:11px;left:'+(ps+bw/2)+'%;transform:translateX(-50%);font-size:8px;font-weight:700;color:#fff;z-index:3;text-shadow:0 1px 2px rgba(0,0,0,.9);white-space:nowrap">'+ap.toFixed(0)+'%</div>';
+        }else{
+          gRows+='<div style="position:absolute;top:12px;left:2%;width:96%;height:8px;background:rgba(255,255,255,.08);border-radius:4px"></div>';
+          if(ap>0)gRows+='<div style="position:absolute;top:12px;left:2%;width:'+Math.min(96,ap*0.96)+'%;height:8px;background:'+barCol+';opacity:.8;border-radius:4px;z-index:2"></div>';
+          gRows+='<div style="position:absolute;top:13px;left:50%;transform:translateX(-50%);font-size:7px;color:rgba(255,255,255,.3);z-index:3;white-space:nowrap">'+ap.toFixed(0)+'% (ยังไม่กำหนดวัน)</div>';
+        }
+        gRows+='</div></div>';
       });
-      bodyHtml+='</div>';
     });
-  }
+    // legend
+    gRows+='<div style="padding:8px 12px;display:flex;gap:10px;border-top:1px solid #1e293b;flex-wrap:wrap;font-size:9px;color:#64748b;align-items:center">';
+    gRows+='<span>■ แผน</span><span style="color:#22c55e">■ จริง≥แผน</span><span style="color:#f97316">■ จริง&lt;แผน</span><span style="color:#fbbf24">┃ วันนี้</span></div>';
 
+    bodyHtml='<div style="overflow-x:auto"><div style="min-width:600px">'+gRows+'</div></div>';
+  }
   var reportHtml='<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
     +'<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">'
     +'<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Sarabun,sans-serif;background:#fff;color:#1e293b;padding:20px}'
@@ -6978,6 +7125,26 @@ setInterval(function(){
   sStat();
   if(_sCV==='table')sTbl();
 },8000);
+
+// ════ Re-render Gantt เมื่อหมุนหน้าจอ ════
+function sOrient(){
+  var ov=document.getElementById('sched-ov');
+  if(!ov||ov.style.display==='none')return;
+  if(_sCV==='gantt')setTimeout(function(){sGnt();},150);
+}
+if(window.screen&&window.screen.orientation){
+  window.screen.orientation.addEventListener('change',sOrient);
+}else{
+  window.addEventListener('orientationchange',sOrient);
+}
+window.addEventListener('resize',function(){
+  clearTimeout(window._sGntResizeTmr);
+  window._sGntResizeTmr=setTimeout(function(){
+    var ov=document.getElementById('sched-ov');
+    if(!ov||ov.style.display==='none')return;
+    if(_sCV==='gantt')sGnt();
+  },250);
+});
 
 })(); // end IIFE
 </script>
