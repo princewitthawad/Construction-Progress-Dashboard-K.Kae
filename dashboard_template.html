@@ -6006,7 +6006,7 @@ var _sTmr  = null;
 
 // ── Data helpers ───────────────────────────────────────────────
 function sLoad(){try{var v=localStorage.getItem(S_LS);if(v)_sch=JSON.parse(v);}catch(e){}}
-function sSave(){try{localStorage.setItem(S_LS,JSON.stringify(_sch));}catch(e){}sPush();}
+function sStore(){try{localStorage.setItem(S_LS,JSON.stringify(_sch));}catch(e){}sPush();}
 
 // ดึง % จริงจาก _sData ของ Dashboard โดยตรง
 function sActual(id){
@@ -6222,23 +6222,36 @@ function sHTML(){
 function sRen(){sStat();if(_sCV==='table')sTbl();else sGnt();}
 
 function sStat(){
-  var tot=0,done=0,late=0,sp=0,sa=0;
+  // นับ stats ทั้งหมดจาก S items จริง ๆ (รวม custom items)
+  var tot=0,done=0,late=0,sp=0;
   S_CATS.forEach(function(cat){
     if(_sCC!=='all'&&_sCC!==cat)return;
     sItems(cat).forEach(function(item){
       var d=sD(item.id),ap=sActual(item.id),pp=parseFloat(d.planPct)||0;
-      tot++;sp+=pp;sa+=ap;
-      if(ap>=100)done++;if(ap<100&&pp>0&&ap<pp)late++;
+      tot++;sp+=pp;
+      if(ap>=100)done++;
+      if(ap<100&&pp>0&&ap<pp)late++;
     });
   });
-  var avgP=tot?sp/tot:0,avgA=tot?sa/tot:0,gap=avgA-avgP;
+  var avgP=tot?sp/tot:0;
+
+  // % จริงรวม = ใช้ calcAllOverall() ของ Dashboard (Weighted) เพื่อให้ตรงกัน
+  // ถ้า filter เฉพาะ cat ใช้ calcCatOverall(cat) แทน
+  var avgA=0;
+  if(_sCC==='all'){
+    avgA=typeof calcAllOverall==='function'?calcAllOverall():0;
+  }else{
+    avgA=typeof calcCatOverall==='function'?calcCatOverall(_sCC):0;
+  }
+  var gap=avgA-avgP;
+
   var el=document.getElementById('s-st');if(!el)return;
   el.innerHTML=[
     {cls:'C',l:'งานทั้งหมด',v:tot,s:'รายการ'},
     {cls:'G',l:'เสร็จแล้ว',v:done,s:'รายการ'},
     {cls:'R',l:'ล่าช้า',v:late,s:'รายการ'},
     {cls:'B',l:'% แผนเฉลี่ย',v:avgP.toFixed(1)+'%',s:'Master'},
-    {cls:'G',l:'% จริงเฉลี่ย',v:avgA.toFixed(1)+'%',s:'Actual'},
+    {cls:'G',l:'% จริง (Weighted)',v:avgA.toFixed(1)+'%',s:'= Dashboard'},
     {cls:gap>=0?'G':'R',l:'ส่วนต่าง',v:(gap>=0?'+':'')+gap.toFixed(1)+'%',s:gap>=0?'ตามแผน':'ล่าช้า'},
   ].map(function(x){
     return '<div class="ssc '+x.cls+'"><div class="ssl">'+x.l+'</div><div class="ssv">'+x.v+'</div>'
@@ -6271,9 +6284,11 @@ function sTbl(){
   S_CATS.forEach(function(cat){
     if(_sCC!=='all'&&_sCC!==cat)return;
     var m=S_CAT[cat],items=sItems(cat);if(!items.length)return;
-    var cp=0,ca=0;
-    items.forEach(function(i){cp+=parseFloat(sD(i.id).planPct)||0;ca+=sActual(i.id);});
-    cp=items.length?cp/items.length:0;ca=items.length?ca/items.length:0;
+    var cp=0;
+    items.forEach(function(i){cp+=parseFloat(sD(i.id).planPct)||0;});
+    cp=items.length?cp/items.length:0;
+    // % จริงต่อหมวด = calcCatOverall() ของ Dashboard เพื่อให้ตรงกัน
+    var ca=typeof calcCatOverall==='function'?calcCatOverall(cat):0;
     var cg=ca-cp;
     h+='<div class="cat-h" style="border-left:4px solid '+m.col+'" onclick="sTCat(\''+cat+'\')">'
       +'<div style="display:flex;align-items:center;gap:6px">'
@@ -6477,13 +6492,13 @@ window.sSave=function(){
     if(_sESi>=0)_sch[par].subs[_sESi]=sub;
     else{_sch[par].subs.push(sub);_sExp[par]=true;}
   }
-  sSave();sRen();sClose();
+  sStore();sRen();sClose();
   if(typeof showToast==='function')showToast('บันทึก Schedule ✅','ok');
 };
 window.sDSb=function(pid,idx){
   if(!confirm('ลบ Sub-task นี้?'))return;
   if(_sch[pid]&&_sch[pid].subs)_sch[pid].subs.splice(idx,1);
-  sSave();sRen();
+  sStore();sRen();
 };
 window.sClose=function(){var el=document.getElementById('s-em');if(el)el.style.display='none';};
 
@@ -6565,12 +6580,10 @@ window.sLine=function(){
 // ── Open/Close ─────────────────────────────────────────────────
 window.openSchedulePage=function(){
   var ov=document.getElementById('sched-ov');if(!ov)return;
-  // สร้าง HTML ครั้งแรก หรือถ้ายังว่างอยู่
-  if(!ov.innerHTML.trim()){
-    ov.innerHTML=sHTML();
-  }
+  // rebuild HTML ทุกครั้งเพื่อให้ได้ S items ล่าสุดจาก Dashboard
+  ov.innerHTML=sHTML();
   ov.style.display='block';
-  document.body.style.overflow='hidden'; // ป้องกัน scroll ซ้อน
+  document.body.style.overflow='hidden';
   sLoad();
   sFbSt('ld','☁️ กำลังโหลด...');
   sPull().then(function(){sRen();});
