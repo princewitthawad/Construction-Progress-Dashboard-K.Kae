@@ -885,9 +885,14 @@ function setSvStatus(st,msg,time=''){
 }
 
 function collectState(){
+  // รวม s_data_v3 (ระบบ S ใหม่) เข้าไปใน state เดียวกันเพื่อ sync Firebase
   return{s1:gv('s1'),s4t:gv('s4t'),s5:gv('s5'),s6:gv('s6'),s7:gv('s7'),s7rooms:Array.from({length:9},(_,i)=>parseFloat(document.getElementById('s7r'+i)?.value||0)||0),s7cor:parseFloat(document.getElementById('s7cor')?.value||0)||0,s5r:parseFloat(document.getElementById('s5r-inp')?.value||0),s6r:parseFloat(document.getElementById('s6r-inp')?.value||0),s7r:parseFloat(document.getElementById('s7r-inp')?.value||0),
     r41:gv('r41'),r42:gv('r42'),r43:gv('r43'),r44:gv('r44'),r45:gv('r45'),
-    fd:FD.map(f=>f.pct),od:OD.map(o=>({fd:o.fd,bd:o.bd,sld:o.sld,srd:o.srd})),savedAt:new Date().toISOString()};
+    fd:FD.map(f=>f.pct),od:OD.map(o=>({fd:o.fd,bd:o.bd,sld:o.sld,srd:o.srd})),savedAt:new Date().toISOString(),
+    s_data_v3: (typeof _sData!=='undefined'?_sData:{}),
+    s_names_v3: (typeof _sNames!=='undefined'?_sNames:{}),
+    custom_items_v3: (typeof _customItems!=='undefined'?_customItems:{})
+  };
 }
 function applyState(s){
   if(!s)return;
@@ -977,48 +982,10 @@ function openFirebaseModal(){
   const modal = document.getElementById('firebase-modal');
   if(!modal) return;
   const inp = document.getElementById('fb-url-input');
-  if(inp){ inp.value = _fbUrl || ''; onFbUrlInput(inp); }
+  if(inp){ inp.value = _fbUrl || ''; }
   updateFbStatus();
   modal.style.display = 'flex';
-  setTimeout(()=>{ if(inp){ inp.focus(); if(inp.value) inp.select(); } }, 120);
-}
-
-// แสดง preview real-time ขณะพิมพ์/วาง
-function onFbUrlInput(inp){
-  const val = (inp.value || '').trim();
-  const pre = document.getElementById('fb-url-preview');
-  if(!pre) return;
-  if(!val){ pre.textContent=''; return; }
-  if(val.startsWith('https://')){
-    const short = val.replace('https://','').replace(/\/+$/,'');
-    pre.innerHTML = '<span style="color:var(--green)">✅ '+short+'</span>';
-  } else {
-    pre.innerHTML = '<span style="color:#ff6b6b">❌ ต้องขึ้นต้นด้วย https://</span>';
-  }
-}
-
-// วาง URL จาก Clipboard — รองรับ iOS / Android / Desktop
-async function pasteFbUrl(){
-  const inp = document.getElementById('fb-url-input');
-  const btn = document.getElementById('fb-paste-btn');
-  if(!inp) return;
-  try {
-    if(navigator.clipboard && navigator.clipboard.readText){
-      const text = await navigator.clipboard.readText();
-      if(text && text.trim()){
-        inp.value = text.trim();
-        onFbUrlInput(inp);
-        inp.focus();
-        if(btn){ btn.textContent='✅ วางแล้ว'; setTimeout(()=>{ btn.innerHTML='📋 วาง'; },2000); }
-        return;
-      }
-    }
-  } catch(e){}
-  // Fallback: focus + แจ้งให้กด Ctrl+V หรือกดค้าง
-  inp.value = '';
-  inp.focus();
-  if(btn){ btn.textContent='👆 กด Ctrl+V'; setTimeout(()=>{ btn.innerHTML='📋 วาง'; },3500); }
-  showToast('กด Ctrl+V หรือกดค้างที่ช่อง แล้วเลือก "วาง"','info',4000);
+  setTimeout(()=>inp?.focus(), 80);
 }
 function closeFirebaseModal(){
   const modal = document.getElementById('firebase-modal');
@@ -1083,6 +1050,8 @@ function startAutoRefresh(){
     if(!isFirebaseReady())return;
     try{const res=await fetch(fbPath());if(!res.ok)return;const s=await res.json();if(!s)return;
       if(s.savedAt&&s.savedAt!==_lastSavedAt){_lastSavedAt=s.savedAt;applyState(s);setSvStatus('saved','🔄 รีเฟรชอัตโนมัติ',new Date(s.savedAt).toLocaleDateString('th-TH',{year:'numeric',month:'short',day:'numeric'}));}
+      // ดึง s_data_v3 แยก (กรณีที่ device อื่น push ด้วย pushOverallPct)
+      else if(s.s_data_v3){applyState({s_data_v3:s.s_data_v3,s_names_v3:s.s_names_v3,custom_items_v3:s.custom_items_v3});}
     }catch(e){}
     // Also pull ACCT + snapshots from cloud every cycle
     if(typeof refreshACCTFromCloud==='function')refreshACCTFromCloud();
@@ -4979,6 +4948,44 @@ function initSSystem() {
   setTimeout(validateJup7History, 600);
   // Auto-snapshot with corrected live values
   setTimeout(function(){ if(typeof jupAutoSaveSnapshot==='function') jupAutoSaveSnapshot(false); }, 1500);
+  // ── ดึง s_data_v3 จาก Firebase เพื่อ sync ข้ามเครื่อง ──
+  setTimeout(async function(){
+    if(!isFirebaseReady()) return;
+    try{
+      const res = await fetch(fbPath());
+      if(!res.ok) return;
+      const s = await res.json();
+      if(!s) return;
+      // merge s_data_v3 จาก cloud เข้า local (cloud wins เฉพาะ key ที่ไม่มีใน local)
+      let changed = false;
+      if(s.s_data_v3){
+        Object.keys(s.s_data_v3).forEach(function(k){
+          // cloud wins — ใช้ค่าจาก cloud เสมอ (ข้อมูลล่าสุดถูก push ขึ้นมาจาก device ที่บันทึกล่าสุด)
+          if(JSON.stringify(_sData[k])!==JSON.stringify(s.s_data_v3[k])){
+            _sData[k] = s.s_data_v3[k];
+            changed = true;
+          }
+        });
+      }
+      if(s.s_names_v3){
+        Object.keys(s.s_names_v3).forEach(function(k){
+          if(_sNames[k]!==s.s_names_v3[k]){ _sNames[k]=s.s_names_v3[k]; changed=true; }
+        });
+      }
+      if(s.custom_items_v3){
+        Object.keys(s.custom_items_v3).forEach(function(k){
+          _customItems[k] = s.custom_items_v3[k]; changed=true;
+        });
+      }
+      if(changed){
+        try{ localStorage.setItem('cp_s_data_v3', JSON.stringify(_sData)); }catch(e){}
+        saveSNames(); saveCustomItems();
+        refreshSUMDEF(); refreshJUP7();
+        updateCategoryCards(); buildAllDonuts(); updateMainKPI(); updateNewSummaryBar(); updateNewPieChart();
+        setSvStatus('saved','☁️ ซิงค์ข้อมูลสำเร็จ ✓');
+      }
+    }catch(e){ console.warn('initSSystem cloud sync:',e); }
+  }, 1800);
 }
 
 // ── Update category overview cards ────────────────────────────────────────
@@ -5655,13 +5662,24 @@ window.collectState = function() {
 const _origApplyState = window.applyState;
 window.applyState = function(s) {
   if (_origApplyState) _origApplyState(s);
-  if (s?.s_data_v3) { _sData = { ..._sData, ...s.s_data_v3 }; try { localStorage.setItem('cp_s_data_v3', JSON.stringify(_sData)); } catch(e){} }
-  if (s?.s_names_v3) { _sNames = { ..._sNames, ...s.s_names_v3 }; saveSNames(); }
-  if (s?.custom_items_v3) { _customItems = { ..._customItems, ...s.custom_items_v3 }; saveCustomItems(); }
+  let sChanged = false;
+  if (s && s.s_data_v3) {
+    // cloud wins — overwrite ทุก key ที่ได้รับมา
+    Object.assign(_sData, s.s_data_v3);
+    try { localStorage.setItem('cp_s_data_v3', JSON.stringify(_sData)); } catch(e){}
+    sChanged = true;
+  }
+  if (s && s.s_names_v3) { Object.assign(_sNames, s.s_names_v3); saveSNames(); sChanged = true; }
+  if (s && s.custom_items_v3) { Object.assign(_customItems, s.custom_items_v3); saveCustomItems(); sChanged = true; }
+  if (sChanged) {
+    refreshSUMDEF();
+    refreshJUP7();
+  }
   updateCategoryCards();
   buildAllDonuts();
   updateMainKPI();
   updateNewSummaryBar();
+  updateNewPieChart();
 };
 
 // ── DOMContentLoaded init ──────────────────────────────────────────────────
@@ -5914,23 +5932,12 @@ document.addEventListener('DOMContentLoaded', function() {
       <!-- URL Input -->
       <div style="margin-bottom:14px">
         <div style="font-size:11px;font-weight:700;color:#8899aa;text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px">Firebase Realtime Database URL *</div>
-        <div style="display:flex;gap:8px;align-items:stretch">
-          <input id="fb-url-input" type="text" inputmode="url"
-            placeholder="https://your-project-default-rtdb.firebaseio.com"
-            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-            style="flex:1;min-width:0;background:rgba(56,139,253,.05);border:1.5px solid rgba(56,139,253,.25);border-radius:10px;padding:12px 14px;color:#e8f0fe;font-size:13px;font-family:var(--m);outline:none;transition:border .2s;box-sizing:border-box;-webkit-user-select:text;user-select:text"
-            onfocus="this.style.borderColor='rgba(56,139,253,.6)'" onblur="this.style.borderColor='rgba(56,139,253,.25)'"
-            onkeydown="if(event.key==='Enter')saveFirebaseUrl()"
-            oninput="onFbUrlInput(this)">
-          <button onclick="pasteFbUrl()" id="fb-paste-btn"
-            style="flex-shrink:0;background:rgba(56,139,253,.15);border:1.5px solid rgba(56,139,253,.35);color:#388bfd;border-radius:10px;padding:0 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f);white-space:nowrap;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:filter .15s"
-            onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter=''">📋 วาง</button>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:5px;flex-wrap:wrap;gap:4px">
-          <div style="font-size:10px;color:#445566;font-family:var(--m)">
-            ตัวอย่าง: <span style="color:#388bfd">https://my-project-rtdb.asia-southeast1.firebasedatabase.app</span>
-          </div>
-          <div id="fb-url-preview" style="font-size:10px;font-family:var(--m)"></div>
+        <input id="fb-url-input" type="url" placeholder="https://your-project-default-rtdb.firebaseio.com"
+          style="width:100%;background:rgba(56,139,253,.05);border:1.5px solid rgba(56,139,253,.25);border-radius:10px;padding:12px 14px;color:#e8f0fe;font-size:13px;font-family:var(--m);outline:none;transition:border .2s;box-sizing:border-box"
+          onfocus="this.style.borderColor='rgba(56,139,253,.6)'" onblur="this.style.borderColor='rgba(56,139,253,.25)'"
+          onkeydown="if(event.key==='Enter')saveFirebaseUrl()">
+        <div style="font-size:10px;color:#445566;margin-top:5px;font-family:var(--m)">
+          ตัวอย่าง: <span style="color:#388bfd">https://my-project-rtdb.asia-southeast1.firebasedatabase.app</span>
         </div>
       </div>
 
