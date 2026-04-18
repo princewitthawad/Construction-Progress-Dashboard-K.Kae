@@ -715,6 +715,15 @@ body.view-mode .edit-only{display:none!important}
   </div>
 </div>
 
+
+<!-- WORKFORCE ADMIN OVERLAY -->
+<div id="workforce-admin-overlay" style="display:none;position:fixed;inset:0;z-index:9800;background:rgba(4,8,16,.97);backdrop-filter:blur(16px);overflow-y:auto">
+  <button onclick="closeWorkforceAdmin()" style="position:fixed;top:16px;right:20px;background:rgba(255,68,68,.15);border:1px solid rgba(255,68,68,.4);color:#ff4444;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;z-index:9801">✕ ปิด</button>
+  <div style="max-width:1000px;margin:0 auto;padding:24px" id="workforce-admin-body">
+    <div style="font-size:18px;font-weight:800;margin-bottom:16px;color:var(--tx)">👷 จัดการแรงงาน</div>
+    <div id="workforce-admin-content">กำลังโหลด...</div>
+  </div>
+</div>
 </div>
 <script>
 const FD=[
@@ -919,7 +928,7 @@ async function saveData(){
     if(!res.ok){const tx=await res.text().catch(()=>'');throw new Error(`HTTP ${res.status}: ${tx.slice(0,60)}`);}
     try{localStorage.setItem('cp_backup',JSON.stringify(state));}catch(e){}
     setSvStatus('saved','☁️ บันทึกสำเร็จ ✓',new Date().toLocaleDateString('th-TH',{year:'numeric',month:'short',day:'numeric'}));
-    showToast('บันทึก Cloud สำเร็จ 💾','ok');
+    autoSaveLog();showToast('บันทึก Cloud สำเร็จ 💾','ok');
   }catch(e){
     let m=e.message;if(m.includes('Failed to fetch')||m.includes('NetworkError'))m='เชื่อมต่อ Firebase ไม่ได้';
     setSvStatus('unsaved','บันทึกล้มเหลว');showToast('❌ '+m,'err',6000);
@@ -963,11 +972,13 @@ function pushOverallPct(){
 }
 
 function scheduleAutoSave(){
+  _lastUserInput=Date.now();
+  try{localStorage.setItem('cp_backup',JSON.stringify(collectState()));}catch(e){}
   clearTimeout(_saveTimer);
   setSvStatus('unsaved','● มีการเปลี่ยนแปลง...');
-  pushOverallPct(); // Push overall% to Firebase immediately
-  // บันทึกอัตโนมัติ 5 วินาทีหลังเปลี่ยนแปลง (ไม่ต้องรอ Firebase)
-  _saveTimer=setTimeout(saveData,5000);
+  pushOverallPct();
+  if(!isFirebaseReady()){setSvStatus('saved','💾 บันทึกท้องถิ่น');return;}
+  _saveTimer=setTimeout(saveData,1500);
 }
 function clearData(){
   if(!confirm('ล้างข้อมูลทั้งหมด (รีเซ็ตเป็นค่าเริ่มต้น)?'))return;
@@ -1047,16 +1058,26 @@ async function testFirebaseConnection(){
 }
 
 let _autoRefTimer=null;
+function autoSaveLog(){
+  try{
+    const logs=getDailyLog(),today=todayStr(),vals=getVals();
+    const vs=[vals.s1,vals.f25,vals.out,vals.s4,vals.s5,vals.s6,vals.s7];
+    const idx=logs.findIndex(l=>l.date===today);
+    const entry={date:today,vals:vs,ts:new Date().toISOString()};
+    if(idx>=0)logs[idx]=entry;else logs.push(entry);
+    saveDailyLog(logs);
+  }catch(e){}
+}
+let _lastUserInput=0;
 function startAutoRefresh(){
   clearInterval(_autoRefTimer);
   _autoRefTimer=setInterval(async()=>{
     if(!isFirebaseReady())return;
+    if(Date.now()-_lastUserInput<5000)return; // ป้องกัน reset ขณะพิมพ์
     try{const res=await fetch(fbPath());if(!res.ok)return;const s=await res.json();if(!s)return;
       if(s.savedAt&&s.savedAt!==_lastSavedAt){_lastSavedAt=s.savedAt;applyState(s);setSvStatus('saved','🔄 รีเฟรชอัตโนมัติ',new Date(s.savedAt).toLocaleDateString('th-TH',{year:'numeric',month:'short',day:'numeric'}));}
-      // ดึง s_data_v3 แยก (กรณีที่ device อื่น push ด้วย pushOverallPct)
       else if(s.s_data_v3){applyState({s_data_v3:s.s_data_v3,s_names_v3:s.s_names_v3,custom_items_v3:s.custom_items_v3});}
     }catch(e){}
-    // Also pull ACCT + snapshots from cloud every cycle
     if(typeof refreshACCTFromCloud==='function')refreshACCTFromCloud();
     if(typeof refreshSnapshotsFromCloud==='function')refreshSnapshotsFromCloud();
   },15000);
@@ -1780,8 +1801,61 @@ function openJupiterPage(){
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px"><div style="background:linear-gradient(135deg,rgba(0,230,118,.15),rgba(0,230,118,.05));border:1px solid rgba(0,230,118,.35);border-radius:10px;padding:16px;text-align:center"><div style="font-size:10px;color:var(--green);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px">ความคืบหน้าโครงการ</div><div style="font-size:40px;font-weight:800;font-family:var(--m);color:var(--green)">${overallPct}%</div></div><div style="background:linear-gradient(135deg,rgba(56,139,253,.15),rgba(56,139,253,.05));border:1px solid rgba(56,139,253,.35);border-radius:10px;padding:16px;text-align:center"><div style="font-size:10px;color:var(--blue);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px">งานที่ได้ตามเป้า</div><div style="font-size:40px;font-weight:800;font-family:var(--m);color:var(--blue)">${doneCount}<span style="font-size:18px;color:var(--tx2)">/7</span></div></div><div style="background:linear-gradient(135deg,rgba(255,149,0,.15),rgba(255,149,0,.05));border:1px solid rgba(255,149,0,.35);border-radius:10px;padding:16px;text-align:center"><div style="font-size:10px;color:var(--orange);font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px">งานที่ต้องเร่ง</div><div style="font-size:40px;font-weight:800;font-family:var(--m);color:var(--orange)">${urgentCount}<span style="font-size:18px;color:var(--tx2)">/7</span></div></div></div>
   <div style="font-size:13px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">📊 การวิเคราะห์รายงานแต่ละงาน ณ วันนี้</div>
   ${adviceCards}${laborHTML}`;
+  // History analysis section
+  try{
+    const histHTML=buildJupiterHistory();
+    const jBody=document.getElementById('jupiter-body');
+    if(jBody&&histHTML)jBody.innerHTML+=histHTML;
+  }catch(e){}
+
   if(document.body.classList.contains('view-mode')){document.querySelectorAll('#jupiter-body .edit-only').forEach(el=>el.style.display='none');}
   document.getElementById('jupiter-overlay').classList.add('show');
+}
+
+function buildJupiterHistory(){
+  const logs=getDailyLog();
+  if(logs.length<2)return`<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:18px;margin-top:20px"><div style="font-size:13px;font-weight:800;color:var(--tx2);margin-bottom:8px">&#128197; ประวัติความคืบหน้า</div><div style="font-size:12px;color:var(--tx3)">ยังไม่มีข้อมูลเพียงพอ — บันทึกอย่างน้อย 2 วัน เพื่อดูการวิเคราะห์</div></div>`;
+  const sorted=logs.slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const latest=sorted[sorted.length-1],prev=sorted[sorted.length-2],first=sorted[0];
+  const daysSinceFirst=Math.max(1,Math.round((new Date(latest.date)-new Date(first.date))/86400000));
+  const daysSincePrev=Math.max(1,Math.round((new Date(latest.date)-new Date(prev.date))/86400000));
+  let histCards='';
+  SUMDEF.forEach((d,i)=>{
+    const cur=latest.vals?.[i]||0,prevV=prev.vals?.[i]||0,firstV=first.vals?.[i]||0;
+    const delta=cur-prevV,totalDelta=cur-firstV;
+    const velocity=daysSinceFirst>0?totalDelta/daysSinceFirst:0;
+    const tgt=d.tgt||100,remaining=Math.max(0,tgt-cur);
+    const daysToFinish=velocity>0?Math.ceil(remaining/velocity):null;
+    const trend=delta>0.5?'&#8593; เร็วขึ้น':delta<-0.5?'&#8595; ช้าลง':'&#8594; คงที่';
+    const trendCol=delta>0.5?'var(--green)':delta<-0.5?'var(--red)':'var(--tx2)';
+    histCards+=`<div style="background:var(--bg2);border:1px solid ${d.col}33;border-left:3px solid ${d.col};border-radius:8px;padding:12px 14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:4px">
+        <span style="font-weight:700;color:${d.col};font-size:13px">${d.lbl}</span>
+        <span style="font-size:11px;font-weight:700;color:${trendCol}">${trend} ${delta>=0?'+':''}${delta.toFixed(1)}%</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px">
+        <div style="background:var(--bgc);border-radius:6px;padding:6px;text-align:center"><div style="font-size:9px;color:var(--tx3)">ปัจจุบัน</div><div style="font-size:15px;font-weight:800;font-family:var(--m);color:${d.col}">${cur.toFixed(1)}%</div></div>
+        <div style="background:var(--bgc);border-radius:6px;padding:6px;text-align:center"><div style="font-size:9px;color:var(--tx3)">%/วัน</div><div style="font-size:15px;font-weight:800;font-family:var(--m);color:${velocity>0?'var(--green)':'var(--tx3)'}">${velocity.toFixed(2)}</div></div>
+        <div style="background:var(--bgc);border-radius:6px;padding:6px;text-align:center"><div style="font-size:9px;color:var(--tx3)">คาดเสร็จ</div><div style="font-size:14px;font-weight:800;font-family:var(--m);color:${daysToFinish&&daysToFinish<30?'var(--green)':daysToFinish?'var(--orange)':'var(--red)'}">${daysToFinish?daysToFinish+' วัน':'—'}</div></div>
+      </div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">${sorted.slice(-5).map(l=>`<span style="font-size:9px;background:${d.col}18;border:1px solid ${d.col}33;border-radius:4px;padding:2px 6px;font-family:var(--m);color:${d.col}">${l.date.slice(5)}: ${(l.vals?.[i]||0).toFixed(1)}%</span>`).join('')}</div>
+    </div>`;
+  });
+  const overallVel=SUMDEF.reduce((a,d,i)=>{const cur=latest.vals?.[i]||0,fv=first.vals?.[i]||0;return a+(cur-fv)/daysSinceFirst/SUMDEF.length;},0);
+  return`<div style="background:var(--bg2);border:1px solid rgba(56,139,253,.25);border-radius:10px;padding:18px;margin-top:20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div style="font-size:14px;font-weight:800;color:var(--blue)">&#128197; วิเคราะห์ความคืบหน้าย้อนหลัง</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <span style="font-size:11px;font-family:var(--m);color:var(--tx2)">${sorted.length} บันทึก · ${daysSinceFirst} วัน</span>
+        <span style="font-size:11px;font-family:var(--m);color:${overallVel>0.5?'var(--green)':'var(--orange)'}">velocity: ${overallVel.toFixed(2)}%/วัน</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px">${histCards}</div>
+    <div style="margin-top:10px;padding:8px 12px;background:var(--bgc);border-radius:8px">
+      <div style="font-size:10px;color:var(--tx2);margin-bottom:5px">บันทึกล่าสุด (${sorted.length} รายการ)</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">${sorted.slice().reverse().slice(0,10).map(l=>`<span style="font-size:10px;background:var(--bg2);border:1px solid var(--bdr);border-radius:4px;padding:2px 7px;font-family:var(--m);color:var(--tx2)">${l.date}</span>`).join('')}</div>
+    </div>
+  </div>`;
 }
 function adjLabor(key,delta){const lc=getLaborCfg();lc[key]=Math.max(1,(lc[key]||1)+delta);saveLaborCfg(lc);const el=document.getElementById('lc-'+key);if(el)el.textContent=lc[key];}
 
@@ -1909,11 +1983,10 @@ window.addEventListener('resize',()=>setTimeout(forcePieSquare,50));
 document.addEventListener('input',function(e){
   const el=e.target;
   if(!(el.classList.contains('PI')||el.classList.contains('DCI')))return;
-  // iPad: ไม่แตะ cursor ระหว่างพิมพ์ — sanitize เฉพาะ char ที่ไม่ใช่ตัวเลข/จุดเท่านั้น
-  const v=el.value;
-  const clean=v.replace(/[^0-9.]/g,'').replace(/^(\d*\.?\d*).*$/,'$1');
-  if(clean!==v) el.value=clean;
-});
+  _lastUserInput=Date.now();
+  const v=el.value,clean=v.replace(/[^0-9.]/g,'').replace(/\.(?=.*\.)/g,'');
+  if(clean!==v)el.value=clean;
+},true);
 document.addEventListener('blur',function(e){
   const el=e.target;
   if(!(el.classList.contains('PI')||el.classList.contains('DCI')))return;
