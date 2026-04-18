@@ -1072,6 +1072,7 @@ input, textarea, [contenteditable] {
       </div>
       <div class="lm-err" id="lm-err"></div>
       <button class="lm-submit" onclick="doUnlock()">เข้าสู่ระบบ</button>
+      <button onclick="showRegisterModal()" style="width:100%;margin-bottom:8px;padding:11px;background:rgba(0,200,83,.15);border:1px solid rgba(0,200,83,.4);border-radius:10px;color:#00c853;font-family:var(--f);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;gap:6px" onmouseover="this.style.background='rgba(0,200,83,.25)'" onmouseout="this.style.background='rgba(0,200,83,.15)'">✏️ สมัครสมาชิก</button>
       <button onclick="showForgotPassModal()" style="width:100%;margin-bottom:8px;padding:10px;background:rgba(255,214,0,.08);border:1px solid rgba(255,214,0,.25);border-radius:10px;color:rgba(255,214,0,.85);font-family:var(--f);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent" onmouseover="this.style.background='rgba(255,214,0,.15)';this.style.color='#ffd600'" onmouseout="this.style.background='rgba(255,214,0,.08)';this.style.color='rgba(255,214,0,.85)'">🔑 ลืมรหัสผ่าน?</button>
       <button class="lm-ghost" onclick="closeLockModal()">ดูข้อมูลอย่างเดียว (Read Only)</button>
       <div class="lm-foot"><div style="width:5px;height:5px;border-radius:50%;background:#0d1a28"></div>Construction Dashboard · Secured<div style="width:5px;height:5px;border-radius:50%;background:#0d1a28"></div></div>
@@ -2113,61 +2114,147 @@ function exportChecklistPDF(){
   \u003cscript\u003ewindow.onload=()=>{window.print();}\u003c/script\u003e
 
 <!-- ════ FIREBASE AUTH OVERLAY ════ -->
-<div id="fb-auth-ov" style="display:none;position:fixed;inset:0;z-index:99000;background:rgba(5,8,15,.97);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;font-family:var(--f,'Sarabun',sans-serif)">
-  <div style="background:linear-gradient(135deg,#0a1020,#0d1a2e);border:1px solid rgba(56,139,253,.35);border-radius:18px;padding:32px 28px;width:100%;max-width:400px;margin:16px;box-shadow:0 24px 80px rgba(0,0,0,.7)">
-    <div style="text-align:center;margin-bottom:24px">
-      <div style="font-size:36px;margin-bottom:8px">🔐</div>
-      <div style="font-size:18px;font-weight:800;color:#e8f0fe">Construction Dashboard</div>
-      <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:4px">กรุณาเข้าสู่ระบบด้วย Email</div>
+<div id="fb-auth-ov" style="display:none;position:fixed;inset:0;z-index:99000;background:rgba(5,8,15,.97);backdrop-filter:blur(20px);align-items:center;justify-content:center;padding:16px;overflow-y:auto;font-family:var(--f,'Sarabun',sans-serif)">
+  <div style="background:linear-gradient(160deg,#0a1628,#0d1a2e);border:1px solid rgba(56,139,253,.3);border-radius:20px;padding:0;width:100%;max-width:420px;margin:auto;box-shadow:0 32px 80px rgba(0,0,0,.8);overflow:hidden">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,rgba(56,139,253,.15),rgba(0,212,255,.08));padding:28px 28px 20px;text-align:center;border-bottom:1px solid rgba(255,255,255,.07)">
+      <div style="font-size:40px;margin-bottom:10px">🏗️</div>
+      <div style="font-size:19px;font-weight:800;color:#e8f0fe;letter-spacing:.3px">Construction Dashboard</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:5px">ระบบติดตามความคืบหน้าการก่อสร้าง</div>
     </div>
-    <!-- TAB -->
-    <div style="display:flex;gap:4px;background:rgba(255,255,255,.05);border-radius:9px;padding:3px;margin-bottom:20px" id="auth-tabs">
-      <button onclick="fbAuthTab('login')" id="auth-tab-login" style="flex:1;padding:8px;border:none;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;background:rgba(56,139,253,.3);color:#388bfd;transition:all .2s">เข้าสู่ระบบ</button>
-      <button onclick="fbAuthTab('register')" id="auth-tab-register" style="flex:1;padding:8px;border:none;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:rgba(255,255,255,.4);transition:all .2s">สมัครสมาชิก</button>
-      <button onclick="fbAuthTab('reset')" id="auth-tab-reset" style="flex:1;padding:8px;border:none;border-radius:7px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:rgba(255,255,255,.4);transition:all .2s">ลืมรหัส</button>
+
+    <!-- Body -->
+    <div style="padding:24px 28px">
+
+      <!-- TAB -->
+      <div style="display:flex;gap:3px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:3px;margin-bottom:22px">
+        <button onclick="fbAuthTab('login')" id="auth-tab-login"
+          style="flex:1;padding:9px 6px;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,rgba(56,139,253,.4),rgba(0,212,255,.2));color:#60a8ff;transition:all .2s;-webkit-tap-highlight-color:transparent">
+          🔓 เข้าสู่ระบบ
+        </button>
+        <button onclick="fbAuthTab('register')" id="auth-tab-register"
+          style="flex:1;padding:9px 6px;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:rgba(255,255,255,.35);transition:all .2s;-webkit-tap-highlight-color:transparent">
+          ✏️ สมัครสมาชิก
+        </button>
+        <button onclick="fbAuthTab('reset')" id="auth-tab-reset"
+          style="flex:1;padding:9px 6px;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:rgba(255,255,255,.35);transition:all .2s;-webkit-tap-highlight-color:transparent">
+          🔑 ลืมรหัส
+        </button>
+      </div>
+
+      <!-- Tab Description -->
+      <div id="auth-tab-desc" style="font-size:11px;color:rgba(255,255,255,.35);text-align:center;margin-bottom:16px;line-height:1.7">
+        กรอก Email และรหัสผ่านเพื่อเข้าใช้งาน
+      </div>
+
+      <!-- Email -->
+      <div style="margin-bottom:12px">
+        <div style="font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:5px">📧 Email</div>
+        <input type="email" id="auth-email" placeholder="example@email.com" inputmode="email" autocomplete="email"
+          style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:13px 14px;color:#e8f0fe;font-size:15px;font-family:inherit;outline:none;-webkit-user-select:text;user-select:text;transition:border .2s"
+          onfocus="this.style.borderColor='rgba(56,139,253,.6)';this.style.background='rgba(56,139,253,.07)'"
+          onblur="this.style.borderColor='rgba(255,255,255,.12)';this.style.background='rgba(255,255,255,.06)'"
+          onkeydown="if(event.key==='Enter')fbAuthNext()">
+      </div>
+
+      <!-- Password -->
+      <div id="auth-pass-wrap" style="margin-bottom:12px">
+        <div style="font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:5px">
+          🔢 รหัสผ่าน <span style="color:rgba(255,255,255,.2);font-size:8px;text-transform:none;font-weight:400">(ตัวเลข 6–8 หลัก)</span>
+        </div>
+        <div style="position:relative">
+          <input type="password" id="auth-pass" placeholder="••••••••" inputmode="numeric" maxlength="8" autocomplete="current-password"
+            style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:13px 46px 13px 14px;color:#e8f0fe;font-size:20px;font-family:var(--m,'IBM Plex Mono',monospace);letter-spacing:6px;outline:none;-webkit-user-select:text;user-select:text;transition:border .2s"
+            onfocus="this.style.borderColor='rgba(56,139,253,.6)';this.style.background='rgba(56,139,253,.07)'"
+            onblur="this.style.borderColor='rgba(255,255,255,.12)';this.style.background='rgba(255,255,255,.06)'"
+            oninput="fbPassValidate(this)"
+            onkeydown="if(event.key==='Enter')fbAuthNext()">
+          <button onclick="fbTogglePass('auth-pass',this)"
+            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.35);cursor:pointer;font-size:16px;padding:4px;-webkit-tap-highlight-color:transparent">
+            👁️
+          </button>
+        </div>
+      </div>
+
+      <!-- Confirm Password (register) -->
+      <div id="auth-pass2-wrap" style="margin-bottom:12px;display:none">
+        <div style="font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:5px">🔢 ยืนยันรหัสผ่าน</div>
+        <input type="password" id="auth-pass2" placeholder="••••••••" inputmode="numeric" maxlength="8" autocomplete="new-password"
+          style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:13px 14px;color:#e8f0fe;font-size:20px;font-family:var(--m,'IBM Plex Mono',monospace);letter-spacing:6px;outline:none;-webkit-user-select:text;user-select:text;transition:border .2s"
+          onfocus="this.style.borderColor='rgba(56,139,253,.6)'"
+          onblur="this.style.borderColor='rgba(255,255,255,.12)'"
+          oninput="fbPassValidate(this)"
+          onkeydown="if(event.key==='Enter')fbAuthNext()">
+      </div>
+
+      <!-- Role (register) -->
+      <div id="auth-role-wrap" style="margin-bottom:12px;display:none">
+        <div style="font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:5px">👤 ประเภทบัญชี</div>
+        <select id="auth-role"
+          style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:13px 14px;color:#e8f0fe;font-size:14px;font-family:inherit;outline:none;cursor:pointer;color-scheme:dark;-webkit-appearance:none;appearance:none">
+          <option value="viewer">👁️ ดูอย่างเดียว (Viewer)</option>
+          <option value="admin">✏️ แก้ไขได้ (Admin)</option>
+          <option value="acct">💰 บัญชีโครงการ (ACCT)</option>
+          <option value="dev">🛠️ นักพัฒนา (Dev)</option>
+        </select>
+      </div>
+
+      <!-- Name (register) -->
+      <div id="auth-name-wrap" style="margin-bottom:12px;display:none">
+        <div style="font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:5px">👤 ชื่อ-นามสกุล</div>
+        <input type="text" id="auth-name" placeholder="ชื่อ นามสกุล" autocomplete="name"
+          style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:13px 14px;color:#e8f0fe;font-size:15px;font-family:inherit;outline:none;-webkit-user-select:text;user-select:text;transition:border .2s"
+          onfocus="this.style.borderColor='rgba(56,139,253,.6)'"
+          onblur="this.style.borderColor='rgba(255,255,255,.12)'"
+          onkeydown="if(event.key==='Enter')fbAuthNext()">
+      </div>
+
+      <!-- Error / Message -->
+      <div id="auth-err" style="font-size:12px;color:#ff4444;min-height:20px;margin-bottom:10px;text-align:center;line-height:1.6"></div>
+
+      <!-- Submit Button -->
+      <button id="auth-submit" onclick="fbAuthNext()"
+        style="width:100%;padding:15px;background:linear-gradient(135deg,rgba(56,139,253,.5),rgba(0,212,255,.3));border:1px solid rgba(56,139,253,.6);border-radius:12px;color:#e8f0fe;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;letter-spacing:.3px"
+        onmouseover="this.style.filter='brightness(1.15)'"
+        onmouseout="this.style.filter=''">
+        🔓 เข้าสู่ระบบ
+      </button>
+
+      <!-- Loading -->
+      <div id="auth-loading" style="display:none;text-align:center;margin-top:14px;color:rgba(255,255,255,.4);font-size:12px">
+        <div style="width:22px;height:22px;border:2px solid rgba(56,139,253,.3);border-top-color:#388bfd;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 8px"></div>
+        กำลังดำเนินการ...
+      </div>
+
+      <!-- Config notice -->
+      <div id="auth-config-notice" style="display:none;margin-top:14px;padding:11px 14px;background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.25);border-radius:9px;font-size:11px;color:rgba(255,149,0,.9);text-align:center;line-height:1.8">
+        ⚙️ ยังไม่ได้เชื่อมต่อ Firebase<br>
+        <button onclick="fbAuthSkip()"
+          style="margin-top:7px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#e8f0fe;border-radius:7px;padding:5px 14px;cursor:pointer;font-family:inherit;font-size:11px;-webkit-tap-highlight-color:transparent">
+          ข้ามและใช้แบบออฟไลน์
+        </button>
+      </div>
+
+      <!-- Divider + Register hint (login tab) -->
+      <div id="auth-register-hint" style="margin-top:16px;text-align:center;font-size:12px;color:rgba(255,255,255,.3)">
+        ยังไม่มีบัญชี?
+        <button onclick="fbAuthTab('register')"
+          style="background:none;border:none;color:#388bfd;font-size:12px;font-weight:700;cursor:pointer;padding:0 4px;font-family:inherit;-webkit-tap-highlight-color:transparent">
+          สมัครสมาชิก →
+        </button>
+      </div>
+
     </div>
-    <!-- Email -->
-    <div style="margin-bottom:12px">
-      <div style="font-size:9px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:5px">Email</div>
-      <input type="email" id="auth-email" class="auth-inp" placeholder="example@email.com" inputmode="email" autocomplete="email" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:12px 14px;color:#e8f0fe;font-size:15px;font-family:inherit;outline:none;-webkit-user-select:text;user-select:text" onkeydown="if(event.key==='Enter')fbAuthNext()">
-    </div>
-    <!-- Password (login/register) -->
-    <div id="auth-pass-wrap" style="margin-bottom:12px">
-      <div style="font-size:9px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:5px">รหัสผ่าน <span style="color:rgba(255,255,255,.25);font-size:8px;text-transform:none">(6–8 ตัวเลข)</span></div>
-      <div style="position:relative">
-        <input type="password" id="auth-pass" class="auth-inp" placeholder="ตัวเลข 6–8 หลัก" inputmode="numeric" maxlength="8" autocomplete="current-password" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:12px 44px 12px 14px;color:#e8f0fe;font-size:18px;font-family:var(--m,'IBM Plex Mono',monospace);letter-spacing:4px;outline:none;-webkit-user-select:text;user-select:text" oninput="fbPassValidate(this)" onkeydown="if(event.key==='Enter')fbAuthNext()">
-        <button onclick="fbTogglePass('auth-pass',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:16px;padding:4px">👁️</button>
+
+    <!-- Footer -->
+    <div style="padding:12px 28px 16px;border-top:1px solid rgba(255,255,255,.05);text-align:center">
+      <div style="font-size:10px;color:rgba(255,255,255,.2);line-height:1.7">
+        🔒 ข้อมูลถูกเข้ารหัสและปลอดภัย<br>
+        <span style="color:rgba(255,255,255,.12)">Construction Progress Dashboard v4</span>
       </div>
     </div>
-    <!-- Confirm Password (register) -->
-    <div id="auth-pass2-wrap" style="margin-bottom:12px;display:none">
-      <div style="font-size:9px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:5px">ยืนยันรหัสผ่าน</div>
-      <input type="password" id="auth-pass2" class="auth-inp" placeholder="ยืนยัน 6–8 หลัก" inputmode="numeric" maxlength="8" autocomplete="new-password" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:12px 14px;color:#e8f0fe;font-size:18px;font-family:var(--m,'IBM Plex Mono',monospace);letter-spacing:4px;outline:none;-webkit-user-select:text;user-select:text" oninput="fbPassValidate(this)" onkeydown="if(event.key==='Enter')fbAuthNext()">
-    </div>
-    <!-- Role selector (register only) -->
-    <div id="auth-role-wrap" style="margin-bottom:12px;display:none">
-      <div style="font-size:9px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:5px">ประเภทบัญชี</div>
-      <select id="auth-role" style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:12px 14px;color:#e8f0fe;font-size:14px;font-family:inherit;outline:none;cursor:pointer;color-scheme:dark;-webkit-appearance:none">
-        <option value="viewer">👁️ ดูอย่างเดียว (Viewer)</option>
-        <option value="admin">✏️ แก้ไขได้ (Admin)</option>
-        <option value="acct">💰 บัญชี (ACCT)</option>
-        <option value="dev">🛠️ นักพัฒนา (Dev)</option>
-      </select>
-    </div>
-    <!-- Error -->
-    <div id="auth-err" style="font-size:12px;color:#ff4444;min-height:18px;margin-bottom:10px;text-align:center"></div>
-    <!-- Submit -->
-    <button id="auth-submit" onclick="fbAuthNext()" style="width:100%;padding:14px;background:linear-gradient(135deg,rgba(56,139,253,.4),rgba(0,212,255,.25));border:1px solid rgba(56,139,253,.5);border-radius:10px;color:#e8f0fe;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent">เข้าสู่ระบบ</button>
-    <!-- Config notice -->
-    <div id="auth-config-notice" style="display:none;margin-top:14px;padding:10px 12px;background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.25);border-radius:8px;font-size:11px;color:rgba(255,149,0,.9);text-align:center;line-height:1.7">
-      ⚙️ กรุณาตั้งค่า Firebase ก่อนใช้งาน<br>
-      <button onclick="fbAuthSkip()" style="margin-top:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#e8f0fe;border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit;font-size:11px">ข้ามและใช้แบบออฟไลน์</button>
-    </div>
-    <!-- Loading -->
-    <div id="auth-loading" style="display:none;text-align:center;margin-top:12px;color:rgba(255,255,255,.4);font-size:12px">
-      <div style="width:20px;height:20px;border:2px solid rgba(56,139,253,.4);border-top-color:#388bfd;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 6px"></div>
-      กำลังดำเนินการ...
-    </div>
+
   </div>
 </div>
 </body></html>`);
@@ -8105,47 +8192,59 @@ function _isValidPass(p){
 window.fbAuthTab = function(mode){
   _authMode = mode;
   _setErr('');
-  // อัพเดท tab styles
-  ['login','register','reset'].forEach(function(m){
-    var t = document.getElementById('auth-tab-'+m);
-    if(!t) return;
+  var tabs=['login','register','reset'];
+  tabs.forEach(function(m){
+    var t=document.getElementById('auth-tab-'+m);
+    if(!t)return;
     if(m===mode){
-      t.style.background='rgba(56,139,253,.3)';
-      t.style.color='#388bfd';
+      t.style.background='linear-gradient(135deg,rgba(56,139,253,.4),rgba(0,212,255,.2))';
+      t.style.color='#60a8ff';
     }else{
       t.style.background='transparent';
-      t.style.color='rgba(255,255,255,.4)';
+      t.style.color='rgba(255,255,255,.35)';
     }
   });
-  // แสดง/ซ่อน fields
   var passWrap  = document.getElementById('auth-pass-wrap');
   var pass2Wrap = document.getElementById('auth-pass2-wrap');
   var roleWrap  = document.getElementById('auth-role-wrap');
+  var nameWrap  = document.getElementById('auth-name-wrap');
   var btn       = document.getElementById('auth-submit');
+  var desc      = document.getElementById('auth-tab-desc');
+  var hint      = document.getElementById('auth-register-hint');
+
   if(mode==='login'){
     if(passWrap)  passWrap.style.display='block';
     if(pass2Wrap) pass2Wrap.style.display='none';
     if(roleWrap)  roleWrap.style.display='none';
-    if(btn) btn.textContent='เข้าสู่ระบบ';
-  }else if(mode==='register'){
+    if(nameWrap)  nameWrap.style.display='none';
+    if(btn){ btn.textContent='🔓 เข้าสู่ระบบ'; btn.style.background='linear-gradient(135deg,rgba(56,139,253,.5),rgba(0,212,255,.3))'; }
+    if(desc) desc.textContent='กรอก Email และรหัสผ่านเพื่อเข้าใช้งาน';
+    if(hint) hint.style.display='block';
+    var p=document.getElementById('auth-pass');
+    if(p) p.setAttribute('autocomplete','current-password');
+  } else if(mode==='register'){
     if(passWrap)  passWrap.style.display='block';
     if(pass2Wrap) pass2Wrap.style.display='block';
     if(roleWrap)  roleWrap.style.display='block';
-    if(btn) btn.textContent='สมัครสมาชิก';
-    // เปลี่ยน autocomplete
-    var p = document.getElementById('auth-pass');
+    if(nameWrap)  nameWrap.style.display='block';
+    if(btn){ btn.textContent='✏️ สมัครสมาชิก'; btn.style.background='linear-gradient(135deg,rgba(0,200,83,.4),rgba(0,230,118,.25))'; }
+    if(desc) desc.textContent='สมัครสมาชิกด้วย Email — รหัสผ่านตัวเลข 6–8 หลัก';
+    if(hint) hint.style.display='none';
+    var p=document.getElementById('auth-pass');
     if(p) p.setAttribute('autocomplete','new-password');
-  }else if(mode==='reset'){
+  } else if(mode==='reset'){
     if(passWrap)  passWrap.style.display='none';
     if(pass2Wrap) pass2Wrap.style.display='none';
     if(roleWrap)  roleWrap.style.display='none';
-    if(btn) btn.textContent='ส่งลิงก์รีเซ็ตรหัสผ่าน';
+    if(nameWrap)  nameWrap.style.display='none';
+    if(btn){ btn.textContent='📧 ส่งลิงก์รีเซ็ตรหัสผ่าน'; btn.style.background='linear-gradient(135deg,rgba(255,214,0,.3),rgba(255,149,0,.2))'; }
+    if(desc) desc.textContent='กรอก Email ที่ลงทะเบียนไว้ — ระบบจะส่งลิงก์รีเซ็ตให้';
+    if(hint) hint.style.display='none';
   }
-  // focus email
   setTimeout(function(){
-    var e = document.getElementById('auth-email');
+    var e=document.getElementById('auth-email');
     if(e) e.focus();
-  }, 80);
+  },80);
 };
 
 window.fbPassValidate = function(inp){
@@ -8211,13 +8310,25 @@ window.fbAuthNext = function(){
       })
       .catch(function(e){ _setLoading(false); _setErr(_friendlyError(e.code)); });
   }else{
+    var displayName=(document.getElementById('auth-name')?document.getElementById('auth-name').value.trim():'');
     _fbAuth.createUserWithEmailAndPassword(email, pass)
       .then(function(uc){
         _setLoading(false);
-        // บันทึก role
-        _saveUserRole(uc.user.uid, role);
-        // ส่ง email verification
-        uc.user.sendEmailVerification().catch(function(){});
+        // บันทึก displayName
+        var updateP=displayName?uc.user.updateProfile({displayName:displayName}):Promise.resolve();
+        updateP.then(function(){
+          // บันทึก role + name ใน DB
+          if(_fbDB) _fbDB.ref('users/'+uc.user.uid).set({
+            role:role, email:email, name:displayName,
+            createdAt:new Date().toISOString()
+          }).catch(function(){});
+          // ส่ง email verification
+          uc.user.sendEmailVerification().catch(function(){});
+          // แสดงข้อความสำเร็จ
+          _setErr('');
+          var errEl=document.getElementById('auth-err');
+          if(errEl){errEl.style.color='#00e676';errEl.textContent='✅ สมัครสมาชิกสำเร็จ! กรุณาตรวจสอบ Email เพื่อยืนยันตัวตน';}
+        });
       })
       .catch(function(e){ _setLoading(false); _setErr(_friendlyError(e.code)); });
   }
@@ -8324,35 +8435,105 @@ window.saveFirebaseUrl = function(){
 
 <!-- ════ Forgot Password Modal ════ -->
 <div id="forgot-pass-modal" style="display:none;position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);align-items:center;justify-content:center;font-family:var(--f,'Sarabun',sans-serif)">
-  <div style="background:linear-gradient(135deg,#0a1020,#0d1a2e);border:1px solid rgba(56,139,253,.35);border-radius:16px;padding:28px 24px;width:100%;max-width:360px;margin:16px;box-shadow:0 24px 60px rgba(0,0,0,.7)">
-    <div style="text-align:center;margin-bottom:20px">
-      <div style="font-size:32px;margin-bottom:8px">🔑</div>
-      <div style="font-size:16px;font-weight:800;color:#e8f0fe">ลืมรหัสผ่าน</div>
-      <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:5px;line-height:1.7">
-        กรอก Email ที่ลงทะเบียนไว้<br>ระบบจะส่งลิงก์รีเซ็ตรหัสผ่านให้
+  <div style="background:linear-gradient(135deg,#0a1020,#0d1a2e);border:1px solid rgba(56,139,253,.35);border-radius:16px;padding:28px 24px;width:100%;max-width:380px;margin:16px;box-shadow:0 24px 60px rgba(0,0,0,.7)">
+
+    <!-- STEP 1: กรอก Email -->
+    <div id="forgot-step1">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:32px;margin-bottom:8px">🔑</div>
+        <div style="font-size:16px;font-weight:800;color:#e8f0fe">ลืมรหัสผ่าน</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:5px;line-height:1.7">
+          กรอก Email ที่ใช้ลงทะเบียนไว้<br>ระบบจะตรวจสอบและส่งลิงก์รีเซ็ตให้
+        </div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:9px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:5px">Email</div>
+        <input type="email" id="forgot-email" placeholder="example@email.com" inputmode="email" autocomplete="email"
+          style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:12px 14px;color:#e8f0fe;font-size:15px;font-family:inherit;outline:none;-webkit-user-select:text;user-select:text"
+          onkeydown="if(event.key==='Enter')sendForgotPass()">
+      </div>
+      <div id="forgot-msg" style="font-size:12px;min-height:36px;margin-bottom:12px;text-align:center;color:#ff4444;line-height:1.7"></div>
+      <div style="display:flex;gap:8px">
+        <button onclick="sendForgotPass()" id="forgot-submit"
+          style="flex:1;padding:13px;background:linear-gradient(135deg,rgba(56,139,253,.35),rgba(0,212,255,.2));border:1px solid rgba(56,139,253,.5);color:#e8f0fe;border-radius:9px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent">
+          ตรวจสอบและส่งลิงก์
+        </button>
+        <button onclick="closeForgotPassModal()"
+          style="padding:13px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5);border-radius:9px;font-family:inherit;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent">
+          ยกเลิก
+        </button>
       </div>
     </div>
-    <div style="margin-bottom:14px">
-      <div style="font-size:9px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:5px">Email</div>
-      <input type="email" id="forgot-email" placeholder="example@email.com" inputmode="email" autocomplete="email"
-        style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:12px 14px;color:#e8f0fe;font-size:15px;font-family:inherit;outline:none;-webkit-user-select:text;user-select:text"
-        onkeydown="if(event.key==='Enter')sendForgotPass()">
+
+    <!-- STEP 2: Email ไม่พบ → แจ้งให้ลงทะเบียน -->
+    <div id="forgot-step2-notfound" style="display:none;text-align:center">
+      <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+      <div style="font-size:15px;font-weight:800;color:#ff9500;margin-bottom:10px">ไม่พบบัญชีนี้ในระบบ</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.5);line-height:1.9;margin-bottom:18px">
+        Email <span id="forgot-shown-email" style="color:#ffd600;font-weight:700"></span><br>
+        ยังไม่ได้ลงทะเบียนในระบบ<br><br>
+        <span style="color:rgba(255,255,255,.35)">กรุณาติดต่อเจ้าของระบบผ่าน<br>
+        <strong style="color:rgba(56,139,253,.9)">Email ต้นฉบับที่ลงทะเบียน</strong><br>
+        เพื่อทำการอนุมัติและยืนยันตัวตน<br>
+        ก่อนเข้าใช้งานระบบ</span>
+      </div>
+      <div style="background:rgba(255,149,0,.08);border:1px solid rgba(255,149,0,.25);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:11px;color:rgba(255,149,0,.85);line-height:1.8">
+        💡 <strong>วิธีดำเนินการ</strong><br>
+        ส่งคำขอลงทะเบียนพร้อมระบุชื่อ-สกุล<br>
+        ไปที่ Admin เพื่อสร้างบัญชีให้คุณ
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="forgotBackToStep1()"
+          style="flex:1;padding:12px;background:rgba(56,139,253,.15);border:1px solid rgba(56,139,253,.4);color:#388bfd;border-radius:9px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">
+          ← ลองอีเมล์อื่น
+        </button>
+        <button onclick="closeForgotPassModal()"
+          style="flex:1;padding:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:9px;font-family:inherit;font-size:13px;cursor:pointer;-webkit-tap-highlight-color:transparent">
+          ปิด
+        </button>
+      </div>
     </div>
-    <div id="forgot-msg" style="font-size:12px;min-height:18px;margin-bottom:12px;text-align:center;color:#ff4444"></div>
-    <div style="display:flex;gap:8px">
-      <button onclick="sendForgotPass()" id="forgot-submit"
-        style="flex:1;padding:13px;background:linear-gradient(135deg,rgba(56,139,253,.35),rgba(0,212,255,.2));border:1px solid rgba(56,139,253,.5);color:#e8f0fe;border-radius:9px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent">
-        ส่งลิงก์รีเซ็ต
-      </button>
+
+    <!-- STEP 3: ส่งลิงก์สำเร็จ -->
+    <div id="forgot-step3-sent" style="display:none;text-align:center">
+      <div style="font-size:48px;margin-bottom:12px">📧</div>
+      <div style="font-size:15px;font-weight:800;color:#00e676;margin-bottom:10px">ส่งลิงก์รีเซ็ตแล้ว!</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.5);line-height:1.9;margin-bottom:18px">
+        ส่งลิงก์รีเซ็ตรหัสผ่านไปที่<br>
+        <span id="forgot-sent-email" style="color:#00e676;font-weight:700"></span><br><br>
+        <span style="color:rgba(255,255,255,.35)">กรุณาตรวจสอบ Inbox<br>
+        (อาจอยู่ใน Spam/Junk)</span>
+      </div>
       <button onclick="closeForgotPassModal()"
-        style="padding:13px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5);border-radius:9px;font-family:inherit;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent">
-        ยกเลิก
+        style="width:100%;padding:13px;background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.4);color:#00e676;border-radius:9px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent">
+        เข้าใจแล้ว
       </button>
     </div>
+
   </div>
 </div>
 
 <script>
+window.showRegisterModal = function(){
+  // ปิด lock modal ก่อน
+  var lm = document.getElementById('lock-modal');
+  if(lm) lm.classList.remove('show');
+  // เปิด Firebase Auth overlay แล้วไปที่ tab สมัครสมาชิก
+  var ov = document.getElementById('fb-auth-ov');
+  if(ov){
+    ov.style.display='flex';
+    if(typeof fbAuthTab==='function') fbAuthTab('register');
+    setTimeout(function(){
+      var e=document.getElementById('auth-email');
+      if(e) e.focus();
+    },100);
+  }else{
+    // Firebase Auth ยังไม่ init → แสดงข้อความ
+    if(typeof showToast==='function') showToast('กรุณาตั้งค่า Firebase ก่อนสมัครสมาชิก','err',4000);
+    if(lm) lm.classList.add('show');
+  }
+};
+
 window.showForgotPassModal = function(){
   var m = document.getElementById('forgot-pass-modal');
   if(m){
@@ -8372,35 +8553,86 @@ window.sendForgotPass = function(){
   var email = (document.getElementById('forgot-email').value||'').trim();
   var msg   = document.getElementById('forgot-msg');
   var btn   = document.getElementById('forgot-submit');
+
   if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
     if(msg){ msg.style.color='#ff4444'; msg.textContent='กรุณากรอก Email ที่ถูกต้อง'; }
     return;
   }
-  // ตรวจว่ามี Firebase Auth พร้อมไหม
-  if(typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0){
-    var auth = firebase.auth();
-    if(btn){ btn.textContent='⏳ กำลังส่ง...'; btn.disabled=true; }
-    auth.sendPasswordResetEmail(email)
-      .then(function(){
-        if(msg){ msg.style.color='#00e676'; msg.textContent='✅ ส่งลิงก์ไปที่ '+email+' แล้ว กรุณาตรวจสอบ Email'; }
-        if(btn){ btn.textContent='ส่งแล้ว ✅'; }
-        // ปิด modal อัตโนมัติหลัง 3 วินาที
-        setTimeout(function(){ closeForgotPassModal(); if(btn){btn.textContent='ส่งลิงก์รีเซ็ต';btn.disabled=false;} }, 3000);
-      })
-      .catch(function(e){
-        if(btn){ btn.textContent='ส่งลิงก์รีเซ็ต'; btn.disabled=false; }
-        var errs = {
-          'auth/user-not-found':     'ไม่พบบัญชีนี้ในระบบ',
-          'auth/invalid-email':      'รูปแบบ Email ไม่ถูกต้อง',
-          'auth/too-many-requests':  'พยายามมากเกินไป กรุณารอสักครู่',
-          'auth/network-request-failed': 'เชื่อมต่อ Network ไม่ได้',
-        };
-        if(msg){ msg.style.color='#ff4444'; msg.textContent = errs[e.code]||('เกิดข้อผิดพลาด: '+e.code); }
-      });
-  } else {
-    // Firebase ยังไม่ได้ตั้งค่า → แนะนำ
-    if(msg){ msg.style.color='#ff9500'; msg.textContent='⚠️ กรุณาตั้งค่า Firebase Auth ก่อนใช้งานฟีเจอร์นี้'; }
+
+  if(typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length){
+    if(msg){ msg.style.color='#ff9500'; msg.textContent='⚠️ กรุณาตั้งค่า Firebase Auth ก่อนใช้งาน'; }
+    return;
   }
+
+  var auth = firebase.auth();
+  if(btn){ btn.textContent='⏳ กำลังตรวจสอบ...'; btn.disabled=true; }
+  if(msg){ msg.textContent=''; }
+
+  // ── ขั้นตอน 1: ตรวจว่า Email มีในระบบก่อน ──────────────────
+  // Firebase Auth: fetchSignInMethodsForEmail → ถ้า empty array = ไม่มีบัญชี
+  auth.fetchSignInMethodsForEmail(email)
+    .then(function(methods){
+      if(!methods || methods.length === 0){
+        // ── Email ไม่พบในระบบ → แสดง Step 2 แจ้งเตือน ──
+        if(btn){ btn.textContent='ตรวจสอบและส่งลิงก์'; btn.disabled=false; }
+        var shownEl = document.getElementById('forgot-shown-email');
+        if(shownEl) shownEl.textContent = email;
+        // ซ่อน step1 แสดง step2
+        var s1 = document.getElementById('forgot-step1');
+        var s2 = document.getElementById('forgot-step2-notfound');
+        if(s1) s1.style.display='none';
+        if(s2) s2.style.display='block';
+      }else{
+        // ── Email มีในระบบ → ส่ง Reset Password Email ──
+        auth.sendPasswordResetEmail(email)
+          .then(function(){
+            if(btn){ btn.textContent='ตรวจสอบและส่งลิงก์'; btn.disabled=false; }
+            var sentEl = document.getElementById('forgot-sent-email');
+            if(sentEl) sentEl.textContent = email;
+            // ซ่อน step1 แสดง step3 สำเร็จ
+            var s1 = document.getElementById('forgot-step1');
+            var s3 = document.getElementById('forgot-step3-sent');
+            if(s1) s1.style.display='none';
+            if(s3) s3.style.display='block';
+          })
+          .catch(function(e){
+            if(btn){ btn.textContent='ตรวจสอบและส่งลิงก์'; btn.disabled=false; }
+            var errs = {
+              'auth/too-many-requests':       'พยายามมากเกินไป กรุณารอสักครู่',
+              'auth/network-request-failed':  'เชื่อมต่อ Network ไม่ได้',
+              'auth/invalid-email':           'รูปแบบ Email ไม่ถูกต้อง',
+            };
+            if(msg){ msg.style.color='#ff4444'; msg.textContent = errs[e.code]||('เกิดข้อผิดพลาด: '+e.code); }
+          });
+      }
+    })
+    .catch(function(e){
+      if(btn){ btn.textContent='ตรวจสอบและส่งลิงก์'; btn.disabled=false; }
+      var errs = {
+        'auth/invalid-email':          'รูปแบบ Email ไม่ถูกต้อง',
+        'auth/network-request-failed': 'เชื่อมต่อ Network ไม่ได้',
+        'auth/too-many-requests':      'พยายามมากเกินไป กรุณารอสักครู่',
+      };
+      if(msg){ msg.style.color='#ff4444'; msg.textContent = errs[e.code]||('เกิดข้อผิดพลาด: '+e.code); }
+    });
+};
+
+window.forgotBackToStep1 = function(){
+  var s1=document.getElementById('forgot-step1');
+  var s2=document.getElementById('forgot-step2-notfound');
+  var s3=document.getElementById('forgot-step3-sent');
+  if(s1) s1.style.display='block';
+  if(s2) s2.style.display='none';
+  if(s3) s3.style.display='none';
+  var msg=document.getElementById('forgot-msg');
+  if(msg) msg.textContent='';
+};
+
+// override closeForgotPassModal to reset steps
+var _origClose = window.closeForgotPassModal;
+window.closeForgotPassModal = function(){
+  forgotBackToStep1();
+  if(typeof _origClose==='function') _origClose();
 };
 </script>
 
