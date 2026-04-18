@@ -454,10 +454,7 @@ body.view-mode .edit-only{display:none!important}
     <div class="view-badge">👁️ โหมดดูอย่างเดียว</div>
     <button class="btn btn-g edit-only" onclick="saveData()">💾 บันทึก</button>
     <button class="btn edit-only" onclick="openExportJpegModal()" style="background:rgba(0,229,255,.15);color:#00e5ff;border:1px solid rgba(0,229,255,.5)">🖼️ Export JPEG</button>
-    <button class="btn edit-only" onclick="downloadCurrentState()" style="background:rgba(179,136,255,.15);color:#b388ff;border:1px solid rgba(179,136,255,.5)">💾 บันทึกไฟล์</button>
-    <button class="btn edit-only" onclick="exportDataJSON()" style="background:rgba(255,149,0,.15);color:#ff9500;border:1px solid rgba(255,149,0,.5)">📤 Export JSON</button>
     <button class="btn btn-b view-only" onclick="openFirebaseModal()">☁️ ลงทะเบียน</button>
-    <button class="btn btn-gold edit-only" onclick="showPwChange()">🔑 รหัสผ่าน</button>
     <a id="dev-login-link" href="#" onclick="event.preventDefault();showDevLoginModal()" style="font-size:11px;font-weight:600;color:#9b66ff;text-decoration:none;padding:5px 10px;border-radius:6px;border:1px solid rgba(120,80,255,.3);background:rgba(120,80,255,.08);transition:color .2s" title="Developer Mode">🛠️ Dev</a>
     <a id="lockin-link" href="#" onclick="event.preventDefault();showLockModal()" style="font-size:11px;font-weight:600;color:var(--tx2);text-decoration:none;padding:5px 10px;border-radius:6px;transition:color .2s" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--tx2)'">🔓 Login</a>
     <button id="logout-btn" class="btn edit-only" onclick="doLogout()" style="display:none;background:rgba(255,68,68,.12);color:#ff6666;border:1px solid rgba(255,68,68,.3);font-size:11px">🔒 Logout</button>
