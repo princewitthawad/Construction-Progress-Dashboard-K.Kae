@@ -409,9 +409,159 @@ body.view-mode .edit-only{display:none!important}
   .overlay, #lock-modal, #pwc-modal, #jpeg-modal { display: none !important; }
   canvas { max-width: 100%; height: auto !important; }
 }
+
+/* ── Source Protection CSS ── */
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+/* อนุญาต select ใน input/textarea */
+input, textarea, [contenteditable] {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  user-select: text !important;
+}
+/* ป้องกัน print screen hint */
+@media print {
+  body { display: none !important; }
+}
 </style>
 </head>
 <body>
+<script>
+// ════════════════════════════════════════════════════════════════
+// SOURCE PROTECTION LAYER — v1.0
+// ════════════════════════════════════════════════════════════════
+(function(){
+  'use strict';
+
+  // ── 1. Disable Right-click ──────────────────────────────────
+  document.addEventListener('contextmenu',function(e){
+    e.preventDefault();
+    return false;
+  });
+
+  // ── 2. Disable keyboard shortcuts ──────────────────────────
+  document.addEventListener('keydown',function(e){
+    // Ctrl+U (View Source), Ctrl+S (Save), Ctrl+Shift+I/J/C (DevTools)
+    // F12 (DevTools)
+    if(
+      e.key==='F12'||
+      (e.ctrlKey&&e.key==='u')||
+      (e.ctrlKey&&e.key==='U')||
+      (e.ctrlKey&&e.key==='s')||
+      (e.ctrlKey&&e.key==='S')||
+      (e.ctrlKey&&e.shiftKey&&(e.key==='I'||e.key==='i'))||
+      (e.ctrlKey&&e.shiftKey&&(e.key==='J'||e.key==='j'))||
+      (e.ctrlKey&&e.shiftKey&&(e.key==='C'||e.key==='c'))||
+      (e.ctrlKey&&e.shiftKey&&(e.key==='K'||e.key==='k'))||
+      (e.metaKey&&e.altKey&&(e.key==='I'||e.key==='i'))
+    ){
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  },true);
+
+  // ── 3. Disable text selection on code elements ──────────────
+  document.addEventListener('selectstart',function(e){
+    // อนุญาตใน input/textarea เท่านั้น
+    var t=e.target;
+    if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable)){
+      return true;
+    }
+    // ป้องกัน select all (Ctrl+A) บน body
+  });
+
+  // ── 4. DevTools Detection ───────────────────────────────────
+  var _devOpen=false;
+  var _devCheckThreshold=160;
+
+  function _checkDevTools(){
+    var w=window.outerWidth-window.innerWidth;
+    var h=window.outerHeight-window.innerHeight;
+    if(w>_devCheckThreshold||h>_devCheckThreshold){
+      if(!_devOpen){
+        _devOpen=true;
+        _onDevToolsOpen();
+      }
+    }else{
+      if(_devOpen){
+        _devOpen=false;
+        _onDevToolsClose();
+      }
+    }
+  }
+
+  function _onDevToolsOpen(){
+    // blur content
+    var ov=document.getElementById('_dev-block');
+    if(!ov){
+      ov=document.createElement('div');
+      ov.id='_dev-block';
+      ov.style.cssText='position:fixed;inset:0;z-index:2147483647;background:rgba(5,8,15,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:sans-serif;backdrop-filter:blur(20px)';
+      ov.innerHTML=
+        '<div style="font-size:48px">🔒</div>'
+        +'<div style="font-size:20px;font-weight:700;color:#e8f0fe">เนื้อหาถูกซ่อนชั่วคราว</div>'
+        +'<div style="font-size:14px;color:rgba(255,255,255,.5);text-align:center;max-width:320px;line-height:1.7">'
+        +'กรุณาปิด Developer Tools<br>เพื่อใช้งานต่อ'
+        +'</div>'
+        +'<div style="font-size:11px;color:rgba(255,255,255,.25);margin-top:8px">Construction Progress Dashboard</div>';
+      document.body.appendChild(ov);
+    }
+    ov.style.display='flex';
+  }
+
+  function _onDevToolsClose(){
+    var ov=document.getElementById('_dev-block');
+    if(ov)ov.style.display='none';
+  }
+
+  // poll ทุก 1 วินาที
+  setInterval(_checkDevTools,1000);
+  _checkDevTools();
+
+  // ── 5. debugger trap (ชะลอ reverse engineering) ─────────────
+  // ใช้ interval-based debugger เพื่อทำให้ step-through ช้า
+  setInterval(function(){
+    (function(){
+      var _s=Date.now();
+      debugger; // จะหยุดถ้า DevTools เปิดอยู่
+      if(Date.now()-_s>100){
+        _onDevToolsOpen();
+      }
+    })();
+  },3000);
+
+  // ── 6. Disable drag (ป้องกัน drag-to-desktop) ───────────────
+  document.addEventListener('dragstart',function(e){
+    e.preventDefault();
+    return false;
+  });
+
+  // ── 7. Console warning ──────────────────────────────────────
+  var _warnStyle='font-size:24px;font-weight:900;color:#ff4444';
+  var _warnStyle2='font-size:14px;color:#ff9500';
+  console.log('%c⛔ STOP!','font-size:32px;font-weight:900;color:#ff4444;background:#000;padding:8px 16px');
+  console.log('%cThis is a browser feature intended for developers only.\nIf someone told you to copy-paste something here to enable a feature or "hack" — it is a scam.',_warnStyle2);
+  console.log('%c© Construction Progress Dashboard — All Rights Reserved',_warnStyle2);
+
+  // ── 8. Hidden ownership watermark ───────────────────────────
+  var _wm=document.createElement('meta');
+  _wm.setAttribute('name','app-owner');
+  _wm.setAttribute('content','Construction-Progress-Dashboard-Protected-'+btoa(location.hostname||'local'));
+  document.head.appendChild(_wm);
+
+  // ── 9. Detect iframe embedding ──────────────────────────────
+  if(window.self!==window.top){
+    // ถูก embed ใน iframe — ซ่อน content
+    document.body.style.visibility='hidden';
+  }
+
+})();
+</script>
 <div class="bg-overlay"></div>
 <!-- EXPORT JPEG MODAL -->
 <div id="jpeg-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9000;align-items:center;justify-content:center">
@@ -1840,10 +1990,202 @@ function renderPlan(){
   <div style="display:grid;gap:10px;margin-bottom:20px">${CAT_PLAN.map(function(d,i){const v=vs[i]||0,tgt=100,gap=Math.max(0,tgt-v),ratio=v/tgt,pctPerDay=gap>0?(gap/DAYS).toFixed(2):0;const status=ratio>=1?'\u2705 บรรลุเป้า':v>0?'\uD83D\uDD04 ดำเนินการ':'\u2B1C ยังไม่เริ่ม',statusCol=ratio>=1?'var(--green)':v>0?'var(--orange)':'var(--red)';return`<div style="background:var(--bg2);border:1px solid ${d.col}33;border-left:4px solid ${d.col};border-radius:9px;padding:14px 16px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px"><span style="font-weight:700;font-size:14px;color:${d.col}">${d.lbl} <span style="font-size:10px;opacity:.6">(weight ${(d.weight*100).toFixed(0)}%)</span></span><span style="font-size:11px;font-weight:700;color:${statusCol}">${status}</span></div><div style="height:6px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;margin-bottom:10px"><div style="height:100%;background:${d.col};width:${Math.min(100,v)}%;border-radius:99px"></div></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"><div style="background:var(--bgc);border-radius:7px;padding:8px;text-align:center"><div style="font-size:9px;color:var(--tx3);margin-bottom:4px">คืบหน้าแล้ว</div><div style="font-size:17px;font-weight:800;font-family:var(--m);color:${d.col}">${ceilTo2(v)}%</div></div><div style="background:var(--bgc);border-radius:7px;padding:8px;text-align:center"><div style="font-size:9px;color:var(--tx3);margin-bottom:4px">เป้าหมาย</div><div style="font-size:17px;font-weight:800;font-family:var(--m);color:var(--tx2)">${tgt}%</div></div><div style="background:var(--bgc);border-radius:7px;padding:8px;text-align:center"><div style="font-size:9px;color:var(--tx3);margin-bottom:4px">เหลืออีก</div><div style="font-size:17px;font-weight:800;font-family:var(--m);color:${gap>0?'var(--orange)':'var(--green)'}">${ceilTo2(gap)}%</div></div><div style="background:var(--bgc);border-radius:7px;padding:8px;text-align:center"><div style="font-size:9px;color:var(--tx3);margin-bottom:4px">ต้องทำ/วัน</div><div style="font-size:17px;font-weight:800;font-family:var(--m);color:${pctPerDay>0?d.col:'var(--green)'}">${pctPerDay>0?pctPerDay+'%':'\u2014'}</div></div></div></div>`;}).join('')}</div>`;
 }
 function renderSafety(){
-  const c=document.getElementById('an-safety');if(!c)return;
-  const groups=[{g:'🦺 PPE — อุปกรณ์ป้องกันส่วนบุคคล',col:'#00e676',items:['หมวกนิรภัย (Safety Helmet) ครบทุกคนในไซท์','รองเท้า Safety มาตรฐาน มอก.','เสื้อสะท้อนแสงสำหรับทีมงาน','อุปกรณ์ป้องกันตา (แว่น/Face Shield) สำหรับงานเจาะ/กรีด','หน้ากากกรองฝุ่น N95 สำหรับงานฉาบ/ก่ออิฐ','ถุงมือนิรภัยสำหรับงานโลหะและไฟฟ้า']},{g:'🏗️ Scaffold & งานสูง',col:'#388bfd',items:['ตรวจสอบ Scaffold ทุกสัปดาห์โดยโฟร์แมน','ราวกันตก ≥ 1.0 เมตร ทุกชั้น','กระดานกันวัสดุตก (Toe Board) ทุกจุดทำงานสูง','ป้ายเตือนและเขตห้ามเข้าใต้ Scaffold','สายนิรภัย (Safety Harness) สำหรับงานสูง > 4 เมตร','ตรวจสอบ Load Capacity ของ Scaffold ก่อนใช้งาน']},{g:'⚡ ความปลอดภัยไฟฟ้า',col:'#ffd600',items:['ต่อสายดินระบบไฟฟ้าชั่วคราวครบถ้วน','ติดตั้ง ELCB (Earth Leakage Circuit Breaker)','ตู้ไฟมีฝาปิดและล็อก ป้องกันน้ำ','สายไฟไม่ลากบนพื้น ต้องยกสูงหรือเดินในท่อ','ช่างไฟฟ้าต้องมีใบอนุญาตประกอบวิชาชีพ','ห้ามงานไฟฟ้าขณะฝนตกหรือพื้นเปียก']},{g:'💧 งานสุขาภิบาลและท่อ',col:'#00d4ff',items:['ตรวจสอบแรงดันน้ำหลังเดินท่อเสร็จแต่ละชั้น','ป้องกันการรั่วของท่อก่อนฉาบปิด','ประสานงานกับช่างก่ออิฐก่อนฉาบผนัง','เก็บวัสดุท่อออกจากทางเดินทุกวัน']},{g:'🧱 งานก่ออิฐและฉาบ',col:'#ff9500',items:['ตรวจแนวดิ่งและแนวระดับทุก 3 แถวก้อนอิฐ','ป้องกันการพังของแนวก่ออิฐที่ยังไม่แห้ง','สวม PPE ครบเมื่อผสมปูนและฉาบ','จัดการฝุ่นปูน — ใช้น้ำพรมก่อนฉาบพื้นที่ใกล้เคียง']},{g:'🧹 Housekeeping & ไซท์ทั่วไป',col:'#ce93d8',items:['เก็บเศษวัสดุก่อสร้างออกจากทางเดินทุกวัน','จัดพื้นที่ไซท์ 6×26 ม. ให้ปลอดภัยและเป็นระเบียบ','ไม่กีดขวางทางหนีไฟและทางฉุกเฉิน','จัดเก็บสารเคมี (สี ทินเนอร์ ฯลฯ) ในที่กำหนด','มีถังดับเพลิงพร้อมใช้งานอย่างน้อย 2 จุด','ป้ายเตือนอันตรายติดตั้งครบทุกจุดเสี่ยง']},{g:'🚨 ปัญหาที่มักเกิดในไซท์นี้',col:'#ff4444',items:['ไฟฟ้าชั่วคราวไม่ได้มาตรฐาน — ตรวจสอบสายพ่วงทุกวัน','Scaffold ไม่มั่นคงในพื้นที่แคบ — ตรวจก่อนขึ้นทุกครั้ง','ช่างไม่สวม Harness ขณะงานสูง — โฟร์แมนตรวจตราเช้า','ฝุ่นปูนและเศษอิฐสะสม — กวาดทำความสะอาดทุกบ่าย 16:00','น้ำขังจากงานผสมปูน — ระบายออกทันที ป้องกันลื่นหก','ก่ออิฐและสุขาภิบาลทำงานพื้นที่เดียวกัน ชั้น 1 — กำหนด Zone ชัดเจน','ช่างไฟฟ้าเดินสายขณะมีงานฝุ่น — ต้องประสานตาราง']}];
-  c.innerHTML=`<div style="font-size:15px;font-weight:800;margin-bottom:6px">🦺 มาตรฐานความปลอดภัยไซท์ก่อสร้าง</div><div style="font-size:11px;color:var(--tx2);margin-bottom:16px;font-family:var(--m)">ติ๊กถูกเมื่อตรวจสอบแล้ว · บันทึกทุกเช้าก่อนเริ่มงาน</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">${groups.map(g=>`<div style="background:var(--bg2);border:1px solid ${g.col}33;border-top:3px solid ${g.col};border-radius:9px;padding:14px"><div style="font-size:12px;font-weight:700;margin-bottom:10px;color:${g.col}">${g.g}</div>${g.items.map(item=>`<label style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;cursor:pointer;user-select:none"><input type="checkbox" style="accent-color:${g.col};width:15px;height:15px;margin-top:1px;flex-shrink:0;cursor:pointer"><span style="font-size:11px;color:var(--tx2);line-height:1.5">${item}</span></label>`).join('')}</div>`).join('')}</div>`;
+  const el=document.getElementById('an-safety');if(!el)return;
+  const groups=[
+    {g:'🦺 PPE — อุปกรณ์ป้องกันส่วนบุคคล',col:'#00e676',items:['หมวกนิรภัย (Safety Helmet) ครบทุกคนในไซท์','รองเท้า Safety มาตรฐาน มอก.','เสื้อสะท้อนแสงสำหรับทีมงาน','อุปกรณ์ป้องกันตา (แว่น/Face Shield) สำหรับงานเจาะ/กรีด','หน้ากากกรองฝุ่น N95 สำหรับงานฉาบ/ก่ออิฐ','ถุงมือนิรภัยสำหรับงานโลหะและไฟฟ้า']},
+    {g:'🏗️ Scaffold & งานสูง',col:'#388bfd',items:['ตรวจสอบ Scaffold ทุกสัปดาห์โดยโฟร์แมน','ราวกันตก ≥ 1.0 เมตร ทุกชั้น','กระดานกันวัสดุตก (Toe Board) ทุกจุดทำงานสูง','ป้ายเตือนและเขตห้ามเข้าใต้ Scaffold','สายนิรภัย (Safety Harness) สำหรับงานสูง > 4 เมตร','ตรวจสอบ Load Capacity ของ Scaffold ก่อนใช้งาน']},
+    {g:'⚡ ความปลอดภัยไฟฟ้า',col:'#ffd600',items:['ต่อสายดินระบบไฟฟ้าชั่วคราวครบถ้วน','ติดตั้ง ELCB (Earth Leakage Circuit Breaker)','ตู้ไฟมีฝาปิดและล็อก ป้องกันน้ำ','สายไฟไม่ลากบนพื้น ต้องยกสูงหรือเดินในท่อ','ช่างไฟฟ้าต้องมีใบอนุญาตประกอบวิชาชีพ','ห้ามงานไฟฟ้าขณะฝนตกหรือพื้นเปียก']},
+    {g:'💧 งานสุขาภิบาลและท่อ',col:'#00d4ff',items:['ตรวจสอบแรงดันน้ำหลังเดินท่อเสร็จแต่ละชั้น','ป้องกันการรั่วของท่อก่อนฉาบปิด','ประสานงานกับช่างก่ออิฐก่อนฉาบผนัง','เก็บวัสดุท่อออกจากทางเดินทุกวัน']},
+    {g:'🧱 งานก่ออิฐและฉาบ',col:'#ff9500',items:['ตรวจแนวดิ่งและแนวระดับทุก 3 แถวก้อนอิฐ','ป้องกันการพังของแนวก่ออิฐที่ยังไม่แห้ง','สวม PPE ครบเมื่อผสมปูนและฉาบ','จัดการฝุ่นปูน — ใช้น้ำพรมก่อนฉาบพื้นที่ใกล้เคียง']},
+    {g:'🧹 Housekeeping & ไซท์ทั่วไป',col:'#ce93d8',items:['เก็บเศษวัสดุก่อสร้างออกจากทางเดินทุกวัน','จัดพื้นที่ไซท์ให้ปลอดภัยและเป็นระเบียบ','ไม่กีดขวางทางหนีไฟและทางฉุกเฉิน','จัดเก็บสารเคมี (สี ทินเนอร์ ฯลฯ) ในที่กำหนด','มีถังดับเพลิงพร้อมใช้งานอย่างน้อย 2 จุด','ป้ายเตือนอันตรายติดตั้งครบทุกจุดเสี่ยง']},
+    {g:'🚨 ปัญหาที่มักเกิดในไซท์นี้',col:'#ff4444',items:['ไฟฟ้าชั่วคราวไม่ได้มาตรฐาน — ตรวจสอบสายพ่วงทุกวัน','Scaffold ไม่มั่นคงในพื้นที่แคบ — ตรวจก่อนขึ้นทุกครั้ง','ช่างไม่สวม Harness ขณะงานสูง — โฟร์แมนตรวจตราเช้า','ฝุ่นปูนและเศษอิฐสะสม — กวาดทำความสะอาดทุกบ่าย 16:00','น้ำขังจากงานผสมปูน — ระบายออกทันที ป้องกันลื่นหก','ก่ออิฐและสุขาภิบาลทำงานพื้นที่เดียวกัน — กำหนด Zone ชัดเจน','ช่างไฟฟ้าเดินสายขณะมีงานฝุ่น — ต้องประสานตาราง']}
+  ];
+
+  el.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+      <div>
+        <div style="font-size:15px;font-weight:800">🦺 มาตรฐานความปลอดภัยไซท์ก่อสร้าง</div>
+        <div style="font-size:11px;color:var(--tx2);margin-top:3px;font-family:var(--m)">ติ๊กถูกเมื่อตรวจสอบแล้ว · บันทึกทุกเช้าก่อนเริ่มงาน</div>
+      </div>
+      <button onclick="shareSafetyLine()" style="background:linear-gradient(135deg,rgba(0,185,0,.25),rgba(6,199,85,.1));color:#06c755;border:1.5px solid rgba(6,199,85,.5);border-radius:9px;padding:9px 18px;font-family:var(--f);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;-webkit-tap-highlight-color:transparent;touch-action:manipulation">
+        <span style="font-size:17px">💚</span> แชร์ LINE
+      </button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px" id="safety-grid">
+      ${groups.map(g=>`
+        <div style="background:var(--bg2);border:1px solid ${g.col}33;border-top:3px solid ${g.col};border-radius:9px;padding:14px">
+          <div style="font-size:12px;font-weight:700;margin-bottom:10px;color:${g.col}">${g.g}</div>
+          ${g.items.map(item=>`
+            <label style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;cursor:pointer;-webkit-user-select:none;user-select:none">
+              <input type="checkbox" style="accent-color:${g.col};width:15px;height:15px;margin-top:1px;flex-shrink:0;cursor:pointer">
+              <span style="font-size:11px;color:var(--tx2);line-height:1.5">${item}</span>
+            </label>`).join('')}
+        </div>`).join('')}
+    </div>`;
 }
+
+// ── แชร์ LINE ────────────────────────────────────────────────
+function shareSafetyLine(){
+  const today=new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+  const todayS=new Date().toISOString().slice(0,10);
+
+  // อ่าน checkbox ที่ติ๊กแล้ว
+  const checks=document.querySelectorAll('#safety-grid input[type=checkbox]');
+  let checked=0,total=0;
+  checks.forEach(function(cb){total++;if(cb.checked)checked++;});
+  const pct=total?Math.round(checked/total*100):0;
+
+  // สร้าง HTML report
+  const groups=[
+    {g:'🦺 PPE — อุปกรณ์ป้องกันส่วนบุคคล',col:'#059669',items:['หมวกนิรภัย (Safety Helmet) ครบทุกคนในไซท์','รองเท้า Safety มาตรฐาน มอก.','เสื้อสะท้อนแสงสำหรับทีมงาน','อุปกรณ์ป้องกันตา (แว่น/Face Shield) สำหรับงานเจาะ/กรีด','หน้ากากกรองฝุ่น N95 สำหรับงานฉาบ/ก่ออิฐ','ถุงมือนิรภัยสำหรับงานโลหะและไฟฟ้า']},
+    {g:'🏗️ Scaffold & งานสูง',col:'#2563eb',items:['ตรวจสอบ Scaffold ทุกสัปดาห์โดยโฟร์แมน','ราวกันตก ≥ 1.0 เมตร ทุกชั้น','กระดานกันวัสดุตก (Toe Board) ทุกจุดทำงานสูง','ป้ายเตือนและเขตห้ามเข้าใต้ Scaffold','สายนิรภัย (Safety Harness) สำหรับงานสูง > 4 เมตร','ตรวจสอบ Load Capacity ของ Scaffold ก่อนใช้งาน']},
+    {g:'⚡ ความปลอดภัยไฟฟ้า',col:'#d97706',items:['ต่อสายดินระบบไฟฟ้าชั่วคราวครบถ้วน','ติดตั้ง ELCB (Earth Leakage Circuit Breaker)','ตู้ไฟมีฝาปิดและล็อก ป้องกันน้ำ','สายไฟไม่ลากบนพื้น ต้องยกสูงหรือเดินในท่อ','ช่างไฟฟ้าต้องมีใบอนุญาตประกอบวิชาชีพ','ห้ามงานไฟฟ้าขณะฝนตกหรือพื้นเปียก']},
+    {g:'💧 งานสุขาภิบาลและท่อ',col:'#0891b2',items:['ตรวจสอบแรงดันน้ำหลังเดินท่อเสร็จแต่ละชั้น','ป้องกันการรั่วของท่อก่อนฉาบปิด','ประสานงานกับช่างก่ออิฐก่อนฉาบผนัง','เก็บวัสดุท่อออกจากทางเดินทุกวัน']},
+    {g:'🧱 งานก่ออิฐและฉาบ',col:'#ea580c',items:['ตรวจแนวดิ่งและแนวระดับทุก 3 แถวก้อนอิฐ','ป้องกันการพังของแนวก่ออิฐที่ยังไม่แห้ง','สวม PPE ครบเมื่อผสมปูนและฉาบ','จัดการฝุ่นปูน — ใช้น้ำพรมก่อนฉาบพื้นที่ใกล้เคียง']},
+    {g:'🧹 Housekeeping & ไซท์ทั่วไป',col:'#7c3aed',items:['เก็บเศษวัสดุก่อสร้างออกจากทางเดินทุกวัน','จัดพื้นที่ไซท์ให้ปลอดภัยและเป็นระเบียบ','ไม่กีดขวางทางหนีไฟและทางฉุกเฉิน','จัดเก็บสารเคมีในที่กำหนด','มีถังดับเพลิงพร้อมใช้งานอย่างน้อย 2 จุด','ป้ายเตือนอันตรายติดตั้งครบทุกจุดเสี่ยง']},
+    {g:'🚨 ปัญหาที่มักเกิดในไซท์นี้',col:'#dc2626',items:['ไฟฟ้าชั่วคราวไม่ได้มาตรฐาน — ตรวจสอบสายพ่วงทุกวัน','Scaffold ไม่มั่นคงในพื้นที่แคบ — ตรวจก่อนขึ้นทุกครั้ง','ช่างไม่สวม Harness ขณะงานสูง — โฟร์แมนตรวจตราเช้า','ฝุ่นปูนและเศษอิฐสะสม — กวาดทุกบ่าย 16:00','น้ำขังจากงานผสมปูน — ระบายออกทันที','ก่ออิฐและสุขาภิบาลทำพื้นที่เดียวกัน — กำหนด Zone ชัดเจน','ช่างไฟฟ้าเดินสายขณะมีงานฝุ่น — ต้องประสานตาราง']}
+  ];
+
+  // อ่านสถานะ checkbox จากหน้าจริง
+  let cbIdx=0;
+  const cbAll=document.querySelectorAll('#safety-grid input[type=checkbox]');
+  const cbStates=Array.from(cbAll).map(function(cb){return cb.checked;});
+
+  let grpRows='';
+  let cbCnt=0;
+  groups.forEach(function(g){
+    let itemRows='';
+    g.items.forEach(function(item){
+      const isDone=cbStates[cbCnt]||false;
+      cbCnt++;
+      itemRows+='<div style="display:flex;align-items:flex-start;gap:10px;padding:6px 10px;background:'+(isDone?'#f0fdf4':'#fafafa')+';border-radius:5px;margin-bottom:5px">'
+        +'<div style="width:18px;height:18px;border-radius:4px;border:2px solid '+(isDone?g.col:'#cbd5e1')+';flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;background:'+(isDone?g.col:'transparent')+'">'
+        +(isDone?'<svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>':'')
+        +'</div>'
+        +'<span style="font-size:12px;color:'+(isDone?'#6b7280':'#374151')+';line-height:1.6;text-decoration:'+(isDone?'line-through':'none')+'">'+item+'</span>'
+        +'</div>';
+    });
+    grpRows+='<div style="margin-bottom:16px;border-radius:10px;overflow:hidden;border:1px solid '+g.col+'33">'
+      +'<div style="padding:10px 14px;background:'+g.col+'18;border-bottom:2px solid '+g.col+'44;display:flex;align-items:center;gap:8px">'
+      +'<div style="font-size:13px;font-weight:700;color:'+g.col+'">'+g.g+'</div>'
+      +'</div>'
+      +'<div style="padding:10px 12px;background:#fff">'+itemRows+'</div>'
+      +'</div>';
+  });
+
+  const pctCol=pct>=80?'#059669':pct>=50?'#2563eb':pct>=25?'#ea580c':'#dc2626';
+  const reportHtml='<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+    +'<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">'
+    +'<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Sarabun,sans-serif;background:#f8fafc;color:#1e293b;padding:20px}'
+    +'.wrap{max-width:760px;margin:0 auto}'
+    +'.hd{display:flex;align-items:center;gap:12px;margin-bottom:6px}'
+    +'.icon{font-size:28px}.title{font-size:18px;font-weight:800}'
+    +'.sub{font-size:11px;color:#64748b;margin-bottom:16px}'
+    +'.kpi{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;padding:14px 18px;background:#fff;border-radius:10px;border:1px solid #e2e8f0}'
+    +'.k{text-align:center;flex:1;min-width:80px}'
+    +'.kv{font-size:24px;font-weight:800;font-family:monospace}'
+    +'.kl{font-size:10px;color:#64748b;margin-top:2px;text-transform:uppercase}'
+    +'.ft{margin-top:16px;padding-top:10px;border-top:1px solid #e2e8f0;font-size:10px;color:#94a3b8;text-align:center}'
+    +'@media print{body{padding:10mm}}</style></head><body>'
+    +'<div class="wrap">'
+    +'<div class="hd"><span class="icon">🦺</span><div><div class="title">มาตรฐานความปลอดภัยไซท์ก่อสร้าง</div></div></div>'
+    +'<div class="sub">ตรวจสอบ · '+today+'</div>'
+    +'<div class="kpi">'
+    +'<div class="k"><div class="kv" style="color:'+pctCol+'">'+pct+'%</div><div class="kl">ผ่านการตรวจ</div></div>'
+    +'<div class="k"><div class="kv" style="color:#059669">'+checked+'</div><div class="kl">รายการ ✓</div></div>'
+    +'<div class="k"><div class="kv" style="color:#dc2626">'+(total-checked)+'</div><div class="kl">ยังไม่ตรวจ</div></div>'
+    +'<div class="k"><div class="kv">'+total+'</div><div class="kl">ทั้งหมด</div></div>'
+    +'</div>'
+    +grpRows
+    +'<div class="ft">Construction Progress Dashboard · มาตรฐานความปลอดภัย · '+today+'</div>'
+    +'</div></body></html>';
+
+  if(typeof showToast==='function')showToast('⏳ กำลังสร้างรายงาน...','info',8000);
+
+  function _loadScript(src,cb){
+    if(document.querySelector('script[src="'+src+'"]')){cb();return;}
+    var s=document.createElement('script');s.src=src;s.onload=cb;s.onerror=function(){cb(null);};document.head.appendChild(s);
+  }
+  function _dlBlob(blob,name){
+    var u=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=u;a.download=name;a.click();
+    setTimeout(function(){URL.revokeObjectURL(u);},3000);
+  }
+  function _showDesktopModal(imgBlob,htmlBlobStr){
+    var old=document.getElementById('s-safe-modal');if(old)old.remove();
+    var imgUrl=imgBlob?URL.createObjectURL(imgBlob):null;
+    var htmlBlob2=htmlBlobStr?new Blob([htmlBlobStr],{type:'text/html;charset=utf-8'}):null;
+    var htmlUrl=htmlBlob2?URL.createObjectURL(htmlBlob2):null;
+    var bst='padding:12px 16px;border:none;border-radius:9px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;width:100%;text-align:left;transition:all .15s';
+    var mo=document.createElement('div');
+    mo.id='s-safe-modal';
+    mo.style.cssText='position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px;font-family:var(--f,"Sarabun",sans-serif)';
+    mo.innerHTML='<div style="background:linear-gradient(135deg,#0d1a2e,#0a1020);border:1px solid rgba(6,199,85,.35);border-radius:16px;padding:22px;width:100%;max-width:460px;max-height:92vh;overflow-y:auto">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
+      +'<div style="font-size:15px;font-weight:800;color:#e8f0fe">💚 แชร์ความปลอดภัยผ่าน LINE</div>'
+      +'<button id="ssc" style="background:rgba(255,68,68,.15);border:1px solid rgba(255,68,68,.4);color:#ff4444;border-radius:7px;padding:5px 11px;cursor:pointer;font-size:12px;font-family:inherit">✕</button>'
+      +'</div>'
+      +(imgUrl?'<div style="border-radius:9px;overflow:hidden;margin-bottom:14px;border:1px solid rgba(255,255,255,.1);background:#fff"><img src="'+imgUrl+'" style="width:100%;display:block;max-height:260px;object-fit:contain"></div>':'')
+      +'<div style="display:flex;flex-direction:column;gap:7px">'
+      +(imgUrl?'<button id="ss-img" style="'+bst+';background:rgba(0,185,0,.18);color:#06c755;border:1px solid rgba(6,199,85,.45)"><span style="font-size:20px">🖼️</span><div><div>ดาวน์โหลดรูปภาพ (.png)</div><div style="font-size:10px;opacity:.65;font-weight:400">LINE → แนบรูป → ส่ง</div></div></button>':'')
+      +(htmlUrl?'<button id="ss-html" style="'+bst+';background:rgba(56,139,253,.15);color:#388bfd;border:1px solid rgba(56,139,253,.4)"><span style="font-size:20px">📄</span><div><div>ดาวน์โหลดรายงาน (.html)</div><div style="font-size:10px;opacity:.65;font-weight:400">เปิดไฟล์ → พิมพ์เป็น PDF → แชร์</div></div></button>':'')
+      +'<button id="ss-line" style="'+bst+';background:rgba(0,185,0,.08);color:#06c755;border:1px solid rgba(6,199,85,.3)"><span style="font-size:20px">💬</span><div><div>เปิด LINE</div><div style="font-size:10px;opacity:.65;font-weight:400">ลากไฟล์มาวางในแชท</div></div></button>'
+      +'</div>'
+      +'<div style="margin-top:12px;padding:9px 12px;background:rgba(255,214,0,.07);border:1px solid rgba(255,214,0,.2);border-radius:7px;font-size:10px;color:rgba(255,214,0,.85);line-height:1.7">'
+      +'💡 <b>เร็วที่สุด:</b> ดาวน์โหลดรูป → ลาก-วางใน LINE Desktop'
+      +'</div></div>';
+    document.body.appendChild(mo);
+    function closeM(){mo.remove();if(imgUrl)URL.revokeObjectURL(imgUrl);if(htmlUrl)URL.revokeObjectURL(htmlUrl);}
+    document.getElementById('ssc').onclick=closeM;
+    mo.onclick=function(e){if(e.target===mo)closeM();};
+    if(imgUrl&&document.getElementById('ss-img'))document.getElementById('ss-img').onclick=function(){_dlBlob(imgBlob,'safety-'+todayS+'.png');if(typeof showToast==='function')showToast('ดาวน์โหลดรูปแล้ว — เปิด LINE แนบได้เลย 💚','ok',5000);};
+    if(htmlUrl&&document.getElementById('ss-html'))document.getElementById('ss-html').onclick=function(){_dlBlob(htmlBlob2,'safety-'+todayS+'.html');if(typeof showToast==='function')showToast('ดาวน์โหลด HTML แล้ว','ok',3000);};
+    document.getElementById('ss-line').onclick=function(){window.open('https://line.me/R/','_blank');};
+  }
+
+  _loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',function(err){
+    if(err||typeof html2canvas==='undefined'){
+      // fallback: download HTML
+      var blob=new Blob([reportHtml],{type:'text/html;charset=utf-8'});
+      if(navigator.canShare){
+        _dlBlob(blob,'safety-'+todayS+'.html');
+        if(typeof showToast==='function')showToast('ดาวน์โหลดแล้ว — เปิด LINE แชร์ได้เลย','ok',5000);
+      }else{
+        _showDesktopModal(null,reportHtml);
+      }
+      return;
+    }
+    // render HTML → PNG
+    var iframe=document.createElement('iframe');
+    iframe.style.cssText='position:fixed;left:-9999px;top:0;width:780px;border:none;visibility:hidden;z-index:-1';
+    document.body.appendChild(iframe);
+    iframe.contentDocument.open();
+    iframe.contentDocument.write(reportHtml);
+    iframe.contentDocument.close();
+    setTimeout(function(){
+      html2canvas(iframe.contentDocument.body,{scale:2,useCORS:true,backgroundColor:'#f8fafc',logging:false,width:760,windowWidth:760})
+        .then(function(canvas){
+          document.body.removeChild(iframe);
+          canvas.toBlob(function(imgBlob){
+            if(!imgBlob){
+              _showDesktopModal(null,reportHtml);return;
+            }
+            var f=new File([imgBlob],'safety-'+todayS+'.png',{type:'image/png'});
+            // Mobile: Web Share API
+            if(navigator.canShare&&navigator.canShare({files:[f]})){
+              navigator.share({files:[f],title:'🦺 ความปลอดภัยไซท์ '+today,text:'รายงานการตรวจความปลอดภัยก่อสร้าง'})
+                .then(function(){if(typeof showToast==='function')showToast('แชร์สำเร็จ ✅','ok');})
+                .catch(function(e){if(e.name!=='AbortError')_showDesktopModal(imgBlob,reportHtml);});
+            }else{
+              // Desktop: modal
+              _showDesktopModal(imgBlob,reportHtml);
+            }
+          },'image/png',0.95);
+        }).catch(function(){try{document.body.removeChild(iframe);}catch(e){}; _showDesktopModal(null,reportHtml);});
+    },700);
+  });
+}
+
 
 function exportExcel(){
   const wb=XLSX.utils.book_new(),vals=getVals(),vs=[vals.s1,vals.f25,vals.out,vals.s4,vals.s5,vals.s6,vals.s7];
