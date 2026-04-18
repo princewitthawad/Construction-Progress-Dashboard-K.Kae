@@ -3464,11 +3464,18 @@ async function acctShareA4(){
 const JUP_AUTOSAVE_KEY='cp_jup_autosave';
 function resetJup7History(){
   if(!confirm('ล้างประวัติ 7 วันทั้งหมดและบันทึก Snapshot ปัจจุบันใหม่?')) return;
+  // ล้าง localStorage
   localStorage.removeItem(JUP_HISTORY_KEY);
+  // ล้าง Firebase ด้วย
+  cloudPutNode('jup_snapshots',{history:[],updatedAt:new Date().toISOString()}).catch(function(){});
   setTimeout(function(){
+    // บันทึก Snapshot ปัจจุบัน (วันนี้) ใหม่
     jupAutoSaveSnapshot(false);
-    renderJup7DayChart();
-    showToast('✅ รีเซ็ตประวัติแล้ว — บันทึก Snapshot ปัจจุบันเรียบร้อย','ok',4000);
+    // รอให้ save เสร็จก่อน render
+    setTimeout(function(){
+      renderJup7DayChart();
+      showToast('✅ รีเซ็ตและบันทึก Snapshot วันนี้เรียบร้อย','ok',4000);
+    },500);
   }, 300);
 }
 
@@ -3753,11 +3760,32 @@ function jup7ToggleLine(i){
   if(el)el.style.opacity=hide?'0.3':'1';
 }
 
-// ── overall% สูตรเดียวกับ Dashboard โดนัท ─────────────────────────────────
+// ── overall% สูตรเดียวกับ Dashboard (Weighted CAT_WEIGHTS) ──────────────
 function jup7Overall(vs){
   if(!vs||!vs.length)return 0;
-  var tgts=getJUP7_TGTS();
-  return parseFloat((vs.reduce(function(a,v,i){return a+(v/(tgts[i]||100));},0)/vs.length*100).toFixed(2));
+  // vs[] mirrors getLiveVals() = pct ของทุก S item เรียงตาม CAT_DEFS
+  // คำนวณ weighted overall เหมือน calcAllOverall()
+  try{
+    if(typeof CAT_DEFS==='undefined'||typeof CAT_WEIGHTS==='undefined') throw 0;
+    var cats=['structure','architecture','electrical','sanitary'];
+    var idx=0;
+    var weighted=0;
+    cats.forEach(function(cat){
+      var items=typeof getAllItemsForCat==='function'?getAllItemsForCat(cat):[];
+      if(!items.length)return;
+      var sum=0;
+      items.forEach(function(){
+        sum+=Math.min(100,Math.max(0,parseFloat(vs[idx]||0)));
+        idx++;
+      });
+      var avg=sum/items.length;
+      weighted+=avg*(CAT_WEIGHTS[cat]||0);
+    });
+    return parseFloat(weighted.toFixed(2));
+  }catch(e){
+    // fallback: simple average
+    return parseFloat((vs.reduce(function(a,v){return a+v;},0)/vs.length).toFixed(2));
+  }
 }
 
 function jup7RenderDayCards(hist, days7){
@@ -3805,7 +3833,7 @@ function jup7RenderDayCards(hist, days7){
       <div style="font-size:16px;font-weight:800;font-family:var(--m);color:${colOvr}">${overall.toFixed(1)}%</div>
       ${delta!==null?`<div style="font-size:9px;color:${delta>=0?'var(--green)':'var(--red)'};margin-top:2px">${delta>=0?'▲+':'▼'}${Math.abs(delta).toFixed(1)}%</div>`:'<div style="font-size:9px;color:#445566">—</div>'}
       <div style="margin-top:5px">
-        ${(()=>{const _s=getJUP7_SERIES(),_t=getJUP7_TGTS();return vs.map((v,i)=>{const pct=Math.min(100,v/(_t[i]||100)*100),col=(_s[i]&&_s[i].col)||'#388bfd';return`<div style="height:3px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;margin-bottom:2px"><div style="height:100%;background:${col};width:${pct.toFixed(0)}%;border-radius:99px"></div></div>`;}).join('');})()}
+        ${(()=>{const _s=getJUP7_SERIES();return vs.map((v,i)=>{const pct=Math.min(100,parseFloat(v)||0),col=(_s[i]&&_s[i].col)||'#388bfd';return`<div style="height:3px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;margin-bottom:2px"><div style="height:100%;background:${col};width:${pct.toFixed(0)}%;border-radius:99px"></div></div>`;}).join('');})()}
       </div>
     </div>`;
   }).join('');
@@ -4932,6 +4960,10 @@ function initSSystem() {
   _customItems = getCustomItems();
   refreshSUMDEF();
   refreshJUP7();
+  // บันทึก Snapshot วันนี้อัตโนมัติเมื่อเปิดแอป
+  setTimeout(function(){
+    if(typeof jupAutoSaveSnapshot==='function')jupAutoSaveSnapshot(false);
+  },2000);
   updateCategoryCards();
   buildAllDonuts();
   updateMainKPI();
@@ -7077,21 +7109,80 @@ window.sLine=function(){
 
   function doSharePng(blob){
     var f=new File([blob],'schedule-'+todayS+'.png',{type:'image/png'});
+    // Mobile: ใช้ Web Share API
     if(navigator.canShare&&navigator.canShare({files:[f]})){
       navigator.share({files:[f],title:'📅 Schedule '+today,text:'รายงาน Schedule ก่อสร้าง'})
         .then(function(){if(typeof showToast==='function')showToast('แชร์สำเร็จ ✅','ok');})
-        .catch(function(e){if(e.name!=='AbortError')dlBlob(blob,'schedule-'+todayS+'.png','image/png');});
-    }else dlBlob(blob,'schedule-'+todayS+'.png','image/png');
+        .catch(function(e){if(e.name!=='AbortError')showShareModal(blob,reportHtml,today);});
+      return;
+    }
+    // Desktop: แสดง modal พร้อม preview
+    showShareModal(blob,reportHtml,today);
   }
   function dlBlob(blob,name,type){
     var u=URL.createObjectURL(new Blob([blob],{type:type}));
     var a=document.createElement('a');a.href=u;a.download=name;a.click();
     setTimeout(function(){URL.revokeObjectURL(u);},3000);
-    if(typeof showToast==='function')showToast('บันทึกไฟล์แล้ว — เปิด LINE แชร์ได้เลย 💚','ok',6000);
+  }
+
+  // Desktop share modal
+  function showShareModal(imgBlob,htmlStr,titleStr){
+    var old2=document.getElementById('s-share-modal');if(old2)old2.remove();
+    var imgUrl=imgBlob?URL.createObjectURL(imgBlob):null;
+    var htmlBlob=htmlStr?new Blob([htmlStr],{type:'text/html;charset=utf-8'}):null;
+    var htmlUrl=htmlBlob?URL.createObjectURL(htmlBlob):null;
+    var ts=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0')+'-'+String(new Date().getDate()).padStart(2,'0');
+    var bst='padding:13px 16px;border:none;border-radius:9px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:9px;transition:all .15s;width:100%;text-align:left';
+    var mo=document.createElement('div');
+    mo.id='s-share-modal';
+    mo.style.cssText='position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px;font-family:var(--f,"Sarabun",sans-serif)';
+    mo.innerHTML=
+      '<div style="background:linear-gradient(135deg,#0d1a2e,#0a1020);border:1px solid rgba(56,139,253,.35);border-radius:16px;padding:22px;width:100%;max-width:460px;max-height:92vh;overflow-y:auto">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
+      +'<div style="font-size:15px;font-weight:800;color:#e8f0fe">💚 แชร์รายงานผ่าน LINE</div>'
+      +'<button id="smc" style="background:rgba(255,68,68,.15);border:1px solid rgba(255,68,68,.4);color:#ff4444;border-radius:7px;padding:5px 11px;cursor:pointer;font-size:12px;font-family:inherit">✕</button>'
+      +'</div>'
+      +(imgUrl?'<div style="border-radius:9px;overflow:hidden;margin-bottom:14px;border:1px solid rgba(255,255,255,.1);background:#fff"><img src="'+imgUrl+'" style="width:100%;display:block;max-height:260px;object-fit:contain"></div>':'')
+      +'<div style="display:flex;flex-direction:column;gap:7px">'
+      +(imgUrl?'<button id="sm-img" style="'+bst+';background:rgba(0,185,0,.18);color:#00c300;border:1px solid rgba(0,185,0,.45)"><span style="font-size:20px">🖼️</span><div><div>ดาวน์โหลดรูปภาพ (.png)</div><div style="font-size:10px;opacity:.65;font-weight:400">จากนั้น: LINE → แนบรูป → ส่ง</div></div></button>':'')
+      +(htmlUrl?'<button id="sm-html" style="'+bst+';background:rgba(56,139,253,.15);color:#388bfd;border:1px solid rgba(56,139,253,.4)"><span style="font-size:20px">📄</span><div><div>ดาวน์โหลดรายงาน (.html)</div><div style="font-size:10px;opacity:.65;font-weight:400">เปิดไฟล์ → พิมพ์/บันทึก PDF → แชร์</div></div></button>':'')
+      +'<button id="sm-line" style="'+bst+';background:rgba(0,185,0,.08);color:#06c755;border:1px solid rgba(6,199,85,.3)"><span style="font-size:20px">💬</span><div><div>เปิด LINE</div><div style="font-size:10px;opacity:.65;font-weight:400">ลากไฟล์ที่ดาวน์โหลดมาวางในแชท LINE</div></div></button>'
+      +'</div>'
+      +'<div style="margin-top:12px;padding:9px 12px;background:rgba(255,214,0,.07);border:1px solid rgba(255,214,0,.2);border-radius:7px;font-size:10px;color:rgba(255,214,0,.85);line-height:1.7">'
+      +'💡 <b>เร็วที่สุด:</b> ดาวน์โหลดรูป → เปิด LINE Desktop → ลาก-วางรูปในแชท'
+      +'</div></div>';
+    document.body.appendChild(mo);
+    function closeModal(){
+      mo.remove();
+      if(imgUrl)URL.revokeObjectURL(imgUrl);
+      if(htmlUrl)URL.revokeObjectURL(htmlUrl);
+    }
+    document.getElementById('smc').onclick=closeModal;
+    mo.onclick=function(e){if(e.target===mo)closeModal();};
+    if(imgUrl){
+      document.getElementById('sm-img').onclick=function(){
+        var a=document.createElement('a');a.href=imgUrl;a.download='schedule-'+ts+'.png';a.click();
+        if(typeof showToast==='function')showToast('ดาวน์โหลดรูปแล้ว 🖼️ — เปิด LINE แล้วแนบรูปได้เลยครับ','ok',6000);
+      };
+    }
+    if(htmlUrl){
+      document.getElementById('sm-html').onclick=function(){
+        var a=document.createElement('a');a.href=htmlUrl;a.download='schedule-'+ts+'.html';a.click();
+        if(typeof showToast==='function')showToast('ดาวน์โหลด HTML แล้ว','ok',3000);
+      };
+    }
+    document.getElementById('sm-line').onclick=function(){window.open('https://line.me/R/','_blank');};
   }
   function fallbackHtml(){
-    var blob=new Blob([reportHtml],{type:'text/html;charset=utf-8'});
-    dlBlob(blob,'schedule-'+todayS+'.html','text/html');
+    if(navigator.canShare){
+      // Mobile fallback: download
+      var blob2=new Blob([reportHtml],{type:'text/html;charset=utf-8'});
+      dlBlob(blob2,'schedule-'+todayS+'.html','text/html');
+      if(typeof showToast==='function')showToast('ดาวน์โหลดแล้ว — เปิด LINE แนบไฟล์ได้เลย','ok',5000);
+    }else{
+      // Desktop: modal
+      showShareModal(null,reportHtml,today);
+    }
   }
 
   function loadScript(src,cb){
