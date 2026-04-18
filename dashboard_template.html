@@ -6038,7 +6038,8 @@ function sPush(){
 }
 function sPull(){
   if(typeof _fbUrl==='undefined'||!_fbUrl||!_fbUrl.startsWith('https://')){
-    sFbSt('err','ยังไม่ได้ตั้งค่า Firebase');return Promise.resolve();
+    sFbSt('err','ยังไม่ได้ตั้งค่า Firebase');
+    return Promise.resolve(); // resolve เสมอ ไม่ block render
   }
   return fetch(_fbUrl.replace(/\/+$/,'')+'/'+S_NODE+'.json',{signal:AbortSignal.timeout(6000)})
     .then(function(r){return r.ok?r.json():null;})
@@ -6095,180 +6096,162 @@ window.schedGetAllData=function(){
 };
 
 // ── HTML builder ───────────────────────────────────────────────
+// ════ CSS ════
+// ════════════════════════════════════════════════════════════════
+// RENDER FUNCTIONS — sCSS, sHTML, sStat, sTbl, sGnt
+// + Interactions: sSwV, sFlt, sTCat, sTExp
+// + Modal: sOEdt, sASb, sOESb, sSave, sClose, sDSb
+// + Open/Close: openSchedulePage, closeSchedulePage
+// ════════════════════════════════════════════════════════════════
+
 function sCSS(){
-  return '<style>'
-    // reset & base
-    +'#sched-ov *{box-sizing:border-box;margin:0;padding:0}'
-    +'#sched-ov{font-size:14px}'
-    // header
-    +'#sched-ov .sh{position:sticky;top:0;z-index:10;background:rgba(5,8,15,.97);border-bottom:1px solid rgba(255,255,255,.07);padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;backdrop-filter:blur(16px)}'
-    +'#sched-ov .sh::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00bcd4,#388bfd,transparent)}'
-    +'#sched-ov .sh-l{display:flex;align-items:center;gap:8px;flex:1;min-width:0}'
-    +'#sched-ov .sh-r{display:flex;gap:5px;flex-wrap:wrap;align-items:center;flex-shrink:0}'
-    // buttons
-    +'#sched-ov .sb{padding:6px 11px;border:none;border-radius:7px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;transition:all .15s;-webkit-tap-highlight-color:transparent}'
-    +'#sched-ov .sb:active{transform:scale(.96)}'
-    +'#sched-ov .sb-red{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.4)}'
-    +'#sched-ov .sb-line{background:rgba(0,185,0,.18);color:#00c300;border:1px solid rgba(0,185,0,.4)}'
-    // view toggle
-    +'#sched-ov .svt{display:flex;gap:2px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:2px}'
-    +'#sched-ov .svtb{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,.4);transition:all .2s;font-family:inherit;-webkit-tap-highlight-color:transparent}'
-    +'#sched-ov .svtb.act{background:rgba(56,139,253,.25);color:#388bfd}'
-    // body wrap
-    +'#sched-ov .sw{max-width:1280px;margin:0 auto;padding:12px 14px}'
-    // stats
-    +'#sched-ov .sst{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:12px}'
-    +'#sched-ov .ssc{background:rgba(10,16,28,.95);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:8px 10px;position:relative;overflow:hidden}'
-    +'#sched-ov .ssc::after{content:"";position:absolute;bottom:0;left:0;right:0;height:2px}'
-    +'#sched-ov .ssc.G::after{background:#00e676}#sched-ov .ssc.B::after{background:#388bfd}#sched-ov .ssc.O::after{background:#ff9500}#sched-ov .ssc.R::after{background:#ff4444}#sched-ov .ssc.C::after{background:#00bcd4}'
-    +'#sched-ov .ssl{font-size:9px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.4px;font-weight:700;margin-bottom:2px}'
-    +'#sched-ov .ssv{font-size:17px;font-weight:800;font-family:var(--m,"IBM Plex Mono",monospace);line-height:1}'
-    +'#sched-ov .ssc.G .ssv{color:#00e676}#sched-ov .ssc.B .ssv{color:#388bfd}#sched-ov .ssc.O .ssv{color:#ff9500}#sched-ov .ssc.R .ssv{color:#ff4444}#sched-ov .ssc.C .ssv{color:#00bcd4}'
-    // filter tabs
-    +'#sched-ov .sft{display:flex;gap:5px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-bottom:10px;padding-bottom:2px}'
-    +'#sched-ov .sft::-webkit-scrollbar{display:none}'
-    +'#sched-ov .sftb{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.1);background:transparent;color:rgba(255,255,255,.5);transition:all .2s;font-family:inherit;white-space:nowrap;flex-shrink:0;-webkit-tap-highlight-color:transparent}'
-    +'#sched-ov .sftb.act{color:#fff}'
-    +'#sched-ov .sftb[data-c="all"].act{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2)}'
-    +'#sched-ov .sftb[data-c="structure"].act{background:rgba(0,188,212,.2);border-color:#00bcd4;color:#00bcd4}'
-    +'#sched-ov .sftb[data-c="architecture"].act{background:rgba(255,149,0,.2);border-color:#ff9500;color:#ff9500}'
-    +'#sched-ov .sftb[data-c="electrical"].act{background:rgba(206,147,216,.2);border-color:#ce93d8;color:#ce93d8}'
-    +'#sched-ov .sftb[data-c="sanitary"].act{background:rgba(56,139,253,.2);border-color:#388bfd;color:#388bfd}'
-    // table
-    +'#sched-ov .stbl{background:rgba(10,16,28,.95);border:1px solid rgba(255,255,255,.08);border-radius:9px;overflow:hidden;margin-bottom:14px}'
-    // Desktop grid: expand|id|name|start|end|pctbar|actual|gap|edit
-    +'#sched-ov .sthd{display:grid;grid-template-columns:22px 48px 1fr 86px 86px 80px 72px 68px 44px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07)}'
-    +'#sched-ov .sr{display:grid;grid-template-columns:22px 48px 1fr 86px 86px 80px 72px 68px 44px;align-items:center;border-bottom:1px solid rgba(255,255,255,.04);min-height:38px;transition:background .1s}'
-    +'#sched-ov .sr:hover{background:rgba(255,255,255,.025)}'
-    +'#sched-ov .sr.sub{background:rgba(255,255,255,.01)}'
-    +'#sched-ov .sr:last-child{border-bottom:none}'
-    +'#sched-ov .cat-h{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.06);-webkit-tap-highlight-color:transparent}'
-    +'#sched-ov .cat-h:active{background:rgba(255,255,255,.04)}'
-    +'#sched-ov .std{padding:5px 5px;font-size:12px;overflow:hidden}'
-    +'#sched-ov .std.c{text-align:center}'
-    // expand btn
-    +'#sched-ov .exb{width:20px;height:20px;border-radius:4px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;margin:auto;-webkit-tap-highlight-color:transparent}'
-    // pct bar
-    +'#sched-ov .pc{display:flex;flex-direction:column;gap:2px;padding:3px 4px}'
-    +'#sched-ov .pb{position:relative;height:5px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden}'
-    +'#sched-ov .pbp{position:absolute;inset:0;border-radius:99px;opacity:.3}'
-    +'#sched-ov .pba{position:absolute;top:0;left:0;height:100%;border-radius:99px}'
-    +'#sched-ov .pn{display:flex;justify-content:space-between;font-size:9px;font-family:var(--m,monospace)}'
-    // gap badge
-    +'#sched-ov .gap{display:inline-flex;align-items:center;justify-content:center;padding:2px 5px;border-radius:10px;font-size:10px;font-weight:700;font-family:var(--m,monospace);width:100%}'
-    +'#sched-ov .gp{background:rgba(0,230,118,.1);color:#00e676;border:1px solid rgba(0,230,118,.25)}'
-    +'#sched-ov .gn{background:rgba(255,68,68,.1);color:#ff4444;border:1px solid rgba(255,68,68,.25)}'
-    +'#sched-ov .gz{background:rgba(255,255,255,.04);color:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.08)}'
-    // add sub
-    +'#sched-ov .asb{font-size:10px;color:rgba(255,255,255,.3);background:none;border:1px dashed rgba(255,255,255,.1);border-radius:5px;padding:3px 8px;cursor:pointer;font-family:inherit}'
-    // fb status
-    +'#sched-ov .fbd{width:6px;height:6px;border-radius:50%;display:inline-block}'
-    +'#sched-ov .fbd.ok{background:#00e676}#sched-ov .fbd.err{background:#ff4444}'
-    +'#sched-ov .fbd.ld{background:#ff9500;animation:fbp 1.5s infinite}'
-    +'@keyframes fbp{0%,100%{opacity:1}50%{opacity:.4}}'
-    // modal
-    +'#sched-ov .smb{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;padding:0}'
-    +'#sched-ov .smd{background:linear-gradient(180deg,#0d1a2e,#0a1020);border:1px solid rgba(56,139,253,.3);border-radius:16px 16px 0 0;padding:20px 18px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}'
-    +'#sched-ov .smt{font-size:14px;font-weight:800;margin-bottom:12px;color:#e8f0fe}'
-    +'#sched-ov .sf{margin-bottom:9px}'
-    +'#sched-ov .sfl{font-size:9px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:4px}'
-    +'#sched-ov .sfi{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:10px 11px;color:#e8f0fe;font-size:14px;font-family:inherit;outline:none;-webkit-user-select:text;user-select:text}'
-    +'#sched-ov .sfi:focus{border-color:rgba(56,139,253,.6);background:rgba(56,139,253,.07)}'
-    +'#sched-ov .sfg{display:grid;grid-template-columns:1fr 1fr;gap:8px}'
-    // ── iPad (768-1024px) ──
-    +'@media(max-width:1024px) and (min-width:601px){'
-    +'#sched-ov .sthd,#sched-ov .sr{grid-template-columns:22px 44px 1fr 80px 80px 76px 66px 0 42px}'
-    // ซ่อน gap col
-    +'#sched-ov .sth:nth-child(8),#sched-ov .std:nth-child(8){display:none}}'
-    // ── Mobile (≤600px) ──
-    +'@media(max-width:600px){'
-    +'#sched-ov .sh{padding:8px 10px}'
-    +'#sched-ov .sh-l .ttl{font-size:13px}'
-    +'#sched-ov .sh-l .sub-ttl{display:none}' // ซ่อน subtitle
-    +'#sched-ov .sw{padding:10px}'
-    // stats: 3 คอลัมน์
-    +'#sched-ov .sst{grid-template-columns:repeat(3,1fr);gap:5px}'
-    +'#sched-ov .ssv{font-size:15px}'
-    +'#sched-ov .ssl{font-size:8px}'
-    // ตาราง: expand|name|pctbar|actual|edit (ซ่อน id, start, end, gap)
-    +'#sched-ov .sthd,#sched-ov .sr{grid-template-columns:22px 0 1fr 72px 60px 0 62px 0 40px}'
-    +'#sched-ov .sth:nth-child(2),#sched-ov .std:nth-child(2),'
-    +'#sched-ov .sth:nth-child(4),#sched-ov .std:nth-child(4),'
-    +'#sched-ov .sth:nth-child(5),#sched-ov .std:nth-child(5),'
-    +'#sched-ov .sth:nth-child(8),#sched-ov .std:nth-child(8){display:none}'
-    // ชื่อ S item เต็มกว่า
-    +'#sched-ov .std{padding:4px 4px;font-size:11px}'
-    // cat header ขนาดเล็กลง
-    +'#sched-ov .cat-h{padding:6px 10px}'
-    // modal full bottom sheet
-    +'#sched-ov .smd{border-radius:14px 14px 0 0;padding:16px 14px}'
-    +'#sched-ov .sfi{font-size:16px}' // iOS ป้องกัน zoom
-    +'}'
-    +'</style>';
+  var s='<style>';
+  s+='#sched-ov *{box-sizing:border-box;margin:0;padding:0}';
+  s+='#sched-ov{font-family:var(--f,"Sarabun",sans-serif);font-size:14px;color:#e8f0fe}';
+  s+='#sched-ov .sh{position:sticky;top:0;z-index:10;background:rgba(5,8,15,.98);border-bottom:1px solid rgba(255,255,255,.07);padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;backdrop-filter:blur(16px)}';
+  s+='#sched-ov .sh::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00bcd4,#388bfd,transparent)}';
+  s+='#sched-ov .sh-l{display:flex;align-items:center;gap:8px;flex:1;min-width:160px}';
+  s+='#sched-ov .sh-r{display:flex;gap:5px;flex-wrap:wrap;align-items:center}';
+  s+='#sched-ov .sb{padding:7px 12px;border:none;border-radius:7px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;transition:all .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}';
+  s+='#sched-ov .sb:active{transform:scale(.95)}';
+  s+='#sched-ov .sb-red{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.4)}';
+  s+='#sched-ov .sb-line{background:rgba(0,185,0,.2);color:#00c300;border:1px solid rgba(0,185,0,.45)}';
+  s+='#sched-ov .svt{display:flex;gap:2px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:2px}';
+  s+='#sched-ov .svtb{padding:5px 11px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,.4);font-family:inherit;-webkit-tap-highlight-color:transparent;touch-action:manipulation}';
+  s+='#sched-ov .svtb.act{background:rgba(56,139,253,.3);color:#388bfd}';
+  s+='#sched-ov .sw{max-width:1200px;margin:0 auto;padding:14px}';
+  s+='#sched-ov .sst{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:14px}';
+  s+='#sched-ov .ssc{background:rgba(10,16,28,.95);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:9px 10px;position:relative;overflow:hidden;min-width:0}';
+  s+='#sched-ov .ssc::after{content:"";position:absolute;bottom:0;left:0;right:0;height:2px}';
+  s+='#sched-ov .ssc.G::after{background:#00e676}#sched-ov .ssc.B::after{background:#388bfd}#sched-ov .ssc.O::after{background:#ff9500}#sched-ov .ssc.R::after{background:#ff4444}#sched-ov .ssc.C::after{background:#00bcd4}';
+  s+='#sched-ov .ssl{font-size:9px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.4px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}';
+  s+='#sched-ov .ssv{font-size:16px;font-weight:800;font-family:var(--m,"IBM Plex Mono",monospace);line-height:1}';
+  s+='#sched-ov .ssc.G .ssv{color:#00e676}#sched-ov .ssc.B .ssv{color:#388bfd}#sched-ov .ssc.O .ssv{color:#ff9500}#sched-ov .ssc.R .ssv{color:#ff4444}#sched-ov .ssc.C .ssv{color:#00bcd4}';
+  s+='#sched-ov .sft{display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-bottom:10px;padding-bottom:2px}';
+  s+='#sched-ov .sft::-webkit-scrollbar{display:none}';
+  s+='#sched-ov .sftb{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.1);background:transparent;color:rgba(255,255,255,.5);font-family:inherit;white-space:nowrap;flex-shrink:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}';
+  s+='#sched-ov .sftb.act{color:#fff}';
+  s+='#sched-ov .sftb[data-c="all"].act{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25)}';
+  s+='#sched-ov .sftb[data-c="structure"].act{background:rgba(0,188,212,.2);border-color:#00bcd4;color:#00bcd4}';
+  s+='#sched-ov .sftb[data-c="architecture"].act{background:rgba(255,149,0,.2);border-color:#ff9500;color:#ff9500}';
+  s+='#sched-ov .sftb[data-c="electrical"].act{background:rgba(206,147,216,.2);border-color:#ce93d8;color:#ce93d8}';
+  s+='#sched-ov .sftb[data-c="sanitary"].act{background:rgba(56,139,253,.2);border-color:#388bfd;color:#388bfd}';
+  s+='#sched-ov .stbl{background:rgba(10,16,28,.95);border:1px solid rgba(255,255,255,.08);border-radius:9px;overflow:hidden;margin-bottom:14px}';
+  s+='#sched-ov .cat-h{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.06);-webkit-tap-highlight-color:transparent;user-select:none}';
+  s+='#sched-ov .cat-h:active{background:rgba(255,255,255,.04)}';
+  // desktop grid: expand|id|name|start|end|pct-bar|pct%|gap|edit
+  s+='#sched-ov .sthd{display:grid;grid-template-columns:26px 46px 1fr 86px 86px 84px 70px 66px 44px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07)}';
+  s+='#sched-ov .sr{display:grid;grid-template-columns:26px 46px 1fr 86px 86px 84px 70px 66px 44px;align-items:center;border-bottom:1px solid rgba(255,255,255,.04);min-height:40px}';
+  s+='#sched-ov .sr:last-child{border-bottom:none}';
+  s+='#sched-ov .sr:hover{background:rgba(255,255,255,.025)}';
+  s+='#sched-ov .sr.sub{background:rgba(255,255,255,.01)}';
+  s+='#sched-ov .sth{padding:6px 6px;font-size:9px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.5px}';
+  s+='#sched-ov .sth.c{text-align:center}';
+  s+='#sched-ov .std{padding:5px 6px;font-size:12px;overflow:hidden}';
+  s+='#sched-ov .std.c{text-align:center}';
+  s+='#sched-ov .exb{width:22px;height:22px;border-radius:5px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;margin:auto;-webkit-tap-highlight-color:transparent;touch-action:manipulation}';
+  s+='#sched-ov .pc{display:flex;flex-direction:column;gap:2px;padding:3px 4px}';
+  s+='#sched-ov .pb{position:relative;height:5px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden}';
+  s+='#sched-ov .pbp{position:absolute;inset:0;border-radius:99px;opacity:.3}';
+  s+='#sched-ov .pba{position:absolute;top:0;left:0;height:100%;border-radius:99px}';
+  s+='#sched-ov .pn{display:flex;justify-content:space-between;font-size:9px;font-family:var(--m,monospace)}';
+  s+='#sched-ov .gap{display:inline-flex;align-items:center;justify-content:center;padding:2px 5px;border-radius:10px;font-size:10px;font-weight:700;font-family:var(--m,monospace);width:100%}';
+  s+='#sched-ov .gp{background:rgba(0,230,118,.1);color:#00e676;border:1px solid rgba(0,230,118,.25)}';
+  s+='#sched-ov .gn{background:rgba(255,68,68,.1);color:#ff4444;border:1px solid rgba(255,68,68,.25)}';
+  s+='#sched-ov .gz{background:rgba(255,255,255,.04);color:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.08)}';
+  s+='#sched-ov .asb{font-size:10px;color:rgba(255,255,255,.3);background:none;border:1px dashed rgba(255,255,255,.12);border-radius:5px;padding:3px 8px;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent}';
+  s+='#sched-ov .fbd{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}';
+  s+='#sched-ov .fbd.ok{background:#00e676}#sched-ov .fbd.err{background:#ff4444}';
+  s+='#sched-ov .fbd.ld{background:#ff9500;animation:sfbp 1.5s infinite}';
+  s+='@keyframes sfbp{0%,100%{opacity:1}50%{opacity:.4}}';
+  s+='#sched-ov .smb{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center}';
+  s+='#sched-ov .smd{background:#0d1a2e;border:1px solid rgba(56,139,253,.3);border-radius:16px 16px 0 0;padding:20px 18px 32px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto}';
+  s+='#sched-ov .smt{font-size:14px;font-weight:800;margin-bottom:12px;color:#e8f0fe}';
+  s+='#sched-ov .sf{margin-bottom:10px}';
+  s+='#sched-ov .sfl{font-size:9px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:4px}';
+  s+='#sched-ov .sfi{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:11px 12px;color:#e8f0fe;font-size:16px;font-family:inherit;outline:none;-webkit-user-select:text;user-select:text}';
+  s+='#sched-ov .sfi:focus{border-color:rgba(56,139,253,.6);background:rgba(56,139,253,.07)}';
+  s+='#sched-ov .sfg{display:grid;grid-template-columns:1fr 1fr;gap:8px}';
+  // iPad
+  s+='@media(max-width:1024px) and (min-width:601px){';
+  s+='#sched-ov .sthd,#sched-ov .sr{grid-template-columns:26px 42px 1fr 78px 78px 78px 64px 0 40px}';
+  s+='#sched-ov .sth:nth-child(8),#sched-ov .std:nth-child(8){display:none}';
+  s+='}';
+  // Mobile portrait
+  s+='@media(max-width:600px){';
+  s+='#sched-ov .sh{padding:8px 10px;gap:6px}';
+  s+='#sched-ov .sub-ttl{display:none}';
+  s+='#sched-ov .sw{padding:8px 10px}';
+  s+='#sched-ov .sst{grid-template-columns:repeat(3,1fr);gap:5px}';
+  s+='#sched-ov .ssv{font-size:14px}#sched-ov .ssl{font-size:8px}';
+  s+='#sched-ov .sthd,#sched-ov .sr{grid-template-columns:26px 1fr 68px 56px 36px}';
+  s+='#sched-ov .sth:nth-child(2),#sched-ov .std:nth-child(2){display:none}';
+  s+='#sched-ov .sth:nth-child(4),#sched-ov .std:nth-child(4){display:none}';
+  s+='#sched-ov .sth:nth-child(5),#sched-ov .std:nth-child(5){display:none}';
+  s+='#sched-ov .sth:nth-child(8),#sched-ov .std:nth-child(8){display:none}';
+  s+='#sched-ov .std{padding:4px 4px;font-size:11px}';
+  s+='#sched-ov .cat-h{padding:7px 10px}';
+  s+='#sched-ov .smd{padding:16px 14px 28px}';
+  s+='}';
+  s+='</style>';
+  return s;
 }
 
 function sHTML(){
-  return sCSS()
-    // HEADER
-    +'<div class="sh">'
-    +'<div class="sh-l">'
-    +'<div style="width:30px;height:30px;background:rgba(0,188,212,.15);border:1px solid rgba(0,188,212,.3);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">📅</div>'
-    +'<div><div class="ttl" style="font-size:13px;font-weight:800;color:#e8f0fe">Construction Schedule</div>'
-    +'<div class="sub-ttl" style="font-size:9px;color:rgba(255,255,255,.3);font-family:var(--m,monospace)">Master vs Actual · Category › S item › Sub-task</div></div>'
-    +'</div>'
-    +'<div class="sh-r">'
-    +'<span style="font-size:10px;font-family:var(--m,monospace);color:rgba(255,255,255,.3);display:flex;align-items:center;gap:4px"><span class="fbd ld" id="s-fbd"></span><span id="s-fbm">กำลังโหลด...</span></span>'
-    +'<div class="svt">'
-    +'<button class="svtb act" onclick="sSwV(\'table\',this)">📋</button>'
-    +'<button class="svtb" onclick="sSwV(\'gantt\',this)">📊</button>'
-    +'</div>'
-    +'<button class="sb sb-line" onclick="sLine()">💚 LINE</button>'
-    +'<button class="sb sb-red" onclick="closeSchedulePage()">✕</button>'
-    +'</div></div>'
-    // BODY
-    +'<div class="sw">'
-    +'<div class="sst" id="s-st"></div>'
-    +'<div class="sft">'
-    +'<button class="sftb act" data-c="all" onclick="sFlt(\'all\',this)">🎯 ทั้งหมด</button>'
-    +'<button class="sftb" data-c="structure" onclick="sFlt(\'structure\',this)">🏗️ โครงสร้าง</button>'
-    +'<button class="sftb" data-c="architecture" onclick="sFlt(\'architecture\',this)">🏛️ สถาปัตย์</button>'
-    +'<button class="sftb" data-c="electrical" onclick="sFlt(\'electrical\',this)">⚡ ไฟฟ้า</button>'
-    +'<button class="sftb" data-c="sanitary" onclick="sFlt(\'sanitary\',this)">💧 สุขาภิบาล</button>'
-    +'</div>'
-    +'<div style="display:flex;gap:8px;flex-wrap:wrap;font-size:10px;color:rgba(255,255,255,.3);margin-bottom:10px;align-items:center">'
-    +'<span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:4px;border-radius:2px;background:#388bfd;opacity:.4;display:inline-block"></span>% แผน</span>'
-    +'<span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:4px;border-radius:2px;background:#00e676;display:inline-block"></span>% จริง</span>'
-    +'<span style="color:rgba(255,255,255,.12)">▶ ขยาย Sub-task</span>'
-    +'</div>'
-    +'<div id="s-vt"><div class="stbl" id="s-tbl"></div></div>'
-    +'<div id="s-vg" style="display:none"><div class="stbl"><div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><div id="s-gnt" style="min-width:700px"></div></div></div></div>'
-    +'</div>'
-    // MODAL — bottom sheet on mobile
-    +'<div id="s-em" class="smb" style="display:none" onclick="if(event.target===this)sClose()">'
-    +'<div class="smd">'
-    +'<div style="width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:0 auto 14px"></div>'
-    +'<div class="smt" id="s-emt">✏️ แก้ไข</div>'
-    +'<input type="hidden" id="s-eid"><input type="hidden" id="s-epar">'
-    +'<div class="sf"><div class="sfl">ชื่องาน</div>'
-    +'<input type="text" id="s-enm" class="sfi" autocomplete="off" spellcheck="false" autocorrect="off"></div>'
-    +'<div class="sfg">'
-    +'<div class="sf"><div class="sfl">📌 วันเริ่ม (แผน)</div><input type="date" id="s-est" class="sfi" style="color-scheme:dark"></div>'
-    +'<div class="sf"><div class="sfl">🏁 วันเสร็จ (แผน)</div><input type="date" id="s-een" class="sfi" style="color-scheme:dark"></div>'
-    +'<div class="sf"><div class="sfl">% แผน</div><input type="number" id="s-epp" class="sfi" min="0" max="100" inputmode="numeric" style="width:100%"></div>'
-    +'<div class="sf"><div class="sfl">% จริง (Dashboard)</div>'
-    +'<input type="number" id="s-eap" class="sfi" min="0" max="100" style="width:100%;background:rgba(0,188,212,.05);border-color:rgba(0,188,212,.2)" readonly></div>'
-    +'</div>'
-    +'<div style="display:flex;gap:8px;margin-top:12px">'
-    +'<button style="flex:1;padding:12px;background:rgba(0,230,118,.15);color:#00e676;border:1px solid rgba(0,230,118,.4);border-radius:9px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent" onclick="sSave()">✅ บันทึก</button>'
-    +'<button style="padding:12px 16px;background:rgba(255,68,68,.12);color:#ff4444;border:1px solid rgba(255,68,68,.3);border-radius:9px;font-family:inherit;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent" onclick="sClose()">ยกเลิก</button>'
-    +'</div></div></div>';
+  var h=sCSS();
+  h+='<div class="sh">';
+  h+='<div class="sh-l">';
+  h+='<div style="width:30px;height:30px;background:rgba(0,188,212,.15);border:1px solid rgba(0,188,212,.3);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">📅</div>';
+  h+='<div><div style="font-size:13px;font-weight:800;color:#e8f0fe;white-space:nowrap">Construction Schedule</div>';
+  h+='<div class="sub-ttl" style="font-size:9px;color:rgba(255,255,255,.3)">Master vs Actual</div></div>';
+  h+='</div>';
+  h+='<div class="sh-r">';
+  h+='<span style="font-size:10px;color:rgba(255,255,255,.3);display:flex;align-items:center;gap:4px"><span class="fbd ld" id="s-fbd"></span><span id="s-fbm">โหลด...</span></span>';
+  h+='<div class="svt">';
+  h+='<button class="svtb act" onclick="window.sSwV(\'table\',this)">📋 ตาราง</button>';
+  h+='<button class="svtb" onclick="window.sSwV(\'gantt\',this)">📊 Gantt</button>';
+  h+='</div>';
+  h+='<button class="sb sb-line" onclick="window.sLine()">💚 LINE</button>';
+  h+='<button class="sb sb-red" onclick="window.closeSchedulePage()">✕ ปิด</button>';
+  h+='</div></div>';
+  h+='<div class="sw">';
+  h+='<div class="sst" id="s-st"></div>';
+  h+='<div class="sft">';
+  h+='<button class="sftb act" data-c="all" onclick="window.sFlt(\'all\',this)">🎯 ทั้งหมด</button>';
+  h+='<button class="sftb" data-c="structure" onclick="window.sFlt(\'structure\',this)">🏗️ โครงสร้าง</button>';
+  h+='<button class="sftb" data-c="architecture" onclick="window.sFlt(\'architecture\',this)">🏛️ สถาปัตย์</button>';
+  h+='<button class="sftb" data-c="electrical" onclick="window.sFlt(\'electrical\',this)">⚡ ไฟฟ้า</button>';
+  h+='<button class="sftb" data-c="sanitary" onclick="window.sFlt(\'sanitary\',this)">💧 สุขาภิบาล</button>';
+  h+='</div>';
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap;font-size:10px;color:rgba(255,255,255,.3);margin-bottom:10px;align-items:center">';
+  h+='<span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:4px;border-radius:2px;background:#388bfd;opacity:.4;display:inline-block"></span>% แผน</span>';
+  h+='<span style="display:flex;align-items:center;gap:3px"><span style="width:14px;height:4px;border-radius:2px;background:#00e676;display:inline-block"></span>% จริง</span>';
+  h+='<span style="color:rgba(255,255,255,.15)">▶ ขยาย Sub-task</span>';
+  h+='</div>';
+  h+='<div id="s-vt"><div class="stbl" id="s-tbl"></div></div>';
+  h+='<div id="s-vg" style="display:none"><div class="stbl"><div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><div id="s-gnt" style="min-width:700px"></div></div></div></div>';
+  h+='</div>';
+  h+='<div id="s-em" class="smb" style="display:none" onclick="if(event.target===this)window.sClose()">';
+  h+='<div class="smd">';
+  h+='<div style="width:40px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:0 auto 14px"></div>';
+  h+='<div class="smt" id="s-emt">✏️ แก้ไข</div>';
+  h+='<input type="hidden" id="s-eid"><input type="hidden" id="s-epar">';
+  h+='<div class="sf"><div class="sfl">ชื่องาน</div><input type="text" id="s-enm" class="sfi" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="off"></div>';
+  h+='<div class="sfg">';
+  h+='<div class="sf"><div class="sfl">📌 วันเริ่ม (แผน)</div><input type="date" id="s-est" class="sfi" style="color-scheme:dark;font-size:14px"></div>';
+  h+='<div class="sf"><div class="sfl">🏁 วันเสร็จ (แผน)</div><input type="date" id="s-een" class="sfi" style="color-scheme:dark;font-size:14px"></div>';
+  h+='<div class="sf"><div class="sfl">% แผน</div><input type="number" id="s-epp" class="sfi" min="0" max="100" inputmode="numeric" style="width:100%"></div>';
+  h+='<div class="sf"><div class="sfl">% จริง (Dashboard)</div><input type="number" id="s-eap" class="sfi" min="0" max="100" style="width:100%;background:rgba(0,188,212,.05);border-color:rgba(0,188,212,.2)" readonly></div>';
+  h+='</div>';
+  h+='<div style="display:flex;gap:8px;margin-top:14px">';
+  h+='<button style="flex:1;padding:14px;background:rgba(0,230,118,.18);color:#00e676;border:1px solid rgba(0,230,118,.45);border-radius:10px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation" onclick="window.sSave()">✅ บันทึก</button>';
+  h+='<button style="padding:14px 18px;background:rgba(255,68,68,.12);color:#ff4444;border:1px solid rgba(255,68,68,.3);border-radius:10px;font-family:inherit;font-size:15px;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation" onclick="window.sClose()">ยกเลิก</button>';
+  h+='</div></div></div>';
+  return h;
 }
 
-// ── Render ─────────────────────────────────────────────────────
-function sRen(){sStat();if(_sCV==='table')sTbl();else sGnt();}
-
+// ════ Stats ════
 function sStat(){
-  // นับ stats ทั้งหมดจาก S items จริง ๆ (รวม custom items)
   var tot=0,done=0,late=0,sp=0;
   S_CATS.forEach(function(cat){
     if(_sCC!=='all'&&_sCC!==cat)return;
@@ -6276,60 +6259,34 @@ function sStat(){
       var d=sD(item.id),ap=sActual(item.id),pp=parseFloat(d.planPct)||0;
       tot++;sp+=pp;
       if(ap>=100)done++;
-      // นับว่าล่าช้าเฉพาะงานที่ถึงวันเริ่มแล้วเท่านั้น
-      var _today=new Date();_today.setHours(0,0,0,0);
+      var _td=new Date();_td.setHours(0,0,0,0);
       var _ps=d.planStart?new Date(d.planStart+'T00:00:00'):null;
-      var _started=!_ps||_ps<=_today;
-      if(_started&&ap<100&&pp>0&&ap<pp)late++;
+      if((!_ps||_ps<=_td)&&ap<100&&pp>0&&ap<pp)late++;
     });
   });
   var avgP=tot?sp/tot:0;
-
-  // % จริงรวม = ใช้ calcAllOverall() ของ Dashboard (Weighted) เพื่อให้ตรงกัน
-  // ถ้า filter เฉพาะ cat ใช้ calcCatOverall(cat) แทน
-  var avgA=0;
-  if(_sCC==='all'){
-    avgA=typeof calcAllOverall==='function'?calcAllOverall():0;
-  }else{
-    avgA=typeof calcCatOverall==='function'?calcCatOverall(_sCC):0;
-  }
+  var avgA=_sCC==='all'?(typeof calcAllOverall==='function'?calcAllOverall():0):(typeof calcCatOverall==='function'?calcCatOverall(_sCC):0);
   var gap=avgA-avgP;
-
   var el=document.getElementById('s-st');if(!el)return;
   el.innerHTML=[
     {cls:'C',l:'งานทั้งหมด',v:tot,s:'รายการ'},
     {cls:'G',l:'เสร็จแล้ว',v:done,s:'รายการ'},
     {cls:'R',l:'ล่าช้า',v:late,s:'รายการ'},
     {cls:'B',l:'% แผนเฉลี่ย',v:avgP.toFixed(1)+'%',s:'Master'},
-    {cls:'G',l:'% จริง (Weighted)',v:avgA.toFixed(1)+'%',s:'= Dashboard'},
+    {cls:'G',l:'% จริง',v:avgA.toFixed(1)+'%',s:'= Dashboard'},
     {cls:gap>=0?'G':'R',l:'ส่วนต่าง',v:(gap>=0?'+':'')+gap.toFixed(1)+'%',s:gap>=0?'ตามแผน':'ล่าช้า'},
   ].map(function(x){
-    return '<div class="ssc '+x.cls+'"><div class="ssl">'+x.l+'</div><div class="ssv">'+x.v+'</div>'
-      +'<div style="font-size:8px;color:rgba(255,255,255,.25);margin-top:2px">'+x.s+'</div></div>';
+    return '<div class="ssc '+x.cls+'"><div class="ssl">'+x.l+'</div><div class="ssv">'+x.v+'</div><div style="font-size:8px;color:rgba(255,255,255,.25);margin-top:2px">'+x.s+'</div></div>';
   }).join('');
 }
 
-function sFmtD(s){
-  if(!s)return'—';
-  try{return new Date(s+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short'});}catch(e){return s;}
-}
+function sFmtD(s){if(!s)return'—';try{return new Date(s+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short'});}catch(e){return s;}}
 function sDL(end){if(!end)return null;return Math.ceil((new Date(end+'T00:00:00')-new Date())/86400000);}
 function sSt(ap,pp,planStart){
-  // ตรวจว่าถึงวันเริ่มงานแล้วหรือยัง
-  var today=new Date();today.setHours(0,0,0,0);
-  var started=true; // default: ถือว่าถึงกำหนดแล้วถ้าไม่ได้กำหนดวัน
-  var notYetStarted=false;
-  if(planStart){
-    var ps=new Date(planStart+'T00:00:00');
-    if(ps>today) notYetStarted=true; // วันเริ่มยังมาไม่ถึง
-  }
+  var td=new Date();td.setHours(0,0,0,0);
+  var notYet=planStart&&new Date(planStart+'T00:00:00')>td;
   if(ap>=100)return{t:'✅ เสร็จ',c:'#ffd600'};
-  // ยังไม่ถึงวันเริ่ม
-  if(notYetStarted){
-    if(ap>0) return{t:'🚀 เริ่มเร็วกว่าแผน',c:'#00e5ff'}; // มีการทำงานแล้วทั้งที่ยังไม่ถึงวัน
-    return{t:'⏰ ยังไม่ถึงกำหนด',c:'rgba(255,255,255,.3)'}; // ยังไม่ถึงและยังไม่ได้ทำ
-  }
-  // ถึงวันเริ่มงานแล้ว (หรือไม่ได้กำหนดวัน)
+  if(notYet){return ap>0?{t:'🚀 เริ่มเร็วกว่าแผน',c:'#00e5ff'}:{t:'⏰ ยังไม่ถึงกำหนด',c:'rgba(255,255,255,.3)'};}
   if(ap===0&&pp===0)return{t:'⬜ ยังไม่เริ่ม',c:'rgba(255,255,255,.25)'};
   var g=ap-pp;
   if(g<-15)return{t:'🔴 ล่าช้ามาก',c:'#ff4444'};
@@ -6337,73 +6294,79 @@ function sSt(ap,pp,planStart){
   return{t:'🟢 ตามแผน',c:'#00e676'};
 }
 
+// ════ Table ════
 function sTbl(){
   var el=document.getElementById('s-tbl');if(!el)return;
-  var h='<div class="sthd">'
-    +'<div class="sth c"></div><div class="sth">ID</div><div class="sth">ชื่องาน / Sub-task</div>'
-    +'<div class="sth c">เริ่ม</div><div class="sth c">เสร็จ</div>'
-    +'<div class="sth c">% แผน/จริง</div><div class="sth c">% จริง</div>'
-    +'<div class="sth c">ส่วนต่าง</div><div class="sth c">แก้ไข</div>'
-    +'</div>';
+  var h='<div class="sthd">';
+  h+='<div class="sth c"></div><div class="sth">ID</div><div class="sth">ชื่องาน / Sub-task</div>';
+  h+='<div class="sth c">เริ่ม</div><div class="sth c">เสร็จ</div>';
+  h+='<div class="sth c">% แผน/จริง</div><div class="sth c">% จริง</div>';
+  h+='<div class="sth c">ส่วนต่าง</div><div class="sth c">แก้ไข</div>';
+  h+='</div>';
   S_CATS.forEach(function(cat){
     if(_sCC!=='all'&&_sCC!==cat)return;
     var m=S_CAT[cat],items=sItems(cat);if(!items.length)return;
     var cp=0;
     items.forEach(function(i){cp+=parseFloat(sD(i.id).planPct)||0;});
     cp=items.length?cp/items.length:0;
-    // % จริงต่อหมวด = calcCatOverall() ของ Dashboard เพื่อให้ตรงกัน
     var ca=typeof calcCatOverall==='function'?calcCatOverall(cat):0;
     var cg=ca-cp;
-    h+='<div class="cat-h" style="border-left:4px solid '+m.col+'" onclick="sTCat(\''+cat+'\')">'
-      +'<div style="display:flex;align-items:center;gap:6px">'
-      +'<div style="width:9px;height:9px;border-radius:2px;background:'+m.col+'"></div>'
-      +'<span style="font-size:12px;font-weight:800;color:'+m.col+'">'+m.icon+' '+m.name+'</span>'
-      +'<span style="font-size:9px;color:rgba(255,255,255,.3);font-family:var(--m,monospace)">('+items.length+')</span>'
-      +'</div>'
-      +'<div style="display:flex;gap:10px;font-size:10px;font-family:var(--m,monospace);align-items:center">'
-      +'<span style="color:'+m.col+';opacity:.6">แผน '+cp.toFixed(1)+'%</span>'
-      +'<span style="color:'+m.col+'">จริง '+ca.toFixed(1)+'%</span>'
-      +'<span style="color:'+(cg>=0?'#00e676':'#ff4444')+';font-weight:700">'+(cg>=0?'+':'')+cg.toFixed(1)+'%</span>'
-      +'<span style="color:rgba(255,255,255,.3)" id="sa-'+cat+'">▲</span>'
-      +'</div></div>';
-    h+='<div id="sr-'+cat+'">';
+    h+='<div class="cat-h" style="border-left:4px solid '+m.col+'" onclick="window.sTCat(\''+cat+'\')">';
+    h+='<div style="display:flex;align-items:center;gap:6px">';
+    h+='<div style="width:9px;height:9px;border-radius:2px;background:'+m.col+'"></div>';
+    h+='<span style="font-size:12px;font-weight:800;color:'+m.col+'">'+m.icon+' '+m.name+'</span>';
+    h+='<span style="font-size:9px;color:rgba(255,255,255,.3);font-family:var(--m,monospace)">('+items.length+')</span>';
+    h+='</div>';
+    h+='<div style="display:flex;gap:8px;font-size:10px;font-family:var(--m,monospace);align-items:center;flex-wrap:wrap">';
+    h+='<span style="color:'+m.col+';opacity:.6">แผน '+cp.toFixed(1)+'%</span>';
+    h+='<span style="color:'+m.col+'">จริง '+ca.toFixed(1)+'%</span>';
+    h+='<span style="color:'+(cg>=0?'#00e676':'#ff4444');
+    h+=';font-weight:700">'+(cg>=0?'+':'')+cg.toFixed(1)+'%</span>';
+    h+='<span style="color:rgba(255,255,255,.3)" id="s-arr-'+cat+'">▲</span>';
+    h+='</div></div>';
+    h+='<div id="s-rows-'+cat+'">';
     items.forEach(function(item){
       var d=sD(item.id),ap=sActual(item.id),pp=parseFloat(d.planPct)||0,gap=ap-pp;
       var col=m.col,st=sSt(ap,pp,d.planStart);
       var dl=d.planEnd?sDL(d.planEnd):null;
       var dlc=dl===null?'rgba(255,255,255,.3)':dl<0?'#ff4444':dl<=7?'#ff9500':'rgba(255,255,255,.5)';
       var hasSubs=d.subs&&d.subs.length>0,isExp=_sExp[item.id];
-      h+='<div class="sr">'
-        +'<div class="std c"><button class="exb" onclick="sTExp(\''+item.id+'\')">'+(hasSubs?(isExp?'▼':'▶'):'＋')+'</button></div>'
-        +'<div class="std"><span style="font-size:10px;font-family:var(--m,monospace);color:'+col+';font-weight:700">'+item.label+'</span></div>'
-        +'<div class="std" style="font-weight:600;color:#e8f0fe">'+sName(item)+'</div>'
-        +'<div class="std c" style="font-size:10px;font-family:var(--m,monospace);color:rgba(255,255,255,.35)">'+(d.planStart?sFmtD(d.planStart):'—')+'</div>'
-        +'<div class="std c" style="font-size:10px;font-family:var(--m,monospace);color:'+dlc+'">'+(d.planEnd?sFmtD(d.planEnd)+(dl!==null?'<br><span style="font-size:8px">('+dl+'v)</span>':''):'—')+'</div>'
-        +'<div class="std pc"><div class="pb"><div class="pbp" style="width:'+Math.min(100,pp)+'%;background:'+col+'"></div><div class="pba" style="width:'+Math.min(100,ap)+'%;background:'+(ap>=pp?'#00e676':'#ff9500')+'"></div></div><div class="pn"><span style="color:rgba(255,255,255,.3)">'+pp.toFixed(0)+'%</span><span style="color:'+(ap>=pp?'#00e676':'#ff9500')+'">'+ap.toFixed(0)+'%</span></div></div>'
-        +'<div class="std c"><span style="font-size:13px;font-weight:800;font-family:var(--m,monospace);color:'+st.c+'">'+ap.toFixed(0)+'%</span><div style="font-size:9px;color:'+st.c+'">'+st.t+'</div></div>'
-        +'<div class="std c"><div class="gap '+(gap>0?'gp':gap<0?'gn':'gz')+'">'+(gap>0?'+':'')+gap.toFixed(1)+'%</div></div>'
-        +'<div class="std c"><button onclick="sOEdt(\''+item.id+'\')" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);border-radius:5px;padding:3px 6px;cursor:pointer;font-size:11px">✏️</button></div>'
-        +'</div>';
+      h+='<div class="sr">';
+      h+='<div class="std c"><button class="exb" onclick="window.sTExp(\''+item.id+'\')">'+(hasSubs?(isExp?'▼':'▶'):'＋')+'</button></div>';
+      h+='<div class="std"><span style="font-size:10px;font-family:var(--m,monospace);color:'+col+';font-weight:700">'+item.label+'</span></div>';
+      h+='<div class="std" style="font-weight:600;color:#e8f0fe">'+sName(item)+'</div>';
+      h+='<div class="std c" style="font-size:10px;font-family:var(--m,monospace);color:rgba(255,255,255,.35)">'+(d.planStart?sFmtD(d.planStart):'—')+'</div>';
+      h+='<div class="std c" style="font-size:10px;font-family:var(--m,monospace);color:'+dlc+'">'+(d.planEnd?sFmtD(d.planEnd)+(dl!==null?'<br><span style="font-size:8px">('+dl+'v)</span>':''):'—')+'</div>';
+      h+='<div class="std pc"><div class="pb"><div class="pbp" style="width:'+Math.min(100,pp)+'%;background:'+col+'"></div>';
+      h+='<div class="pba" style="width:'+Math.min(100,ap)+'%;background:'+(ap>=pp?'#00e676':'#ff9500')+'"></div></div>';
+      h+='<div class="pn"><span style="color:rgba(255,255,255,.3)">'+pp.toFixed(0)+'%</span><span style="color:'+(ap>=pp?'#00e676':'#ff9500')+'">'+ap.toFixed(0)+'%</span></div></div>';
+      h+='<div class="std c"><span style="font-size:13px;font-weight:800;font-family:var(--m,monospace);color:'+st.c+'">'+ap.toFixed(0)+'%</span>';
+      h+='<div style="font-size:9px;color:'+st.c+'">'+st.t+'</div></div>';
+      h+='<div class="std c"><div class="gap '+(gap>0?'gp':gap<0?'gn':'gz')+'">'+(gap>0?'+':'')+gap.toFixed(1)+'%</div></div>';
+      h+='<div class="std c"><button onclick="window.sOEdt(\''+item.id+'\')" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);border-radius:5px;padding:4px 7px;cursor:pointer;font-size:11px;-webkit-tap-highlight-color:transparent;touch-action:manipulation">✏️</button></div>';
+      h+='</div>';
       if(isExp){
         (d.subs||[]).forEach(function(sub,si){
           var sap=parseFloat(sub.actualPct||0),spp=parseFloat(sub.planPct||0),sg=sap-spp,sst=sSt(sap,spp,sub.planStart);
-          h+='<div class="sr sub">'
-            +'<div class="std c"></div>'
-            +'<div class="std c"><span style="font-size:8px;color:rgba(255,255,255,.2);font-family:var(--m,monospace)">sub</span></div>'
-            +'<div class="std"><div style="padding-left:12px;display:flex;align-items:center;gap:4px"><div style="width:4px;height:4px;border-radius:50%;background:'+col+';opacity:.5;flex-shrink:0"></div><span style="color:rgba(255,255,255,.6);font-size:11px">'+sub.name+'</span></div></div>'
-            +'<div class="std c" style="font-size:10px;font-family:var(--m,monospace);color:rgba(255,255,255,.3)">'+(sub.planStart?sFmtD(sub.planStart):'—')+'</div>'
-            +'<div class="std c" style="font-size:10px;font-family:var(--m,monospace);color:rgba(255,255,255,.4)">'+(sub.planEnd?sFmtD(sub.planEnd):'—')+'</div>'
-            +'<div class="std pc"><div class="pb"><div class="pbp" style="width:'+Math.min(100,spp)+'%;background:'+col+'"></div><div class="pba" style="width:'+Math.min(100,sap)+'%;background:'+(sap>=spp?'#00e676':'#ff9500')+'"></div></div><div class="pn"><span style="color:rgba(255,255,255,.25)">'+spp.toFixed(0)+'%</span><span style="color:'+(sap>=spp?'#00e676':'#ff9500')+'">'+sap.toFixed(0)+'%</span></div></div>'
-            +'<div class="std c"><span style="font-size:12px;font-weight:700;font-family:var(--m,monospace);color:'+sst.c+'">'+sap.toFixed(0)+'%</span></div>'
-            +'<div class="std c"><div class="gap '+(sg>0?'gp':sg<0?'gn':'gz')+'">'+(sg>0?'+':'')+sg.toFixed(1)+'%</div></div>'
-            +'<div class="std c">'
-            +'<button onclick="sOESb(\''+item.id+'\','+si+')" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:rgba(255,255,255,.3);border-radius:5px;padding:2px 5px;cursor:pointer;font-size:10px">✏️</button> '
-            +'<button onclick="sDSb(\''+item.id+'\','+si+')" style="background:rgba(255,68,68,.07);border:1px solid rgba(255,68,68,.2);color:#ff4444;border-radius:5px;padding:2px 4px;cursor:pointer;font-size:10px">✕</button>'
-            +'</div></div>';
+          h+='<div class="sr sub">';
+          h+='<div class="std c"></div>';
+          h+='<div class="std c"><span style="font-size:8px;color:rgba(255,255,255,.2);font-family:var(--m,monospace)">sub</span></div>';
+          h+='<div class="std"><div style="padding-left:10px;display:flex;align-items:center;gap:4px"><div style="width:4px;height:4px;border-radius:50%;background:'+col+';opacity:.5;flex-shrink:0"></div><span style="color:rgba(255,255,255,.6);font-size:11px">'+sub.name+'</span></div></div>';
+          h+='<div class="std c" style="font-size:10px;font-family:var(--m,monospace);color:rgba(255,255,255,.3)">'+(sub.planStart?sFmtD(sub.planStart):'—')+'</div>';
+          h+='<div class="std c" style="font-size:10px;font-family:var(--m,monospace);color:rgba(255,255,255,.35)">'+(sub.planEnd?sFmtD(sub.planEnd):'—')+'</div>';
+          h+='<div class="std pc"><div class="pb"><div class="pbp" style="width:'+Math.min(100,spp)+'%;background:'+col+'"></div>';
+          h+='<div class="pba" style="width:'+Math.min(100,sap)+'%;background:'+(sap>=spp?'#00e676':'#ff9500')+'"></div></div>';
+          h+='<div class="pn"><span style="color:rgba(255,255,255,.25)">'+spp.toFixed(0)+'%</span><span style="color:'+(sap>=spp?'#00e676':'#ff9500')+'">'+sap.toFixed(0)+'%</span></div></div>';
+          h+='<div class="std c"><span style="font-size:12px;font-weight:700;font-family:var(--m,monospace);color:'+sst.c+'">'+sap.toFixed(0)+'%</span></div>';
+          h+='<div class="std c"><div class="gap '+(sg>0?'gp':sg<0?'gn':'gz')+'">'+(sg>0?'+':'')+sg.toFixed(1)+'%</div></div>';
+          h+='<div class="std c">';
+          h+='<button onclick="window.sOESb(\''+item.id+'\','+si+')" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:rgba(255,255,255,.3);border-radius:5px;padding:3px 5px;cursor:pointer;font-size:10px;-webkit-tap-highlight-color:transparent">✏️</button> ';
+          h+='<button onclick="window.sDSb(\''+item.id+'\','+si+')" style="background:rgba(255,68,68,.07);border:1px solid rgba(255,68,68,.2);color:#ff4444;border-radius:5px;padding:3px 4px;cursor:pointer;font-size:10px;-webkit-tap-highlight-color:transparent">✕</button>';
+          h+='</div></div>';
         });
-        h+='<div style="padding:4px 10px 6px;border-bottom:1px solid rgba(255,255,255,.04)">'
-          +'<button class="asb" onclick="sASb(\''+item.id+'\')">➕ เพิ่ม Sub-task</button>'
-          +'</div>';
+        h+='<div style="padding:5px 10px 7px;border-bottom:1px solid rgba(255,255,255,.04)">';
+        h+='<button class="asb" onclick="window.sASb(\''+item.id+'\')">➕ เพิ่ม Sub-task</button>';
+        h+='</div>';
       }
     });
     h+='</div>';
@@ -6411,8 +6374,12 @@ function sTbl(){
   el.innerHTML=h||'<div style="padding:20px;text-align:center;color:rgba(255,255,255,.3)">ไม่มีข้อมูล</div>';
 }
 
+// ════ Gantt ════
 function sGnt(){
   var el=document.getElementById('s-gnt');if(!el)return;
+
+  // ── หา date range ──────────────────────────────────────────
+  // 1. รวบรวมวันจาก schedule data
   var aD=[];
   S_CATS.forEach(function(cat){
     sItems(cat).forEach(function(item){
@@ -6421,62 +6388,184 @@ function sGnt(){
       if(d.planEnd)aD.push(new Date(d.planEnd+'T00:00:00'));
     });
   });
-  if(!aD.length){el.innerHTML='<div style="padding:24px;text-align:center;color:rgba(255,255,255,.3)">กรุณากรอกวันก่อนดู Gantt</div>';return;}
-  var minD=new Date(Math.min.apply(null,aD)),maxD=new Date(Math.max.apply(null,aD));
-  minD.setDate(minD.getDate()-3);maxD.setDate(maxD.getDate()+5);
-  var tot=Math.ceil((maxD-minD)/86400000);
+
+  // 2. fallback: ใช้ project dates ถ้าไม่มีวันกรอก
+  var projStart=null,projEnd=null;
+  if(typeof getProjectDates==='function'){
+    var pd=getProjectDates();
+    if(pd.startDate)projStart=new Date(pd.startDate+'T00:00:00');
+    if(pd.deadlineDate)projEnd=new Date(pd.deadlineDate+'T00:00:00');
+  }
+  if(!aD.length){
+    if(projStart)aD.push(projStart);
+    if(projEnd)aD.push(projEnd);
+    // ถ้ายังไม่มีเลย ใช้ range ปัจจุบัน ±3 เดือน
+    if(!aD.length){
+      var now=new Date();
+      aD.push(new Date(now.getFullYear(),now.getMonth()-1,1));
+      aD.push(new Date(now.getFullYear(),now.getMonth()+3,28));
+    }
+  }
+
+  var minD=new Date(Math.min.apply(null,aD));
+  var maxD=new Date(Math.max.apply(null,aD));
+  minD.setDate(minD.getDate()-5);
+  maxD.setDate(maxD.getDate()+7);
+  var tot=Math.max(1,Math.ceil((maxD-minD)/86400000));
   var today=new Date();today.setHours(0,0,0,0);
   var tPct=Math.max(0,Math.min(100,(today-minD)/86400000/tot*100));
-  var NAME=185;
-  var months=[];
-  var cur=new Date(minD.getFullYear(),minD.getMonth(),1);
+  var NAME=190;
+
+  // ── month headers ──────────────────────────────────────────
+  var months=[],cur=new Date(minD.getFullYear(),minD.getMonth(),1);
   while(cur<=maxD){
-    var ms=new Date(cur.getFullYear(),cur.getMonth(),1),me=new Date(cur.getFullYear(),cur.getMonth()+1,0);
-    var s=Math.max(0,(ms-minD)/86400000),e=Math.min(tot,(me-minD)/86400000+1);
+    var ms=new Date(cur.getFullYear(),cur.getMonth(),1);
+    var me=new Date(cur.getFullYear(),cur.getMonth()+1,0);
+    var s=Math.max(0,(ms-minD)/86400000);
+    var e=Math.min(tot,(me-minD)/86400000+1);
     months.push({label:cur.toLocaleDateString('th-TH',{month:'short',year:'2-digit'}),w:(e-s)/tot*100});
     cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);
   }
-  function pos(ds){if(!ds)return null;return Math.max(0,Math.min(100,(new Date(ds+'T00:00:00')-minD)/86400000/tot*100));}
-  var h='<div style="min-width:'+(NAME+600)+'px">';
-  h+='<div style="display:flex;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07)">'
-    +'<div style="width:'+NAME+'px;flex-shrink:0;padding:5px 9px;font-size:9px;font-weight:700;color:rgba(255,255,255,.3)">งาน</div>'
-    +'<div style="flex:1;display:flex">';
-  months.forEach(function(m){h+='<div style="flex:0 0 '+m.w+'%;text-align:center;padding:4px 2px;font-size:9px;font-weight:700;color:rgba(255,255,255,.25);border-right:1px solid rgba(255,255,255,.04)">'+m.label+'</div>';});
+
+  function pos(ds){
+    if(!ds)return null;
+    return Math.max(0,Math.min(100,(new Date(ds+'T00:00:00')-minD)/86400000/tot*100));
+  }
+  function posFallback(cat){
+    // ถ้าไม่มีวัน ใช้ project start/end
+    var ps=pos(projStart?projStart.toISOString().slice(0,10):null);
+    var pe=pos(projEnd?projEnd.toISOString().slice(0,10):null);
+    return{ps:ps,pe:pe};
+  }
+
+  // ── build HTML ──────────────────────────────────────────────
+  var h='<div style="min-width:'+(NAME+500)+'px">';
+
+  // header row: name col + month cols
+  h+='<div style="display:flex;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07)">';
+  h+='<div style="width:'+NAME+'px;flex-shrink:0;padding:5px 10px;font-size:9px;font-weight:700;color:rgba(255,255,255,.3)">งาน</div>';
+  h+='<div style="flex:1;display:flex;position:relative">';
+  months.forEach(function(m){
+    h+='<div style="flex:0 0 '+m.w+'%;text-align:center;padding:5px 2px;font-size:9px;font-weight:700;color:rgba(255,255,255,.35);border-right:1px solid rgba(255,255,255,.05)">'+m.label+'</div>';
+  });
   h+='</div></div>';
+
+  // today line helper
+  var todayLine='<div style="position:absolute;top:0;bottom:0;left:'+tPct+'%;width:2px;background:rgba(255,214,0,.7);z-index:5;pointer-events:none"></div>';
+
   S_CATS.forEach(function(cat){
     if(_sCC!=='all'&&_sCC!==cat)return;
-    var m=S_CAT[cat],items=sItems(cat);if(!items.length)return;
-    h+='<div style="display:flex;align-items:center;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06);min-height:27px">'
-      +'<div style="width:'+NAME+'px;flex-shrink:0;padding:4px 9px;display:flex;align-items:center;gap:5px">'
-      +'<div style="width:8px;height:8px;border-radius:2px;background:'+m.col+'"></div>'
-      +'<span style="font-size:11px;font-weight:700;color:'+m.col+'">'+m.icon+' '+m.name+'</span></div>'
-      +'<div style="flex:1;position:relative;height:27px"><div style="position:absolute;top:0;bottom:0;left:'+tPct+'%;width:1.5px;background:rgba(255,214,0,.6)"></div></div></div>';
+    var m=S_CAT[cat];
+    var items=sItems(cat);if(!items.length)return;
+
+    // category header row
+    var catPP=0,catAP=0;
+    items.forEach(function(i){
+      catPP+=parseFloat(sD(i.id).planPct)||0;
+      catAP+=sActual(i.id);
+    });
+    catPP=items.length?catPP/items.length:0;
+    catAP=typeof calcCatOverall==='function'?calcCatOverall(cat):catAP/Math.max(1,items.length);
+
+    h+='<div style="display:flex;align-items:center;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07);min-height:30px">';
+    h+='<div style="width:'+NAME+'px;flex-shrink:0;padding:5px 10px;display:flex;align-items:center;gap:6px">';
+    h+='<div style="width:10px;height:10px;border-radius:2px;background:'+m.col+'"></div>';
+    h+='<span style="font-size:11px;font-weight:800;color:'+m.col+'">'+m.icon+' '+m.name+'</span>';
+    h+='<span style="font-size:9px;color:rgba(255,255,255,.3);font-family:var(--m,monospace)">'+catAP.toFixed(1)+'%</span>';
+    h+='</div>';
+    h+='<div style="flex:1;position:relative;height:30px">'+todayLine+'</div></div>';
+
+    // S item rows
     items.forEach(function(item){
-      var d=sD(item.id),ap=sActual(item.id),pp=parseFloat(d.planPct)||0;
-      var ps=pos(d.planStart),pe=pos(d.planEnd);
-      h+='<div style="display:flex;align-items:center;border-bottom:1px solid rgba(255,255,255,.04);min-height:31px">'
-        +'<div style="width:'+NAME+'px;flex-shrink:0;padding:4px 9px">'
-        +'<div style="font-size:10px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#e8f0fe">'
-        +'<span style="font-family:var(--m,monospace);color:'+m.col+';font-size:9px;margin-right:3px">'+item.label+'</span>'+sName(item)+'</div>'
-        +'<div style="font-size:9px;color:rgba(255,255,255,.3);font-family:var(--m,monospace)"><span style="color:'+m.col+';opacity:.6">'+pp.toFixed(0)+'%</span> <span style="color:'+(ap>=pp?'#00e676':'#ff9500')+'">→'+ap.toFixed(0)+'%</span></div>'
-        +'</div>'
-        +'<div style="flex:1;position:relative;height:31px">'
-        +'<div style="position:absolute;top:0;bottom:0;left:'+tPct+'%;width:1.5px;background:rgba(255,214,0,.6);z-index:3"></div>';
-      if(ps!==null&&pe!==null&&pe>ps){
-        h+='<div style="position:absolute;top:9px;left:'+ps+'%;width:'+(pe-ps)+'%;height:8px;background:'+m.col+';opacity:.22;border-radius:4px"></div>';
-        h+='<div style="position:absolute;top:9px;left:'+ps+'%;width:'+(pe-ps)*ap/100+'%;height:8px;background:'+(ap>=pp?'#00e676':'#ff9500')+';border-radius:4px;z-index:2"></div>';
+      var d=sD(item.id);
+      var ap=sActual(item.id);
+      var pp=parseFloat(d.planPct)||0;
+
+      // วันจาก schedule หรือ fallback project dates
+      var ps=pos(d.planStart);
+      var pe=pos(d.planEnd);
+      var hasDates=(ps!==null&&pe!==null&&pe>ps);
+
+      // ถ้าไม่มีวัน → ใช้ project range แสดงเป็นแถบเทา
+      if(!hasDates&&projStart&&projEnd){
+        ps=pos(projStart.toISOString().slice(0,10));
+        pe=pos(projEnd.toISOString().slice(0,10));
+        hasDates=(ps!==null&&pe!==null&&pe>ps);
+      }
+
+      var rowH=36;
+      h+='<div style="display:flex;align-items:center;border-bottom:1px solid rgba(255,255,255,.04);min-height:'+rowH+'px">';
+
+      // name cell
+      h+='<div style="width:'+NAME+'px;flex-shrink:0;padding:4px 10px">';
+      h+='<div style="font-size:10px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#e8f0fe">';
+      h+='<span style="font-family:var(--m,monospace);color:'+m.col+';font-size:9px;margin-right:3px">'+item.label+'</span>'+sName(item);
+      h+='</div>';
+      // แสดงวันถ้ามี
+      if(d.planStart&&d.planEnd){
+        h+='<div style="font-size:8px;color:rgba(255,255,255,.3)">'+sFmtD(d.planStart)+' → '+sFmtD(d.planEnd)+'</div>';
+      }
+      h+='<div style="font-size:9px;font-family:var(--m,monospace)">';
+      h+='<span style="color:'+m.col+';opacity:.7">แผน '+pp.toFixed(0)+'%</span> ';
+      h+='<span style="color:'+(ap>=pp?'#00e676':'#ff9500')+'">จริง '+ap.toFixed(0)+'%</span>';
+      h+='</div></div>';
+
+      // bar area
+      h+='<div style="flex:1;position:relative;height:'+rowH+'px">';
+      h+=todayLine;
+
+      if(hasDates){
+        var barW=pe-ps;
+        // plan bar (โปร่งใส)
+        h+='<div style="position:absolute;top:10px;left:'+ps+'%;width:'+barW+'%;height:10px;background:'+m.col+';opacity:.2;border-radius:5px"></div>';
+        // actual progress bar
+        var actualW=barW*(ap/100);
+        var barCol=ap>=pp?'#00e676':'#ff9500';
+        if(ap===0&&pp===0)barCol='rgba(255,255,255,.15)';
+        h+='<div style="position:absolute;top:10px;left:'+ps+'%;width:'+actualW+'%;height:10px;background:'+barCol+';border-radius:5px;z-index:2"></div>';
+        // % label ตรงกลาง bar
+        if(barW>8){
+          h+='<div style="position:absolute;top:11px;left:'+(ps+barW/2)+'%;transform:translateX(-50%);font-size:8px;font-weight:700;color:rgba(255,255,255,.9);z-index:4;text-shadow:0 1px 3px rgba(0,0,0,.8);white-space:nowrap">'+ap.toFixed(0)+'%</div>';
+        }
+        // border outline plan
+        h+='<div style="position:absolute;top:10px;left:'+ps+'%;width:'+barW+'%;height:10px;border:1px solid '+m.col+';opacity:.4;border-radius:5px;z-index:1"></div>';
+      } else {
+        // ไม่มีวัน — แสดง progress bar เต็มความกว้าง
+        h+='<div style="position:absolute;top:12px;left:2%;width:96%;height:8px;background:rgba(255,255,255,.06);border-radius:4px"></div>';
+        var apW=ap*0.96;
+        if(ap>0){
+          h+='<div style="position:absolute;top:12px;left:2%;width:'+apW+'%;height:8px;background:'+(ap>=pp?'#00e676':'#ff9500')+';opacity:.7;border-radius:4px;z-index:2"></div>';
+        }
+        h+='<div style="position:absolute;top:13px;left:50%;transform:translateX(-50%);font-size:8px;color:rgba(255,255,255,.3);z-index:4;white-space:nowrap">'+ap.toFixed(0)+'% (ยังไม่กำหนดวัน)</div>';
       }
       h+='</div></div>';
     });
   });
-  h+='<div style="padding:7px 10px;font-size:9px;color:rgba(255,255,255,.25);display:flex;gap:10px;border-top:1px solid rgba(255,255,255,.05);flex-wrap:wrap">'
-    +'<span>■ แผน(โปร่งใส)</span><span style="color:#00e676">■ จริง≥แผน</span><span style="color:#ff9500">■ จริง&lt;แผน</span><span style="color:#ffd600">┃ วันนี้</span></div></div>';
+
+  // legend
+  h+='<div style="padding:8px 12px;font-size:9px;color:rgba(255,255,255,.3);display:flex;gap:12px;border-top:1px solid rgba(255,255,255,.06);flex-wrap:wrap;align-items:center">';
+  h+='<span>■ แผน (โปร่งใส)</span>';
+  h+='<span style="color:#00e676">■ จริง ≥ แผน</span>';
+  h+='<span style="color:#ff9500">■ จริง &lt; แผน</span>';
+  h+='<span style="color:#ffd600">┃ วันนี้</span>';
+  h+='<span style="margin-left:auto;color:rgba(255,255,255,.2)">คลิก ✏️ ในตาราง เพื่อกรอกวันแผน</span>';
+  h+='</div>';
+  h+='</div>';
+
   el.innerHTML=h;
 }
 
-// ── Interactions ────────────────────────────────────────────────
+
+// ════ Render ════
+function sRen(){
+  sStat();
+  if(_sCV==='table') sTbl();
+  else sGnt();
+}
+
+// ════ Interactions ════
 window.sTCat=function(cat){
-  var r=document.getElementById('sr-'+cat),a=document.getElementById('sa-'+cat);
+  var r=document.getElementById('s-rows-'+cat),a=document.getElementById('s-arr-'+cat);
   if(!r)return;var h=r.style.display==='none';
   r.style.display=h?'':'none';if(a)a.textContent=h?'▲':'▼';
 };
@@ -6496,17 +6585,16 @@ window.sSwV=function(v,btn){
   sRen();
 };
 
-// ── Modal ───────────────────────────────────────────────────────
+// ════ Modal ════
 var _sEId='',_sESi=-1;
 window.sOEdt=function(id){
   _sEId=id;_sESi=-1;
-  var d=sD(id);
-  var item=null;
+  var d=sD(id),item=null;
   S_CATS.forEach(function(cat){sItems(cat).forEach(function(i){if(i.id===id)item=i;});});
   document.getElementById('s-emt').textContent='✏️ '+(item?sName(item):id);
   document.getElementById('s-eid').value=id;
   document.getElementById('s-epar').value='';
-  var nm=document.getElementById('s-enm');if(nm){nm.value=item?sName(item):'';nm.readOnly=true;nm.style.background='rgba(255,255,255,.03)';}
+  var nm=document.getElementById('s-enm');if(nm){nm.value=item?sName(item):'';nm.readOnly=true;nm.style.opacity='.6';}
   document.getElementById('s-est').value=d.planStart||'';
   document.getElementById('s-een').value=d.planEnd||'';
   document.getElementById('s-epp').value=parseFloat(d.planPct)||0;
@@ -6518,7 +6606,7 @@ window.sASb=function(pid){
   document.getElementById('s-emt').textContent='➕ เพิ่ม Sub-task';
   document.getElementById('s-eid').value='';
   document.getElementById('s-epar').value=pid;
-  ['s-enm','s-est','s-een'].forEach(function(i){var el=document.getElementById(i);if(el){el.value='';el.readOnly=false;el.style.background='';}});
+  ['s-enm','s-est','s-een'].forEach(function(i){var el=document.getElementById(i);if(el){el.value='';el.readOnly=false;el.style.opacity='1';}});
   document.getElementById('s-epp').value=0;
   var ap=document.getElementById('s-eap');if(ap)ap.value=0;
   document.getElementById('s-em').style.display='flex';
@@ -6530,7 +6618,7 @@ window.sOESb=function(pid,idx){
   document.getElementById('s-emt').textContent='✏️ Sub-task';
   document.getElementById('s-eid').value='sub';
   document.getElementById('s-epar').value=pid;
-  var nm=document.getElementById('s-enm');if(nm){nm.value=sub.name||'';nm.readOnly=false;nm.style.background='';}
+  var nm=document.getElementById('s-enm');if(nm){nm.value=sub.name||'';nm.readOnly=false;nm.style.opacity='1';}
   document.getElementById('s-est').value=sub.planStart||'';
   document.getElementById('s-een').value=sub.planEnd||'';
   document.getElementById('s-epp').value=parseFloat(sub.planPct)||0;
@@ -6556,7 +6644,7 @@ window.sSave=function(){
     if(_sESi>=0)_sch[par].subs[_sESi]=sub;
     else{_sch[par].subs.push(sub);_sExp[par]=true;}
   }
-  sStore();sRen();sClose();
+  sStore();sRen();window.sClose();
   if(typeof showToast==='function')showToast('บันทึก Schedule ✅','ok');
 };
 window.sDSb=function(pid,idx){
@@ -6566,194 +6654,33 @@ window.sDSb=function(pid,idx){
 };
 window.sClose=function(){var el=document.getElementById('s-em');if(el)el.style.display='none';};
 
-// ── Share LINE ──────────────────────────────────────────────────
-window.sLine=function(){
-  var today=new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
-  var todayS=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0')+'-'+String(new Date().getDate()).padStart(2,'0');
-
-  // ── สร้าง HTML รายงาน ──────────────────────────────────────────
-  var tRows='',tot=0,done=0,late=0,sp=0,sa=0;
-  S_CATS.forEach(function(cat){
-    var m=S_CAT[cat],items=sItems(cat);if(!items.length)return;
-    tRows+='<tr style="background:'+m.col+'18"><td colspan="6" style="padding:6px 9px;font-weight:800;font-size:13px;color:'+m.col+'">'+m.icon+' '+m.name+'</td></tr>';
-    items.forEach(function(item){
-      var d=sD(item.id),ap=sActual(item.id),pp=parseFloat(d.planPct)||0,g=ap-pp;
-      tot++;sp+=pp;sa+=ap;if(ap>=100)done++;if(ap<100&&pp>0&&ap<pp)late++;
-      var gc=g>=0?'#059669':'#dc2626';
-      var st=sSt(ap,pp,d.planStart);
-      tRows+='<tr style="border-bottom:1px solid #e5e7eb">'
-        +'<td style="padding:6px 8px;font-family:monospace;font-size:12px;color:'+m.col+';font-weight:700">'+item.label+'</td>'
-        +'<td style="padding:6px 8px;font-size:12px">'+sName(item)+'</td>'
-        +'<td style="padding:6px 8px;font-size:11px;text-align:center;color:#64748b">'+(d.planStart?sFmtD(d.planStart):'—')+'</td>'
-        +'<td style="padding:6px 8px;font-size:11px;text-align:center;color:#64748b">'+(d.planEnd?sFmtD(d.planEnd):'—')+'</td>'
-        +'<td style="padding:6px 8px;font-family:monospace;font-size:12px;text-align:center">'+pp.toFixed(0)+'%→'+ap.toFixed(0)+'%</td>'
-        +'<td style="padding:6px 8px;font-size:11px;text-align:center;font-weight:700;color:'+gc+'">'+(g>=0?'+':'')+g.toFixed(0)+'% '+st.t+'</td>'
-        +'</tr>';
-      (d.subs||[]).forEach(function(sub){
-        var sap=parseFloat(sub.actualPct||0),spp=parseFloat(sub.planPct||0);
-        tRows+='<tr style="background:#f9fafb;border-bottom:1px solid #f3f4f6">'
-          +'<td style="padding:4px 8px 4px 20px;font-size:11px;color:#9ca3af">↳</td>'
-          +'<td style="padding:4px 8px;font-size:11px;color:#6b7280">'+sub.name+'</td>'
-          +'<td style="padding:4px 8px;font-size:10px;text-align:center;color:#9ca3af">'+(sub.planStart?sFmtD(sub.planStart):'—')+'</td>'
-          +'<td style="padding:4px 8px;font-size:10px;text-align:center;color:#9ca3af">'+(sub.planEnd?sFmtD(sub.planEnd):'—')+'</td>'
-          +'<td style="padding:4px 8px;font-family:monospace;font-size:11px;text-align:center">'+spp.toFixed(0)+'%</td>'
-          +'<td></td></tr>';
-      });
-    });
-  });
-  var avgP=tot?sp/tot:0;
-  var avgA=typeof calcAllOverall==='function'?calcAllOverall():0;
-  var gap=avgA-avgP;
-
-  var reportHtml='<!DOCTYPE html><html><head><meta charset="UTF-8">'
-    +'<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">'
-    +'<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Sarabun,sans-serif;background:#fff;color:#1e293b;padding:20px}'
-    +'.hd{display:flex;align-items:center;gap:10px;margin-bottom:6px}'
-    +'.hd-icon{font-size:24px}.hd-title{font-size:18px;font-weight:800}'
-    +'.sub{font-size:11px;color:#94a3b8;margin-bottom:14px}'
-    +'.kpi{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}'
-    +'.k{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;text-align:center;min-width:80px}'
-    +'.kv{font-size:18px;font-weight:800;font-family:monospace}'
-    +'.kl{font-size:9px;color:#94a3b8;margin-top:2px;text-transform:uppercase}'
-    +'table{width:100%;border-collapse:collapse;margin-bottom:14px}'
-    +'thead tr{background:#f1f5f9}'
-    +'th{padding:7px 8px;font-size:10px;font-weight:700;text-align:left;color:#64748b;text-transform:uppercase;border-bottom:2px solid #e2e8f0}'
-    +'td{vertical-align:middle}'
-    +'.ft{font-size:10px;color:#94a3b8;text-align:center;padding-top:10px;border-top:1px solid #e2e8f0}'
-    +'</style></head><body>'
-    +'<div class="hd"><span class="hd-icon">📅</span><div><div class="hd-title">Construction Schedule</div></div></div>'
-    +'<div class="sub">Master vs Actual · '+today+'</div>'
-    +'<div class="kpi">'
-    +'<div class="k"><div class="kv">'+tot+'</div><div class="kl">งานทั้งหมด</div></div>'
-    +'<div class="k"><div class="kv" style="color:#059669">'+done+'</div><div class="kl">เสร็จ</div></div>'
-    +'<div class="k"><div class="kv" style="color:#dc2626">'+late+'</div><div class="kl">ล่าช้า</div></div>'
-    +'<div class="k"><div class="kv" style="color:#3b82f6">'+avgP.toFixed(1)+'%</div><div class="kl">% แผน</div></div>'
-    +'<div class="k"><div class="kv" style="color:'+(avgA>=avgP?'#059669':'#f97316')+'">'+avgA.toFixed(1)+'%</div><div class="kl">% จริง</div></div>'
-    +'<div class="k"><div class="kv" style="color:'+(gap>=0?'#059669':'#dc2626')+'">'+(gap>=0?'+':'')+gap.toFixed(1)+'%</div><div class="kl">ส่วนต่าง</div></div>'
-    +'</div>'
-    +'<table><thead><tr><th>ID</th><th>ชื่องาน</th><th>เริ่ม</th><th>เสร็จ</th><th>แผน→จริง</th><th>ผล</th></tr></thead>'
-    +'<tbody>'+tRows+'</tbody></table>'
-    +'<div class="ft">Construction Progress Dashboard · '+today+'</div>'
-    +'</body></html>';
-
-  // ── วิธีแชร์ตามลำดับ ──────────────────────────────────────────
-  function doSharePng(imgBlob){
-    // 1. พยายาม Web Share API (PNG) — รองรับ LINE บน iOS/Android
-    var imgFile=new File([imgBlob],'schedule-'+todayS+'.png',{type:'image/png'});
-    if(navigator.canShare&&navigator.canShare({files:[imgFile]})){
-      navigator.share({files:[imgFile],title:'📅 Schedule '+today,text:'รายงาน Schedule ก่อสร้าง'})
-        .then(function(){if(typeof showToast==='function')showToast('แชร์สำเร็จ ✅','ok');})
-        .catch(function(e){
-          if(e.name!=='AbortError'){
-            // fallback: download PNG
-            var u=URL.createObjectURL(imgBlob);
-            var a=document.createElement('a');a.href=u;a.download='schedule-'+todayS+'.png';a.click();
-            setTimeout(function(){URL.revokeObjectURL(u);},3000);
-            if(typeof showToast==='function')showToast('บันทึกรูปแล้ว — เปิด LINE แชร์ได้เลย 💚','ok',6000);
-          }
-        });
-    }else{
-      // fallback: download PNG
-      var u=URL.createObjectURL(imgBlob);
-      var a=document.createElement('a');a.href=u;a.download='schedule-'+todayS+'.png';a.click();
-      setTimeout(function(){URL.revokeObjectURL(u);},3000);
-      if(typeof showToast==='function')showToast('บันทึกรูปแล้ว — เปิด LINE แชร์ได้เลย 💚','ok',6000);
-    }
-  }
-
-  function doShareHtml(){
-    // fallback สุดท้าย: share/download HTML
-    var blob=new Blob([reportHtml],{type:'text/html;charset=utf-8'});
-    var htmlFile=new File([blob],'schedule-'+todayS+'.html',{type:'text/html'});
-    if(navigator.canShare&&navigator.canShare({files:[htmlFile]})){
-      navigator.share({files:[htmlFile],title:'📅 Schedule '+today})
-        .then(function(){if(typeof showToast==='function')showToast('แชร์สำเร็จ ✅','ok');})
-        .catch(function(e){
-          if(e.name!=='AbortError'){
-            var u=URL.createObjectURL(blob);
-            var a=document.createElement('a');a.href=u;a.download='schedule-'+todayS+'.html';a.click();
-            setTimeout(function(){URL.revokeObjectURL(u);},3000);
-          }
-        });
-    }else{
-      var u=URL.createObjectURL(blob);
-      var a=document.createElement('a');a.href=u;a.download='schedule-'+todayS+'.html';a.click();
-      setTimeout(function(){URL.revokeObjectURL(u);},3000);
-      if(typeof showToast==='function')showToast('ดาวน์โหลดแล้ว — แชร์ผ่าน LINE ได้เลย','ok',5000);
-    }
-  }
-
-  // ── render HTML → PNG ด้วย html2canvas ──────────────────────
-  if(typeof showToast==='function')showToast('⏳ กำลังสร้างรายงาน...','info',8000);
-
-  function loadScript(src,cb){
-    if(document.querySelector('script[src="'+src+'"]')){cb();return;}
-    var s=document.createElement('script');s.src=src;s.onload=cb;s.onerror=function(){cb(null);};document.head.appendChild(s);
-  }
-  loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',function(err){
-    if(err||typeof html2canvas==='undefined'){
-      // html2canvas โหลดไม่ได้ → fallback HTML
-      if(typeof showToast==='function')showToast('แชร์เป็น HTML แทน','info',3000);
-      doShareHtml();
-      return;
-    }
-    // สร้าง iframe ซ่อนเพื่อ render รายงาน
-    var iframe=document.createElement('iframe');
-    iframe.style.cssText='position:fixed;left:-9999px;top:0;width:780px;height:auto;border:none;visibility:hidden;z-index:-1';
-    document.body.appendChild(iframe);
-    iframe.contentDocument.open();
-    iframe.contentDocument.write(reportHtml);
-    iframe.contentDocument.close();
-    // รอให้ font โหลด
-    setTimeout(function(){
-      var body=iframe.contentDocument.body;
-      body.style.width='760px';
-      html2canvas(body,{
-        scale:2,
-        useCORS:true,
-        backgroundColor:'#ffffff',
-        logging:false,
-        width:760,
-        windowWidth:760
-      }).then(function(canvas){
-        document.body.removeChild(iframe);
-        canvas.toBlob(function(blob){
-          if(blob){
-            doSharePng(blob);
-          }else{
-            doShareHtml();
-          }
-        },'image/png',0.95);
-      }).catch(function(){
-        document.body.removeChild(iframe);
-        doShareHtml();
-      });
-    },600);
-  });
-};
-
-// ── Open/Close ─────────────────────────────────────────────────
+// ════ Open / Close ════
 window.openSchedulePage=function(){
   var ov=document.getElementById('sched-ov');if(!ov)return;
-  // rebuild HTML ทุกครั้งเพื่อให้ได้ S items ล่าสุดจาก Dashboard
   ov.innerHTML=sHTML();
   ov.style.display='block';
   document.body.style.overflow='hidden';
   sLoad();
+  _sCV='table';
+  _sCC='all';
+  // render ทันทีจาก local data
+  sRen();
+  // pull Firebase แล้ว re-render
   sFbSt('ld','☁️ กำลังโหลด...');
-  sPull().then(function(){sRen();});
+  sPull().then(function(){sRen();}).catch(function(){sFbSt('err','❌ โหลดไม่ได้');});
 };
 window.closeSchedulePage=function(){
   var ov=document.getElementById('sched-ov');
-  if(ov){ov.style.display='none';}
+  if(ov)ov.style.display='none';
   document.body.style.overflow='';
 };
 
-// ── Auto-refresh % จริง ────────────────────────────────────────
+// ════ Auto-refresh % จริง ════
 setInterval(function(){
   var ov=document.getElementById('sched-ov');
   if(!ov||ov.style.display==='none')return;
-  sStat();if(_sCV==='table')sTbl();
+  sStat();
+  if(_sCV==='table')sTbl();
 },8000);
 
 })(); // end IIFE
