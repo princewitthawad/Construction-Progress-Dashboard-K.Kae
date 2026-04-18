@@ -951,12 +951,15 @@ function pushOverallPct(){
   clearTimeout(_ovPushTimer);
   _ovPushTimer=setTimeout(function(){
     try{
+      // ตรวจสอบว่า _sData โหลดแล้วจริง ๆ ก่อน push
+      if(typeof _sData==='undefined'||!Object.keys(_sData).length) return;
       const ov=typeof calcAllOverall==='function'?calcAllOverall():0;
+      // Push overall_pct (ใช้โดย index_realtime_3)
       cloudPutNode('overall_pct',{pct:parseFloat(ov.toFixed(2)),updatedAt:new Date().toISOString()}).catch(function(){});
-      // Also sync s_data_v3 for fallback
-      if(typeof _sData!=='undefined') cloudPutNode('s_data_v3',_sData).catch(function(){});
+      // Push s_data_v3 แยก node (ใช้โดย device อื่น sync ข้าม)
+      cloudPutNode('s_data_v3',_sData).catch(function(){});
     }catch(e){}
-  },2000); // 2s debounce — frequent but not spammy
+  },2000); // 2s debounce
 }
 
 function scheduleAutoSave(){
@@ -4983,6 +4986,8 @@ function initSSystem() {
         refreshSUMDEF(); refreshJUP7();
         updateCategoryCards(); buildAllDonuts(); updateMainKPI(); updateNewSummaryBar(); updateNewPieChart();
         setSvStatus('saved','☁️ ซิงค์ข้อมูลสำเร็จ ✓');
+        // Push overall_pct หลัง sync เสร็จ เพื่อให้ index_realtime_3 อ่านได้ถูกต้อง
+        setTimeout(pushOverallPct, 500);
       }
     }catch(e){ console.warn('initSSystem cloud sync:',e); }
   }, 1800);
@@ -5036,7 +5041,7 @@ function updateMainKPI() {
   const cp = document.getElementById('pie-cpct');
   const cl = document.getElementById('pie-clbl');
   if (cp) { cp.textContent = overall.toFixed(1) + '%'; cp.style.color = gcol(overall / 100); }
-  if (cl) cl.textContent = 'ภาพรวมทั้งหมด';
+  if (cl) cl.textContent = 'ภาพรวม';
 
   // Update stat boxes
   setEl('stat-done', done);
@@ -5165,9 +5170,10 @@ function buildNewPieChart() {
 function updateNewPieLegend(data) {
   const c = document.getElementById('pie-legend');
   if (!c) return;
-  c.innerHTML = NEW_PIE_DEFS.map((d, i) => `<div class="leg-item" onclick="highlightNewPie(${i})"><div class="leg-dot" style="background:${d.col}"></div><div class="leg-name">${d.lbl}</div><div class="leg-val" style="color:${d.col}">${(data[i]||0).toFixed(1)}%</div></div>`).join('');
-  // Update pie-stats
-  const overall = data.reduce((a, v) => a + v, 0) / data.length;
+  const weightLabels = ['40%','40%','15%','5%'];
+  c.innerHTML = NEW_PIE_DEFS.map((d, i) => `<div class="leg-item" onclick="highlightNewPie(${i})"><div class="leg-dot" style="background:${d.col}"></div><div class="leg-name">${d.lbl} <span style="font-size:9px;color:var(--tx3);font-family:var(--m)">(${weightLabels[i]})</span></div><div class="leg-val" style="color:${d.col}">${(data[i]||0).toFixed(1)}%</div></div>`).join('');
+  // ใช้ calcAllOverall() (Weighted) — ตรงกับ KPI card และ pushOverallPct
+  const overall = calcAllOverall();
   const cp = document.getElementById('pie-cpct'), cl = document.getElementById('pie-clbl');
   if (cp) { cp.textContent = overall.toFixed(1) + '%'; cp.style.color = gcol(overall / 100); }
   if (cl) cl.textContent = 'ภาพรวม';
