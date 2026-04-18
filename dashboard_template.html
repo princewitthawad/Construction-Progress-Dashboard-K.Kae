@@ -1411,7 +1411,7 @@ function buildPieLegend(){
 function updatePieStats(){
   const _pDef=getLiveDef(),vs=getLiveVals(),tgts=_pDef.map(d=>d.tgt||100);
   let done=0;vs.forEach((v,i)=>{if(v/tgts[i]>=1)done++;});
-  const ovr=vs.reduce((a,v,i)=>a+v/tgts[i],0)/vs.length*100;
+  const ovr=typeof calcAllOverall==='function'?calcAllOverall():vs.reduce((a,v,i)=>a+v/tgts[i],0)/vs.length*100;
   const s=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
   s('stat-done',done);s('stat-rem',vs.length-done);s('stat-ovr',ceilTo2(ovr)+'%');
   const cp=document.getElementById('pie-cpct'),cl=document.getElementById('pie-clbl');
@@ -1763,7 +1763,7 @@ function openJupiterPage(){
   const _def=getLiveDef(),vs=getLiveVals(),tgts=_def.map(d=>d.tgt||100),today=new Date(),DAYS=getProjDaysLeft();
   let doneCount=0,urgentCount=0,sumRatio=0;
   vs.forEach((x,i)=>{const r=x/tgts[i];sumRatio+=Math.min(1,r);if(r>=1)doneCount++;else if(x>0)urgentCount++;});
-  const overallPct=(sumRatio/vs.length*100).toFixed(1);
+  const overallPct=(typeof calcAllOverall==='function'?calcAllOverall():sumRatio/vs.length*100).toFixed(1);
   let adviceCards='';
   _def.forEach((d,i)=>{
     const pct=vs[i],tgt=tgts[i],gap=tgt-pct,ratio=pct/tgt,perDay=gap>0?(gap/DAYS).toFixed(2):0;
@@ -1826,15 +1826,21 @@ function saveLogEntry(){
 }
 function renderPlan(){
   const c=document.getElementById('an-plan');if(!c)return;
-  const _def=getLiveDef(),vs=getLiveVals();
-  const startDate=getProjStart(),deadline=getProjDeadline(),fastDeadline=getProjFastDeadline(),today=new Date(),lc=getLaborCfg();
+  const CAT_PLAN=[
+    {key:'structure',   lbl:'🏗️ โครงสร้าง', col:'#00bcd4', weight:0.40},
+    {key:'architecture',lbl:'🏛️ สถาปัตย์',  col:'#ff9500', weight:0.40},
+    {key:'electrical',  lbl:'⚡ ไฟฟ้า',      col:'#ce93d8', weight:0.15},
+    {key:'sanitary',    lbl:'💧 สุขาภิบาล', col:'#388bfd', weight:0.05},
+  ];
+  const vs=CAT_PLAN.map(function(d){return typeof calcCatOverall==='function'?parseFloat(calcCatOverall(d.key).toFixed(2)):0;});
+  const startDate=getProjStart(),deadline=getProjDeadline(),fastDeadline=getProjFastDeadline(),today=new Date();
   const DAYS=getProjDaysLeft();
   const DAYS_FAST=Math.ceil((fastDeadline-today)/(1000*60*60*24));
-  const fmtDate=d=>d.toLocaleDateString('th-TH',{year:'numeric',month:'short',day:'numeric'});
-  const totalPct=(vs.reduce((a,v,i)=>a+Math.min(1,v/(_def[i]?.tgt||100)),0)/Math.max(1,vs.length)*100).toFixed(1);
+  const fmtDate=function(d){return d.toLocaleDateString('th-TH',{year:'numeric',month:'short',day:'numeric'});};
+  const totalPct=(typeof calcAllOverall==='function'?calcAllOverall():0).toFixed(1);
   c.innerHTML=`<div style="margin-bottom:18px"><div style="font-size:15px;font-weight:800;margin-bottom:6px">📅 แผนการทำงาน</div><div style="display:flex;gap:12px;flex-wrap:wrap;font-size:11px;font-family:var(--m);color:var(--tx2)"><span>📌 เริ่ม: <strong>${fmtDate(startDate)}</strong></span><span>🎯 แผนเร่งรัด: <strong style="color:var(--orange)">${fmtDate(fastDeadline)}</strong> (เหลือ ${DAYS_FAST} วัน)</span><span>📅 กำหนดส่ง: <strong style="color:var(--red)">${fmtDate(deadline)}</strong> (เหลือ ${DAYS} วัน)</span></div></div>
-  <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px;margin-bottom:16px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tx2);margin-bottom:8px"><span>ความคืบหน้าโดยรวม</span><span style="font-family:var(--m);font-weight:700;color:${gcol(parseFloat(totalPct)/100)}">${totalPct}%</span></div><div class="PBG" style="height:12px"><div class="PF ${gclass(parseFloat(totalPct)/100)}" style="width:${totalPct}%"></div></div></div>
-  <div style="display:grid;gap:10px;margin-bottom:20px">${_def.map((d,i)=>{const v=vs[i]||0,tgt=d.tgt,gap=Math.max(0,tgt-v),ratio=v/tgt,pctPerDay=gap>0?(gap/DAYS).toFixed(2):0;const status=ratio>=1?'✅ บรรลุเป้า':v>0?'🔄 ดำเนินการ':'⬜ ยังไม่เริ่ม',statusCol=ratio>=1?'var(--green)':v>0?'var(--orange)':'var(--red)';return`<div style="background:var(--bg2);border:1px solid ${d.col}33;border-left:4px solid ${d.col};border-radius:9px;padding:14px 16px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px"><span style="font-weight:700;font-size:14px;color:${d.col}">${d.lbl}</span><span style="font-size:11px;font-weight:700;color:${statusCol}">${status}</span></div><div style="height:6px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;margin-bottom:10px"><div style="height:100%;background:${d.col};width:${Math.min(100,v/tgt*100)}%;border-radius:99px"></div></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"><div style="background:var(--bgc);border-radius:7px;padding:8px;text-align:center"><div style="font-size:9px;color:var(--tx3);margin-bottom:4px">คืบหน้าแล้ว</div><div style="font-size:17px;font-weight:800;font-family:var(--m);color:${d.col}">${ceilTo2(v)}%</div></div><div style="background:var(--bgc);border-radius:7px;padding:8px;text-align:center"><div style="font-size:9px;color:var(--tx3);margin-bottom:4px">เป้าหมาย</div><div style="font-size:17px;font-weight:800;font-family:var(--m);color:var(--tx2)">${tgt}%</div></div><div style="background:var(--bgc);border-radius:7px;padding:8px;text-align:center"><div style="font-size:9px;color:var(--tx3);margin-bottom:4px">เหลืออีก</div><div style="font-size:17px;font-weight:800;font-family:var(--m);color:${gap>0?'var(--orange)':'var(--green)'}">${ceilTo2(gap)}%</div></div><div style="background:var(--bgc);border-radius:7px;padding:8px;text-align:center"><div style="font-size:9px;color:var(--tx3);margin-bottom:4px">ต้องทำ/วัน</div><div style="font-size:17px;font-weight:800;font-family:var(--m);color:${pctPerDay>0?d.col:'var(--green)'}">${pctPerDay>0?pctPerDay+'%':'—'}</div></div></div></div>`;}).join('')}</div>`;
+  <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px;margin-bottom:16px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tx2);margin-bottom:8px"><span>ความคืบหน้าโดยรวม (Weighted)</span><span style="font-family:var(--m);font-weight:700;color:${gcol(parseFloat(totalPct)/100)}">${totalPct}%</span></div><div class="PBG" style="height:12px"><div class="PF ${gclass(parseFloat(totalPct)/100)}" style="width:${totalPct}%"></div></div></div>
+  <div style="display:grid;gap:10px;margin-bottom:20px">${CAT_PLAN.map(function(d,i){const v=vs[i]||0,tgt=100,gap=Math.max(0,tgt-v),ratio=v/tgt,pctPerDay=gap>0?(gap/DAYS).toFixed(2):0;const status=ratio>=1?'\u2705 บรรลุเป้า':v>0?'\uD83D\uDD04 ดำเนินการ':'\u2B1C ยังไม่เริ่ม',statusCol=ratio>=1?'var(--green)':v>0?'var(--orange)':'var(--red)';return`<div style="background:var(--bg2);border:1px solid ${d.col}33;border-left:4px solid ${d.col};border-radius:9px;padding:14px 16px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px"><span style="font-weight:700;font-size:14px;color:${d.col}">${d.lbl} <span style="font-size:10px;opacity:.6">(weight ${(d.weight*100).toFixed(0)}%)</span></span><span style="font-size:11px;font-weight:700;color:${statusCol}">${status}</span></div><div style="height:6px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;margin-bottom:10px"><div style="height:100%;background:${d.col};width:${Math.min(100,v)}%;border-radius:99px"></div></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"><div style="background:var(--bgc);border-radius:7px;padding:8px;text-align:center"><div style="font-size:9px;color:var(--tx3);margin-bottom:4px">คืบหน้าแล้ว</div><div style="font-size:17px;font-weight:800;font-family:var(--m);color:${d.col}">${ceilTo2(v)}%</div></div><div style="background:var(--bgc);border-radius:7px;padding:8px;text-align:center"><div style="font-size:9px;color:var(--tx3);margin-bottom:4px">เป้าหมาย</div><div style="font-size:17px;font-weight:800;font-family:var(--m);color:var(--tx2)">${tgt}%</div></div><div style="background:var(--bgc);border-radius:7px;padding:8px;text-align:center"><div style="font-size:9px;color:var(--tx3);margin-bottom:4px">เหลืออีก</div><div style="font-size:17px;font-weight:800;font-family:var(--m);color:${gap>0?'var(--orange)':'var(--green)'}">${ceilTo2(gap)}%</div></div><div style="background:var(--bgc);border-radius:7px;padding:8px;text-align:center"><div style="font-size:9px;color:var(--tx3);margin-bottom:4px">ต้องทำ/วัน</div><div style="font-size:17px;font-weight:800;font-family:var(--m);color:${pctPerDay>0?d.col:'var(--green)'}">${pctPerDay>0?pctPerDay+'%':'\u2014'}</div></div></div></div>`;}).join('')}</div>`;
 }
 function renderSafety(){
   const c=document.getElementById('an-safety');if(!c)return;
@@ -2313,7 +2319,7 @@ function exportDataJSON(){
       's5_ไฟฟ้า':           {pct: parseFloat(v.s5.toFixed(2)),  target:80},
       's6_ท่อน้ำดี':        {pct: parseFloat(v.s6.toFixed(2)),  target:50},
     },
-    overall: parseFloat((getLiveVals().reduce((a,v,i)=>{const t=getLiveDef()[i]?.tgt||100;return a+Math.min(1,v/t);},0)/Math.max(1,getLiveDef().length)*100).toFixed(2)),
+    overall: parseFloat((typeof calcAllOverall==='function'?calcAllOverall():0).toFixed(2)),
     rawState: state
   };
   const json=JSON.stringify(data,null,2);
@@ -2544,29 +2550,38 @@ function doSaveAPIKey(){
 }
 
 function getAIInsights(){
-  const _def=getLiveDef(),vs=getLiveVals();
-  const names=_def.map(d=>d.lbl);
-  const tgts=_def.map(d=>d.tgt||100);
+  // ใช้ category-level (4 หมวด) + Weighted — ตรงกับ KPI card และ AI Decision
+  const CAT_DEFS_AI = [
+    {key:'structure',   name:'🏗️ โครงสร้าง', col:'#00bcd4', weight:0.40},
+    {key:'architecture',name:'🏛️ สถาปัตย์',  col:'#ff9500', weight:0.40},
+    {key:'electrical',  name:'⚡ ไฟฟ้า',      col:'#ce93d8', weight:0.15},
+    {key:'sanitary',    name:'💧 สุขาภิบาล', col:'#388bfd', weight:0.05},
+  ];
+  const vs   = CAT_DEFS_AI.map(c => typeof calcCatOverall==='function' ? parseFloat(calcCatOverall(c.key).toFixed(2)) : 0);
+  const names= CAT_DEFS_AI.map(c => c.name);
+  const tgts = CAT_DEFS_AI.map(() => 100);
+  const cols = CAT_DEFS_AI.map(c => c.col);
+  const weights = CAT_DEFS_AI.map(c => c.weight);
   const deadline=getProjDeadline(),today=new Date(),daysLeft=getProjDaysLeft();
   const issues=[],bottlenecks=[],critical=[];
   vs.forEach((pct,i)=>{
-    const tgt=tgts[i]||100;
-    const gap=tgt-pct;
+    const tgt=100, gap=tgt-pct;
     const risk=pct<tgt*0.3?'CRITICAL':pct<tgt*0.6?'HIGH':pct<tgt?'MEDIUM':'OK';
-    if(risk==='CRITICAL')critical.push({i,name:names[i],pct,tgt,gap});
-    else if(risk==='HIGH')bottlenecks.push({i,name:names[i],pct,tgt,gap});
-    else if(risk==='MEDIUM')issues.push({i,name:names[i],pct,tgt,gap});
+    if(risk==='CRITICAL')critical.push({i,name:names[i],pct,tgt,gap,col:cols[i],weight:weights[i]});
+    else if(risk==='HIGH')bottlenecks.push({i,name:names[i],pct,tgt,gap,col:cols[i],weight:weights[i]});
+    else if(risk==='MEDIUM')issues.push({i,name:names[i],pct,tgt,gap,col:cols[i],weight:weights[i]});
   });
-  return{vs,names,tgts,deadline,today,daysLeft,critical,bottlenecks,issues};
+  return{vs,names,tgts,cols,weights,deadline,today,daysLeft,critical,bottlenecks,issues};
 }
 function openAIInsights(){
   const overlay=document.createElement('div');
   overlay.id='ai-insights-overlay';
   overlay.style.cssText='position:fixed;inset:0;z-index:9995;background:rgba(4,8,16,.98);backdrop-filter:blur(16px);overflow-y:auto;display:block';
-  const {vs,names,tgts,critical,bottlenecks,issues}=getAIInsights();
+  const {vs,names,tgts,cols,weights,critical,bottlenecks,issues}=getAIInsights();
   const daysLeft=getProjDaysLeft();
   const deadlineStr=getProjDeadline().toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});
-  const overall=(vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:0).toFixed(1);
+  // ใช้ calcAllOverall() — Weighted เหมือน KPI card ทุกจุด
+  const overall=(typeof calcAllOverall==='function'?calcAllOverall():0).toFixed(1);
   const html=`<div style="max-width:1000px;margin:0 auto;padding:24px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
       <div><div style="font-size:24px;font-weight:800;color:#76ff03">🧠 AI Insights</div><div style="font-size:11px;color:var(--tx2);margin-top:6px;font-family:var(--m)">วิเคราะห์อัจฉริยะ • ตรวจสอบปัญหา • แนะนำวิธีแก้</div></div>
@@ -2585,7 +2600,7 @@ function openAIInsights(){
           <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px;text-align:center">
             <div style="font-size:10px;color:var(--tx3);margin-bottom:6px">📈 คืบหน้า</div>
             <div style="font-size:20px;font-weight:800;font-family:var(--m);color:#00d4ff">${overall}%</div>
-            <div style="font-size:10px;color:var(--tx2)">เฉลี่ยรวม</div>
+            <div style="font-size:10px;color:var(--tx2)">Weighted Avg</div>
           </div>
           <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px;text-align:center">
             <div style="font-size:10px;color:var(--tx3);margin-bottom:6px">🚨 วิกฤต</div>
@@ -2611,7 +2626,7 @@ function openAIInsights(){
         </div>`).join('')}</div>`:``}
       <div style="background:rgba(56,139,253,.08);border:1px solid rgba(56,139,253,.3);border-radius:12px;padding:20px">
         <div style="font-size:14px;font-weight:800;color:var(--blue);margin-bottom:14px">📋 ต้องทำ/วัน (${getProjDaysLeft()} วัน)</div>
-        <div style="font-size:12px;color:var(--tx);">${names.map((n,i)=>{const pd=(tgts[i]-(vs[i]||0))/Math.max(1,getProjDaysLeft());return `<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)"><strong>${n}</strong>: ${pd.toFixed(2)}%/วัน (${(vs[i]||0).toFixed(1)}% → ${tgts[i]}%)</div>`;}).join('')}</div>
+        <div style="font-size:12px;color:var(--tx);">${names.map((n,i)=>{const pd=(tgts[i]-(vs[i]||0))/Math.max(1,getProjDaysLeft());const col=cols?cols[i]:'#388bfd';return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)"><div style="width:8px;height:8px;border-radius:2px;background:${col};flex-shrink:0"></div><div style="flex:1"><strong style="color:${col}">${n}</strong></div><div style="font-family:var(--m);color:${(vs[i]||0)>=tgts[i]?'var(--green)':'var(--orange)'};">${(vs[i]||0).toFixed(1)}%</div><div style="font-family:var(--m);font-size:11px;color:var(--tx3)">→</div><div style="font-family:var(--m);color:var(--tx2)">${tgts[i]}%</div><div style="font-family:var(--m);color:${pd>0?'#ff9500':'var(--green)'};min-width:70px;text-align:right">${pd>0?pd.toFixed(2)+'%/วัน':'✅ บรรลุ'}</div></div>`;}).join('')}</div>
       </div>
       <div style="background:linear-gradient(135deg,rgba(76,175,80,.1),transparent);border:1px solid rgba(118,255,3,.4);border-radius:12px;padding:20px">
         <div style="font-size:13px;color:var(--tx);line-height:1.8">
@@ -2639,7 +2654,7 @@ function jupSaveSnapshot(){
       ts:new Date().toISOString(),
       date:new Date().toLocaleDateString('th-TH',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),
       data:names.map((n,i)=>({name:n,pct:parseFloat(vs[i].toFixed(2)),tgt:tgts[i]})),
-      overall:parseFloat((vs.reduce((a,v,i)=>a+Math.min(1,v/(tgts[i]||100)),0)/Math.max(1,vs.length)*100).toFixed(2))
+      overall:parseFloat((typeof calcAllOverall==='function'?calcAllOverall():0).toFixed(2))
     };
     let snaps=jupGetSnapshots();
     // ไม่บันทึกซ้ำถ้าข้อมูลเหมือนกับอันล่าสุด
@@ -4361,12 +4376,19 @@ function jup7SeedFromLatest(){
 <script>
 // ════════════════════════════════════════════════════════════════════
 // 🧠 AI DECISION SYSTEM — Admin Only
-//    สูตร: Σ(v/tgt)/n×100  เหมือน Dashboard โดนัท
+//    สูตร: Weighted Avg  เหมือน Dashboard โดนัท
 // ════════════════════════════════════════════════════════════════════
 function getADS_DEADLINE(){return getProjDeadline();}
-function getADS_TGTS(){return getLiveDef().map(function(d){return d.tgt||100;});}
-function getADS_NAMES(){return getLiveDef().map(function(d){return d.lbl;});}
-function getADS_COLS(){return getLiveDef().map(function(d){return d.col;});}
+
+// ADS ทำงานระดับ Category (4 หมวด) — ตรงกับ calcAllOverall() และ KPI card
+var ADS_CATS = ['structure','architecture','electrical','sanitary'];
+var ADS_CAT_NAMES = { structure:'🏗️ โครงสร้าง', architecture:'🏛️ สถาปัตย์', electrical:'⚡ ไฟฟ้า', sanitary:'💧 สุขาภิบาล' };
+var ADS_CAT_COLS  = { structure:'#00bcd4', architecture:'#ff9500', electrical:'#ce93d8', sanitary:'#388bfd' };
+
+function getADS_TGTS(){ return ADS_CATS.map(function(){ return 100; }); }
+function getADS_NAMES(){ return ADS_CATS.map(function(c){ return ADS_CAT_NAMES[c]; }); }
+function getADS_COLS(){ return ADS_CATS.map(function(c){ return ADS_CAT_COLS[c]; }); }
+
 // Backwards-compatible accessors
 var ADS_TGTS={valueOf:function(){return getADS_TGTS();}};
 var ADS_NAMES={valueOf:function(){return getADS_NAMES();}};
@@ -4375,16 +4397,53 @@ var ADS_COLS={valueOf:function(){return getADS_COLS();}};
 function isAdminMode(){
   try{return !document.body.classList.contains('view-mode')&&sessionStorage.getItem('cp_edit_session')==='1';}catch(e){return false;}
 }
-function adsOverall(vs){var tgts=getADS_TGTS();return vs.reduce(function(a,v,i){return a+Math.min(1,v/(tgts[i]||100));},0)/Math.max(1,vs.length)*100;}
-function adsGetVs(){return getLiveVals();}
+
+// adsGetVs คืน [pct_structure, pct_architecture, pct_electrical, pct_sanitary]
+// ตรงกับ calcCatOverall() ที่ calcAllOverall() ใช้
+function adsGetVs(){
+  return ADS_CATS.map(function(cat){
+    return typeof calcCatOverall==='function' ? parseFloat(calcCatOverall(cat).toFixed(2)) : 0;
+  });
+}
+
+// adsOverall ใช้ Weighted เหมือน calcAllOverall()
+function adsOverall(vs){
+  var total=0;
+  ADS_CATS.forEach(function(cat,i){ total += (vs[i]||0) * (CAT_WEIGHTS[cat]||0); });
+  return total;
+}
 function adsFmtDate(d){if(!d||isNaN(d))return'—';return d.toLocaleDateString('th-TH',{year:'numeric',month:'short',day:'numeric'});}
+// แปลง snapshot vs[] (S item รายตัว) → category pct (4 ค่า) เหมือน adsGetVs()
+function adsSnapToCatVs(snapVs){
+  if(!snapVs||!snapVs.length) return [0,0,0,0];
+  // snapVs มาจาก jupAutoSaveSnapshot ซึ่ง call getLiveVals()
+  // getLiveVals() คืน pctVal ต่อ S item ใน order ของ getLiveDef()
+  // ดังนั้นต้องจัดกลุ่มตาม catKey ของ getLiveDef()
+  try{
+    var def = getLiveDef();
+    return ADS_CATS.map(function(cat){
+      var items = def.filter(function(d){ return d.catKey===cat; });
+      if(!items.length) return 0;
+      var sum = items.reduce(function(a,d,di){
+        // หา index ใน def array
+        var idx = def.indexOf(d);
+        return a + (snapVs[idx]||0);
+      },0);
+      return sum/items.length;
+    });
+  }catch(e){ return [0,0,0,0]; }
+}
+
 function adsGetRates(){
   try{
     var hist=JSON.parse(localStorage.getItem('cp_jup_7day')||'[]');
     if(hist.length<2)return null;
     var o=hist[0],n=hist[hist.length-1];
     var days=Math.max(1,(new Date(n.date)-new Date(o.date))/86400000);
-    var _tgts=getADS_TGTS();var rates=_tgts.map(function(_,i){return((n.vs[i]||0)-(o.vs[i]||0))/days;});
+    // แปลง snapshot vs → category level
+    var oVs=adsSnapToCatVs(o.vs);
+    var nVs=adsSnapToCatVs(n.vs);
+    var rates=ADS_CATS.map(function(_,i){ return (nVs[i]-oVs[i])/days; });
     return{rates:rates,days:days,oldest:o,newest:n};
   }catch(e){return null;}
 }
@@ -4411,7 +4470,10 @@ function adsRisk(pred,vs,i){
   return'ok';
 }
 function adsAnalyze(){
-  var vs=adsGetVs(),overall=adsOverall(vs),today=new Date();
+  var vs=adsGetVs();
+  // ใช้ calcAllOverall() โดยตรง — ตรงกับ KPI card และ pie chart ทุกจุด
+  var overall=typeof calcAllOverall==='function'?calcAllOverall():adsOverall(vs);
+  var today=new Date();
   var daysLeft=getProjDaysLeft();
   var ri=adsGetRates(),rates=ri?ri.rates:null,pred=adsPredict(vs,rates);
   var _names=getADS_NAMES();var _tgts2=getADS_TGTS();var _cols=getADS_COLS();
@@ -4425,7 +4487,11 @@ function adsAnalyze(){
   var highs=tasks.filter(function(t){return t.risk==='high';});
   var delayed=tasks.filter(function(t){return t.delay;});
   var oFinDate=null;
-  if(rates){var _adsTgts=getADS_TGTS();var oR=vs.reduce(function(a,v,i){return a+Math.min(1,rates[i]/(_adsTgts[i]||100)*100);},0)/Math.max(1,vs.length);var oG=100-overall;if(oR>0){oFinDate=new Date(today);oFinDate.setDate(today.getDate()+Math.ceil(oG/oR));}}
+  if(rates){
+    // Weighted rate = อัตราการเปลี่ยนแปลง overall% ต่อวัน (weighted เหมือน calcAllOverall)
+    var oR=ADS_CATS.reduce(function(a,cat,i){ return a+(rates[i]||0)*(CAT_WEIGHTS[cat]||0); },0);
+    var oG=100-overall;
+    if(oR>0){oFinDate=new Date(today);oFinDate.setDate(today.getDate()+Math.ceil(oG/oR));}}
   return{vs:vs,overall:overall,daysLeft:daysLeft,tasks:tasks,criticals:criticals,highs:highs,delayed:delayed,rateInfo:ri,pred:pred,overallFinDate:oFinDate};
 }
 
@@ -4910,31 +4976,29 @@ function getItemData(itemId) {
 }
 
 // ── Calculation helpers ──────────────────────────────────────────────────
+// น้ำหนักแต่ละหมวด: โครงสร้าง 40%, สถาปัตย์ 40%, ไฟฟ้า 15%, สุขาภิบาล 5%
+const CAT_WEIGHTS = { structure: 0.40, architecture: 0.40, electrical: 0.15, sanitary: 0.05 };
+
 function calcCatOverall(catKey) {
+  // เฉลี่ย % ทุก S item ในหมวด (raw pct — ไม่หาร pctTarget)
   const items = getAllItemsForCat(catKey);
   if (!items.length) return 0;
-  // Average of (pct / pctTarget * 100) so reaching the target = 100% achievement
   const sum = items.reduce((a, item) => {
     const d = getItemData(item.id);
-    const pct = Math.min(100, Math.max(0, d.pct || 0));
-    const tgt = d.pctTarget > 0 && d.pctTarget <= 100 ? d.pctTarget : 100;
-    return a + Math.min(100, pct / tgt * 100);
+    return a + Math.min(100, Math.max(0, d.pct || 0));
   }, 0);
   return sum / items.length;
 }
 
 function calcAllOverall() {
+  // Weighted: โครงสร้าง×0.40 + สถาปัตย์×0.40 + ไฟฟ้า×0.15 + สุขาภิบาล×0.05
+  // สูตรเดียวกับ index_realtime_3 และ pushOverallPct
   const cats = ['structure','architecture','electrical','sanitary'];
-  let totalPct = 0, totalCount = 0;
+  let weighted = 0;
   cats.forEach(cat => {
-    const items = getAllItemsForCat(cat);
-    items.forEach(item => {
-      const d = getItemData(item.id);
-      totalPct += Math.min(100, Math.max(0, d.pct || 0));
-      totalCount++;
-    });
+    weighted += calcCatOverall(cat) * (CAT_WEIGHTS[cat] || 0);
   });
-  return totalCount > 0 ? totalPct / totalCount : 0;
+  return weighted;
 }
 
 // ── Initialize ─────────────────────────────────────────────────────────────
