@@ -6565,19 +6565,26 @@ function sGnt(){
   var dlPct=projDeadline?posDate(projDeadline):null;
 
   // ── build HTML ────────────────────────────────────────────────
-  // wrapper ให้ scroll แนวนอนบนมือถือ
-  var NAME=160; // ชื่อ col (px) — เล็กลงสำหรับ mobile
-  var h='<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%">';
-  h+='<div style="min-width:'+Math.max(600,(NAME+months.length*80))+'px">';
+  var vw=typeof window!=='undefined'?window.innerWidth:800;
+  var isMob=vw<=480;
+  var NAME=isMob?Math.floor(vw*0.30):160;
+  var ROW_H=isMob?28:38;
+  var BAR_H=isMob?6:10;
+  var BAR_T=isMob?8:11;
+  var FMON=isMob?7:9;
+  var FNAME=isMob?8:10;
+  var h=isMob?'<div style="width:100%">':'<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%">';
+  var innerW=isMob?'100%':Math.max(500,(NAME+months.length*65))+'px';
+  h+='<div style="min-width:'+innerW+';width:100%">';
 
   // month header row
   h+='<div style="display:flex;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07);position:sticky;top:0;z-index:2">';
-  h+='<div style="width:'+NAME+'px;flex-shrink:0;padding:6px 10px;font-size:9px;font-weight:700;color:rgba(255,255,255,.3)">งาน / % จริง</div>';
+  h+='<div style="width:'+NAME+'px;flex-shrink:0;padding:4px 8px;font-size:'+FMON+'px;font-weight:700;color:rgba(255,255,255,.3)">'+(isMob?'งาน':'งาน / % จริง')+'</div>';
   h+='<div style="flex:1;display:flex;position:relative">';
   months.forEach(function(m){
     var bg=m.isDeadlineMonth?'rgba(255,68,68,.12)':'transparent';
     var col=m.isDeadlineMonth?'#ff4444':'rgba(255,255,255,.35)';
-    h+='<div style="flex:0 0 '+m.w+'%;text-align:center;padding:5px 2px;font-size:9px;font-weight:700;color:'+col+';background:'+bg+';border-right:1px solid rgba(255,255,255,.05)">'+m.label+(m.isDeadlineMonth?' 🏁':'')+'</div>';
+    h+='<div style="flex:0 0 '+m.w+'%;text-align:center;padding:3px 1px;font-size:'+FMON+'px;font-weight:700;color:'+col+';background:'+bg+';border-right:1px solid rgba(255,255,255,.05)">'+m.label+(m.isDeadlineMonth?' 🏁':'')+'</div>';
   });
   h+='</div></div>';
 
@@ -6601,7 +6608,7 @@ function sGnt(){
 
     // category header
     h+='<div style="display:flex;align-items:center;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07);min-height:28px">';
-    h+='<div style="width:'+NAME+'px;flex-shrink:0;padding:4px 10px;display:flex;align-items:center;gap:5px">';
+    h+='<div style="width:'+NAME+'px;flex-shrink:0;padding:3px 6px;display:flex;align-items:center;gap:3px">';
     h+='<div style="width:9px;height:9px;border-radius:2px;background:'+m.col+'"></div>';
     h+='<span style="font-size:11px;font-weight:800;color:'+m.col+'">'+m.icon+' '+m.name+'</span>';
     h+='<span style="font-size:9px;font-family:var(--m,monospace);color:'+(cGap>=0?'#00e676':'#ff9500')+'">'+(cGap>=0?'+':'')+cGap.toFixed(1)+'%</span>';
@@ -6623,12 +6630,12 @@ function sGnt(){
         ps=posDate(projStart);pe=posDate(projDeadline);hasSched=pe>ps;
       }
 
-      var rowH=38;
+      var rowH=ROW_H;
       h+='<div style="display:flex;align-items:center;border-bottom:1px solid rgba(255,255,255,.04);min-height:'+rowH+'px">';
 
       // name
-      h+='<div style="width:'+NAME+'px;flex-shrink:0;padding:3px 10px">';
-      h+='<div style="font-size:10px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#e8f0fe">';
+      h+='<div style="width:'+NAME+'px;flex-shrink:0;padding:2px 5px">';
+      h+='<div style="font-size:'+FNAME+'px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#e8f0fe">';
       h+='<span style="font-family:var(--m,monospace);color:'+m.col+';font-size:9px;margin-right:2px">'+item.label+'</span>'+sName(item);
       h+='</div>';
       // date range ถ้ามี
@@ -6648,23 +6655,23 @@ function sGnt(){
       if(hasSched){
         var bw=Math.max(0.5,pe-ps);
         // plan outline
-        h+='<div style="position:absolute;top:11px;left:'+ps+'%;width:'+bw+'%;height:12px;border:1px solid '+m.col+';opacity:.35;border-radius:5px"></div>';
+        h+='<div style="position:absolute;top:'+BAR_T+'px;left:'+ps+'%;width:'+bw+'%;height:'+BAR_H+'px;border:1px solid '+m.col+';opacity:.35;border-radius:5px"></div>';
         // plan fill bg
-        h+='<div style="position:absolute;top:11px;left:'+ps+'%;width:'+bw+'%;height:12px;background:'+m.col+';opacity:.15;border-radius:5px"></div>';
+        h+='<div style="position:absolute;top:'+BAR_T+'px;left:'+ps+'%;width:'+bw+'%;height:'+BAR_H+'px;background:'+m.col+';opacity:.15;border-radius:5px"></div>';
         // actual fill
         var aw=bw*(ap/100);
-        h+='<div style="position:absolute;top:11px;left:'+ps+'%;width:'+aw+'%;height:12px;background:'+barCol+';border-radius:5px;z-index:2;transition:width .3s"></div>';
+        h+='<div style="position:absolute;top:'+BAR_T+'px;left:'+ps+'%;width:'+aw+'%;height:'+BAR_H+'px;background:'+barCol+';border-radius:5px;z-index:2;transition:width .3s"></div>';
         // % label
         if(bw>6){
-          h+='<div style="position:absolute;top:12px;left:'+(ps+bw/2)+'%;transform:translateX(-50%);font-size:8px;font-weight:700;color:#fff;z-index:3;text-shadow:0 1px 3px rgba(0,0,0,.9);white-space:nowrap;pointer-events:none">'+ap.toFixed(0)+'%</div>';
+          h+='<div style="position:absolute;top:'+(BAR_T+1)+'px;left:'+(ps+bw/2)+'%;transform:translateX(-50%);font-size:8px;font-weight:700;color:#fff;z-index:3;text-shadow:0 1px 3px rgba(0,0,0,.9);white-space:nowrap;pointer-events:none">'+ap.toFixed(0)+'%</div>';
         }
       } else {
         // no date — full width progress
-        h+='<div style="position:absolute;top:14px;left:2%;width:96%;height:8px;background:rgba(255,255,255,.07);border-radius:4px"></div>';
+        h+='<div style="position:absolute;top:'+BAR_T+'px;left:2%;width:96%;height:'+BAR_H+'px;background:rgba(255,255,255,.07);border-radius:4px"></div>';
         if(ap>0){
-          h+='<div style="position:absolute;top:14px;left:2%;width:'+Math.min(96,ap*0.96)+'%;height:8px;background:'+barCol+';opacity:.8;border-radius:4px;z-index:2"></div>';
+          h+='<div style="position:absolute;top:'+BAR_T+'px;left:2%;width:'+Math.min(96,ap*0.96)+'%;height:'+BAR_H+'px;background:'+barCol+';opacity:.8;border-radius:4px;z-index:2"></div>';
         }
-        h+='<div style="position:absolute;top:15px;left:51%;transform:translateX(-50%);font-size:7px;color:rgba(255,255,255,.3);z-index:3;white-space:nowrap">'+ap.toFixed(0)+'% (ยังไม่กำหนดวัน)</div>';
+        h+='<div style="position:absolute;top:'+(BAR_T+2)+'px;left:51%;transform:translateX(-50%);font-size:7px;color:rgba(255,255,255,.3);z-index:3;white-space:nowrap">'+ap.toFixed(0)+'% (ยังไม่กำหนดวัน)</div>';
       }
       h+='</div></div>';
     });
