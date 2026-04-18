@@ -8518,19 +8518,30 @@ window.showRegisterModal = function(){
   // ปิด lock modal ก่อน
   var lm = document.getElementById('lock-modal');
   if(lm) lm.classList.remove('show');
-  // เปิด Firebase Auth overlay แล้วไปที่ tab สมัครสมาชิก
+
+  // เปิด overlay เสมอ ไม่ว่า Firebase จะ init แล้วหรือยัง
   var ov = document.getElementById('fb-auth-ov');
   if(ov){
-    ov.style.display='flex';
-    if(typeof fbAuthTab==='function') fbAuthTab('register');
+    ov.style.display = 'flex';
+    // ถ้า Firebase ready แล้ว เปลี่ยน tab ได้เลย
+    if(typeof _authReady !== 'undefined' && _authReady){
+      if(typeof fbAuthTab === 'function') fbAuthTab('register');
+    } else {
+      // init Firebase ก่อน แล้วค่อยเปลี่ยน tab
+      if(typeof _initFirebaseAuth === 'function') _initFirebaseAuth();
+      var _wc = 0;
+      var _wt = setInterval(function(){
+        _wc++;
+        if((typeof _authReady !== 'undefined' && _authReady) || _wc > 20){
+          clearInterval(_wt);
+          if(typeof fbAuthTab === 'function') fbAuthTab('register');
+        }
+      }, 150);
+    }
     setTimeout(function(){
-      var e=document.getElementById('auth-email');
+      var e = document.getElementById('auth-email');
       if(e) e.focus();
-    },100);
-  }else{
-    // Firebase Auth ยังไม่ init → แสดงข้อความ
-    if(typeof showToast==='function') showToast('กรุณาตั้งค่า Firebase ก่อนสมัครสมาชิก','err',4000);
-    if(lm) lm.classList.add('show');
+    }, 300);
   }
 };
 
