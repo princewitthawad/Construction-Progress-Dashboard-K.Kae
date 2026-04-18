@@ -6068,7 +6068,10 @@ window.schedBuildAIContext=function(){
     items.forEach(function(item){
       var sch=sD(item.id),ap=sActual(item.id),pp=parseFloat(sch.planPct)||0,gap=ap-pp;
       var dt=(sch.planStart&&sch.planEnd)?sch.planStart+'>'+sch.planEnd:'ยังไม่กำหนด';
-      var st=ap>=100?'✅':ap===0&&pp===0?'⬜':gap<-10?'🔴':gap<0?'🟡':'🟢';
+      var _todayCtx=new Date();_todayCtx.setHours(0,0,0,0);
+    var _psCtx=sch.planStart?new Date(sch.planStart+'T00:00:00'):null;
+    var _notYetCtx=_psCtx&&_psCtx>_todayCtx;
+    var st=ap>=100?'✅':_notYetCtx&&ap>0?'🚀':_notYetCtx?'⏰':ap===0&&pp===0?'⬜':gap<-10?'🔴':gap<0?'🟡':'🟢';
       cLines.push('  '+item.label+' '+sName(item)+': แผน'+pp.toFixed(0)+'% จริง'+ap.toFixed(0)+'%('+st+(gap>=0?'+':'')+gap.toFixed(0)+'%)['+dt+']');
       (sch.subs||[]).forEach(function(sub){
         cLines.push('    ↳ '+sub.name+': แผน'+parseFloat(sub.planPct||0).toFixed(0)+'%');
@@ -6230,7 +6233,11 @@ function sStat(){
       var d=sD(item.id),ap=sActual(item.id),pp=parseFloat(d.planPct)||0;
       tot++;sp+=pp;
       if(ap>=100)done++;
-      if(ap<100&&pp>0&&ap<pp)late++;
+      // นับว่าล่าช้าเฉพาะงานที่ถึงวันเริ่มแล้วเท่านั้น
+      var _today=new Date();_today.setHours(0,0,0,0);
+      var _ps=d.planStart?new Date(d.planStart+'T00:00:00'):null;
+      var _started=!_ps||_ps<=_today;
+      if(_started&&ap<100&&pp>0&&ap<pp)late++;
     });
   });
   var avgP=tot?sp/tot:0;
@@ -6264,8 +6271,22 @@ function sFmtD(s){
   try{return new Date(s+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short'});}catch(e){return s;}
 }
 function sDL(end){if(!end)return null;return Math.ceil((new Date(end+'T00:00:00')-new Date())/86400000);}
-function sSt(ap,pp){
+function sSt(ap,pp,planStart){
+  // ตรวจว่าถึงวันเริ่มงานแล้วหรือยัง
+  var today=new Date();today.setHours(0,0,0,0);
+  var started=true; // default: ถือว่าถึงกำหนดแล้วถ้าไม่ได้กำหนดวัน
+  var notYetStarted=false;
+  if(planStart){
+    var ps=new Date(planStart+'T00:00:00');
+    if(ps>today) notYetStarted=true; // วันเริ่มยังมาไม่ถึง
+  }
   if(ap>=100)return{t:'✅ เสร็จ',c:'#ffd600'};
+  // ยังไม่ถึงวันเริ่ม
+  if(notYetStarted){
+    if(ap>0) return{t:'🚀 เริ่มเร็วกว่าแผน',c:'#00e5ff'}; // มีการทำงานแล้วทั้งที่ยังไม่ถึงวัน
+    return{t:'⏰ ยังไม่ถึงกำหนด',c:'rgba(255,255,255,.3)'}; // ยังไม่ถึงและยังไม่ได้ทำ
+  }
+  // ถึงวันเริ่มงานแล้ว (หรือไม่ได้กำหนดวัน)
   if(ap===0&&pp===0)return{t:'⬜ ยังไม่เริ่ม',c:'rgba(255,255,255,.25)'};
   var g=ap-pp;
   if(g<-15)return{t:'🔴 ล่าช้ามาก',c:'#ff4444'};
@@ -6305,7 +6326,7 @@ function sTbl(){
     h+='<div id="sr-'+cat+'">';
     items.forEach(function(item){
       var d=sD(item.id),ap=sActual(item.id),pp=parseFloat(d.planPct)||0,gap=ap-pp;
-      var col=m.col,st=sSt(ap,pp);
+      var col=m.col,st=sSt(ap,pp,d.planStart);
       var dl=d.planEnd?sDL(d.planEnd):null;
       var dlc=dl===null?'rgba(255,255,255,.3)':dl<0?'#ff4444':dl<=7?'#ff9500':'rgba(255,255,255,.5)';
       var hasSubs=d.subs&&d.subs.length>0,isExp=_sExp[item.id];
@@ -6322,7 +6343,7 @@ function sTbl(){
         +'</div>';
       if(isExp){
         (d.subs||[]).forEach(function(sub,si){
-          var sap=parseFloat(sub.actualPct||0),spp=parseFloat(sub.planPct||0),sg=sap-spp,sst=sSt(sap,spp);
+          var sap=parseFloat(sub.actualPct||0),spp=parseFloat(sub.planPct||0),sg=sap-spp,sst=sSt(sap,spp,sub.planStart);
           h+='<div class="sr sub">'
             +'<div class="std c"></div>'
             +'<div class="std c"><span style="font-size:8px;color:rgba(255,255,255,.2);font-family:var(--m,monospace)">sub</span></div>'
