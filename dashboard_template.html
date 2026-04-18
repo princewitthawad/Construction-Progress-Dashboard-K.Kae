@@ -8515,34 +8515,48 @@ window.saveFirebaseUrl = function(){
 
 <script>
 window.showRegisterModal = function(){
-  // ปิด lock modal ก่อน
+  // ① ปิด lock modal
   var lm = document.getElementById('lock-modal');
   if(lm) lm.classList.remove('show');
 
-  // เปิด overlay เสมอ ไม่ว่า Firebase จะ init แล้วหรือยัง
+  // ② เปิด overlay ทันที
   var ov = document.getElementById('fb-auth-ov');
-  if(ov){
-    ov.style.display = 'flex';
-    // ถ้า Firebase ready แล้ว เปลี่ยน tab ได้เลย
-    if(typeof _authReady !== 'undefined' && _authReady){
-      if(typeof fbAuthTab === 'function') fbAuthTab('register');
+  if(!ov) return;
+  ov.style.display = 'flex';
+
+  // ③ switch tab ไปที่ register โดยตรง (ไม่รอ Firebase)
+  //    — ทำ inline เพื่อไม่ต้องพึ่ง fbAuthTab
+  var tabs = ['login','register','reset'];
+  tabs.forEach(function(m){
+    var t = document.getElementById('auth-tab-'+m);
+    if(!t) return;
+    if(m === 'register'){
+      t.style.background = 'linear-gradient(135deg,rgba(0,200,83,.4),rgba(0,230,118,.25))';
+      t.style.color = 'rgba(0,230,118,.9)';
     } else {
-      // init Firebase ก่อน แล้วค่อยเปลี่ยน tab
-      if(typeof _initFirebaseAuth === 'function') _initFirebaseAuth();
-      var _wc = 0;
-      var _wt = setInterval(function(){
-        _wc++;
-        if((typeof _authReady !== 'undefined' && _authReady) || _wc > 20){
-          clearInterval(_wt);
-          if(typeof fbAuthTab === 'function') fbAuthTab('register');
-        }
-      }, 150);
+      t.style.background = 'transparent';
+      t.style.color = 'rgba(255,255,255,.35)';
     }
-    setTimeout(function(){
-      var e = document.getElementById('auth-email');
-      if(e) e.focus();
-    }, 300);
-  }
+  });
+  // แสดง/ซ่อน fields ของ register
+  var show = ['auth-pass-wrap','auth-pass2-wrap','auth-role-wrap','auth-name-wrap'];
+  show.forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='block'; });
+  var desc = document.getElementById('auth-tab-desc');
+  if(desc) desc.textContent = 'สมัครสมาชิกด้วย Email — รหัสผ่านตัวเลข 6–8 หลัก';
+  var hint = document.getElementById('auth-register-hint');
+  if(hint) hint.style.display = 'none';
+  var btn = document.getElementById('auth-submit');
+  if(btn){ btn.textContent = '✏️ สมัครสมาชิก'; btn.style.background = 'linear-gradient(135deg,rgba(0,200,83,.4),rgba(0,230,118,.25))'; }
+  var err = document.getElementById('auth-err');
+  if(err) err.textContent = '';
+  // set _authMode ถ้าตัวแปรมี
+  try{ _authMode = 'register'; }catch(e){}
+
+  // ④ focus email
+  setTimeout(function(){
+    var e = document.getElementById('auth-email');
+    if(e){ e.value=''; e.focus(); }
+  }, 150);
 };
 
 window.showForgotPassModal = function(){
