@@ -9024,20 +9024,34 @@ window.doRoleRequest = function(){
   function sendRequest(toAdmin){
     var otp = _genOTP();
     var roleLabel = role==='acct'?'ACCT (บัญชีโครงการ)':'Dev (นักพัฒนา)';
-    var approveUrl = window.location.href.split('?')[0]+'?approve=1&uid='+btoa(email)+'&role='+role+'&otp='+otp;
+    // ไม่ใช้ URL approve แล้ว — Admin กรอก OTP โดยตรงใน Dashboard
+    var approveUrl = 'กรอก OTP: '+otp+' ใน Dashboard หน้า ACCT/Dev login';
 
     if(subEl){ subEl.disabled=true; subEl.textContent='กำลังส่ง...'; }
     if(ldEl) ldEl.style.display='block';
 
-    // บันทึกคำขอใน Firebase
+    // บันทึกคำขอ + OTP hash ใน Firebase
+    var otpHash = typeof sha256==='function' ? sha256(otp) : otp;
+    var fbKey = btoa(email).replace(/[^a-zA-Z0-9]/g,'_');
     try{
       if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length){
-        firebase.database().ref('role_requests/'+btoa(email).replace(/[^a-zA-Z0-9]/g,'_')).set({
+        // บันทึก request
+        firebase.database().ref('role_requests/'+fbKey).set({
           email:email, name:name, role:role, otp:otp,
-          status:'pending', createdAt:new Date().toISOString()
+          otpHash:otpHash, status:'pending',
+          createdAt:new Date().toISOString()
         });
+        // บันทึก OTP hash ใน shared_hashes ทันที
+        // ใครรู้ OTP → เข้าได้ทุกเครื่อง
+        var sharedKey = role==='acct' ? 'acct_pass_hash' : 'dev_pass_hash';
+        firebase.database().ref('shared_hashes/'+sharedKey).set({
+          hash: otpHash,
+          updatedAt: new Date().toISOString(),
+          grantedTo: email
+        });
+        console.log(roleLabel+' OTP hash saved to Firebase shared_hashes');
       }
-    }catch(e3){}
+    }catch(e3){ console.warn('Firebase save:', e3); }
 
     // ส่ง Email ผ่าน EmailJS
     if(typeof emailjs==='undefined'){
@@ -9070,7 +9084,7 @@ window.doRoleRequest = function(){
       // ปิด popup หลัง 3 วิ
       setTimeout(function(){
         window.closeRoleRequestPopup();
-        if(typeof showToast==='function') showToast('ส่งคำขอสิทธิ์ '+roleLabel+' แล้ว รอ Admin อนุมัติ','ok',6000);
+        if(typeof showToast==='function') showToast('ส่งคำขอเรียบร้อย! Admin จะได้รับ OTP ทาง Email · นำ OTP มากรอกใน ACCT/Dev login ได้เลย','ok',8000);
       }, 3000);
     }).catch(function(err){
       if(ldEl) ldEl.style.display='none';
@@ -9083,37 +9097,7 @@ window.doRoleRequest = function(){
   sendRequest('witthawad1@gmail.com');
 };
 
-// ════ Check Approve URL on load ════════════════════════════════
-// เมื่อ Admin กด approve link → popup แสดง OTP ครั้งเดียว
-(function(){
-  var params=new URLSearchParams(window.location.search);
-  if(params.get('approve')==='1'){
-    var uid=params.get('uid')||'';
-    var role=params.get('role')||'';
-    var otp=params.get('otp')||'';
-    if(!uid||!role||!otp) return;
-
-    // รอ page โหลดเสร็จก่อน
-    window.addEventListener('load',function(){
-      setTimeout(function(){
-        // อัพเดท Firebase role
-        try{
-          if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length){
-            var key=uid.replace(/[^a-zA-Z0-9]/g,'_');
-            firebase.database().ref('role_requests/'+key).update({status:'approved',approvedAt:new Date().toISOString()});
-            // อัพเดท user role ถ้ามีใน Firebase Auth
-          }
-        }catch(e){}
-
-        // แสดง OTP popup ครั้งเดียว
-        _showOTPPopup(otp, role, atob(uid));
-
-        // ลบ query params ออก
-        window.history.replaceState({},'',window.location.pathname);
-      }, 1500);
-    });
-  }
-})();
+// Approve URL check removed — using OTP direct entry
 
 function _showOTPPopup(otp, role, userEmail){
   var roleLabel = role==='acct' ? 'ACCT' : 'Dev';
