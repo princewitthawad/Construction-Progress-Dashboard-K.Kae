@@ -853,6 +853,9 @@ input, textarea, [contenteditable] {
 #reg-popup input,#reg-popup textarea,#reg-popup select{pointer-events:all!important;-webkit-user-select:text!important;user-select:text!important;cursor:text!important;opacity:1!important;z-index:10!important}
 body.view-mode #reg-popup input,body.view-mode #reg-popup textarea{pointer-events:all!important;cursor:text!important;opacity:1!important}
 
+
+#firebase-modal input,#firebase-modal textarea{pointer-events:all!important;user-select:text!important;-webkit-user-select:text!important;cursor:text!important;opacity:1!important}
+body.view-mode #firebase-modal input{pointer-events:all!important;cursor:text!important;opacity:1!important}
 </style>
 <script>
 // ── Stub functions — defined early so buttons work before full script loads ──
@@ -924,7 +927,8 @@ window.showForgotPassModal = function(){
     <div class="live-badge"><div class="ld"></div>LIVE</div>
     <div class="view-badge">👁️ โหมดดูอย่างเดียว</div>
     <a id="dev-login-link" href="#" onclick="event.preventDefault();showDevLoginModal()" style="font-size:11px;font-weight:600;color:#9b66ff;text-decoration:none;padding:5px 10px;border-radius:6px;border:1px solid rgba(120,80,255,.3);background:rgba(120,80,255,.08);transition:color .2s" title="Developer Mode">🛠️ Dev</a>
-    <a id="lockin-link" href="#" onclick="event.preventDefault();showLockModal()" style="font-size:11px;font-weight:600;color:var(--tx2);text-decoration:none;padding:5px 10px;border-radius:6px;transition:color .2s" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--tx2)'">🔓 Login</a>
+    <a id="lockin-link" href="#" onclick="event.preventDefault();showLockModal()" style="font-size:11px;font-weight:600;color:#a8e063;text-decoration:none;padding:5px 10px;border-radius:6px;border:1px solid rgba(168,224,99,.35);background:rgba(168,224,99,.1);transition:all .2s;-webkit-tap-highlight-color:transparent" onmouseover="this.style.background='rgba(168,224,99,.2)';this.style.borderColor='rgba(168,224,99,.6)'" onmouseout="this.style.background='rgba(168,224,99,.1)';this.style.borderColor='rgba(168,224,99,.35)'">🔓 Login</a>
+    <button onclick="openFirebaseModal()" id="cloud-register-btn" style="font-size:11px;font-weight:600;color:rgba(56,139,253,.8);padding:5px 10px;border-radius:6px;border:1px solid rgba(56,139,253,.3);background:rgba(56,139,253,.08);cursor:pointer;font-family:var(--f);transition:all .2s;-webkit-tap-highlight-color:transparent" onmouseover="this.style.background='rgba(56,139,253,.15)'" onmouseout="this.style.background='rgba(56,139,253,.08)'">☁️ ลงทะเบียน</button>
     <button id="approve-notif-btn" onclick="openApprovePanel()" style="display:none;align-items:center;gap:5px;background:rgba(255,200,0,.12);color:#ffd600;border:1px solid rgba(255,200,0,.3);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">📋 คำขอ <span class="ap-count" style="background:rgba(255,80,80,.8);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px">0</span></button>
     <button id="logout-btn" class="btn edit-only" onclick="doLogout()" style="display:none;background:rgba(255,68,68,.12);color:#ff6666;border:1px solid rgba(255,68,68,.3);font-size:11px">🔒 Logout</button>
     <button id="lock-btn" class="btn btn-o edit-only" onclick="applyViewMode()" style="display:none">🔒 ล็อก</button>
@@ -1490,11 +1494,28 @@ function openFirebaseModal(){
   if(inp){ inp.value = _fbUrl || ''; }
   updateFbStatus();
   modal.style.display = 'flex';
-  setTimeout(()=>inp?.focus(), 80);
+  // ลบ view-mode ชั่วคราวเพื่อให้ input กรอกได้
+  var wasVM = document.body.classList.contains('view-mode');
+  if(wasVM){ document.body.classList.remove('view-mode'); document.body._fbModalVM=true; }
+  // force input interactive
+  if(inp){
+    inp.style.pointerEvents='all';
+    inp.style.userSelect='text';
+    inp.style.webkitUserSelect='text';
+    inp.style.cursor='text';
+    inp.removeAttribute('disabled');
+    inp.removeAttribute('readonly');
+    setTimeout(function(){ inp.focus(); inp.click(); }, 150);
+  }
 }
 function closeFirebaseModal(){
   const modal = document.getElementById('firebase-modal');
   if(modal) modal.style.display = 'none';
+  // คืน view-mode ถ้าเคยเป็น
+  if(document.body._fbModalVM){
+    document.body.classList.add('view-mode');
+    document.body._fbModalVM = false;
+  }
 }
 function updateFbStatus(){
   const st = document.getElementById('fb-status-badge');
@@ -3817,24 +3838,32 @@ function doACCTUnlock(){
     }
   }
 
-  // ตรวจ localStorage ก่อน → ถ้าไม่มี ดึงจาก Firebase
-  const localHash = localStorage.getItem('cp_acct_pass_hash');
-  if(localHash){
-    _doACCTCheck(localHash);
-  } else {
-    // ดึง hash จาก Firebase
-    try{
-      if(typeof firebase!=='undefined' && firebase.apps && firebase.apps.length){
-        firebase.database().ref('shared_hashes/acct_pass_hash').once('value')
-          .then(function(snap){
-            var fbHash = snap.val() ? snap.val().hash : null;
-            if(fbHash) localStorage.setItem('cp_acct_pass_hash', fbHash); // cache ไว้
+  // ดึงจาก Firebase เสมอ เพื่อให้ได้รหัสล่าสุด
+  try{
+    if(typeof firebase!=='undefined' && firebase.apps && firebase.apps.length){
+      firebase.database().ref('shared_hashes/acct_pass_hash').once('value')
+        .then(function(snap){
+          var fbHash = snap.val() ? snap.val().hash : null;
+          if(fbHash){
+            localStorage.setItem('cp_acct_pass_hash', fbHash); // อัพเดท cache
             _doACCTCheck(fbHash);
-          }).catch(function(){ _doACCTCheck(null); });
-      } else {
-        _doACCTCheck(null);
-      }
-    }catch(e){ _doACCTCheck(null); }
+          } else {
+            // ไม่มีใน Firebase → ใช้ localStorage หรือค่า default
+            var localHash = localStorage.getItem('cp_acct_pass_hash');
+            _doACCTCheck(localHash);
+          }
+        }).catch(function(){
+          // Firebase ไม่ได้ → fallback localStorage
+          var localHash = localStorage.getItem('cp_acct_pass_hash');
+          _doACCTCheck(localHash);
+        });
+    } else {
+      var localHash = localStorage.getItem('cp_acct_pass_hash');
+      _doACCTCheck(localHash);
+    }
+  }catch(e){
+    var localHash = localStorage.getItem('cp_acct_pass_hash');
+    _doACCTCheck(localHash);
   }
 }
 
@@ -6658,21 +6687,30 @@ function doDevLogin() {
     return;
   }
 
-  // ตรวจ localStorage → Firebase
-  const localDevHash = localStorage.getItem('cp_dev_pass_hash');
-  if(localDevHash){
-    if(_checkDevHash(localDevHash)){ _doDevSuccess(); } else { _doDevFail(); }
-  } else {
-    try{
-      if(typeof firebase!=='undefined' && firebase.apps && firebase.apps.length){
-        firebase.database().ref('shared_hashes/dev_pass_hash').once('value')
-          .then(function(snap){
-            var fbHash = snap.val() ? snap.val().hash : null;
-            if(fbHash) localStorage.setItem('cp_dev_pass_hash', fbHash);
+  // ดึงจาก Firebase เสมอ เพื่อให้ได้รหัสล่าสุด
+  try{
+    if(typeof firebase!=='undefined' && firebase.apps && firebase.apps.length){
+      firebase.database().ref('shared_hashes/dev_pass_hash').once('value')
+        .then(function(snap){
+          var fbHash = snap.val() ? snap.val().hash : null;
+          if(fbHash){
+            localStorage.setItem('cp_dev_pass_hash', fbHash); // อัพเดท cache
             if(_checkDevHash(fbHash)){ _doDevSuccess(); } else { _doDevFail(); }
-          }).catch(function(){ _doDevFail(); });
-      } else { _doDevFail(); }
-    }catch(e){ _doDevFail(); }
+          } else {
+            var localHash = localStorage.getItem('cp_dev_pass_hash');
+            if(_checkDevHash(localHash)){ _doDevSuccess(); } else { _doDevFail(); }
+          }
+        }).catch(function(){
+          var localHash = localStorage.getItem('cp_dev_pass_hash');
+          if(_checkDevHash(localHash)){ _doDevSuccess(); } else { _doDevFail(); }
+        });
+    } else {
+      var localHash = localStorage.getItem('cp_dev_pass_hash');
+      if(_checkDevHash(localHash)){ _doDevSuccess(); } else { _doDevFail(); }
+    }
+  }catch(e){
+    var localHash = localStorage.getItem('cp_dev_pass_hash');
+    if(_checkDevHash(localHash)){ _doDevSuccess(); } else { _doDevFail(); }
   }
 }
 
@@ -6726,9 +6764,11 @@ document.addEventListener('DOMContentLoaded', function() {
       <div style="margin-bottom:14px">
         <div style="font-size:11px;font-weight:700;color:#8899aa;text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px">Firebase Realtime Database URL *</div>
         <input id="fb-url-input" type="url" placeholder="https://your-project-default-rtdb.firebaseio.com"
-          style="width:100%;background:rgba(56,139,253,.05);border:1.5px solid rgba(56,139,253,.25);border-radius:10px;padding:12px 14px;color:#e8f0fe;font-size:13px;font-family:var(--m);outline:none;transition:border .2s;box-sizing:border-box"
+          autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+          style="width:100%;background:rgba(56,139,253,.05);border:1.5px solid rgba(56,139,253,.25);border-radius:10px;padding:12px 14px;color:#e8f0fe;font-size:13px;font-family:var(--m);outline:none;transition:border .2s;box-sizing:border-box;-webkit-user-select:text;user-select:text;pointer-events:all;cursor:text"
           onfocus="this.style.borderColor='rgba(56,139,253,.6)'" onblur="this.style.borderColor='rgba(56,139,253,.25)'"
-          onkeydown="if(event.key==='Enter')saveFirebaseUrl()">
+          onkeydown="if(event.key==='Enter')saveFirebaseUrl()"
+          onclick="this.focus();this.select()">
         <div style="font-size:10px;color:#445566;margin-top:5px;font-family:var(--m)">
           ตัวอย่าง: <span style="color:#388bfd">https://my-project-rtdb.asia-southeast1.firebasedatabase.app</span>
         </div>
@@ -8129,6 +8169,18 @@ function _setLoading(v){
 
 // ── On auth success → apply role ───────────────────────────────
 function _onAuthSuccess(user, role){
+  // ตรวจว่า session ยังมีอยู่ไหม (ไม่ใช่เปิดใหม่)
+  var exp = parseInt(localStorage.getItem('cp_session_expire')||'0');
+  var hasSession = exp > Date.now();
+  if(!hasSession){
+    // เปิดใหม่ / session หมดอายุ → ต้องกรอกรหัสใหม่
+    // signOut Firebase แต่ยังแสดง lock modal
+    try{ if(_fbAuth) _fbAuth.signOut().catch(function(){}); }catch(e){}
+    _currentUser = null; _currentRole = null;
+    // แสดง lock modal แทน
+    if(typeof showLockModal==='function') showLockModal();
+    return;
+  }
   _hideAuthOverlay();
   // อัพเดท UI ตาม role
   _applyRole(role);
@@ -9434,6 +9486,8 @@ document.addEventListener('DOMContentLoaded', function(){
     sessionStorage.removeItem('cp_dev_session');
     sessionStorage.removeItem('cp_acct_session');
     sessionStorage.removeItem(EXPIRE_KEY);
+    // ล้าง localStorage expire ด้วย → บังคับ login ใหม่ทุกครั้งที่เปิดแอพ
+    localStorage.removeItem(EXPIRE_KEY);
   });
 
   // ── ตรวจ 2 ชม. (ทุก 1 นาที) ────────────────────────────
