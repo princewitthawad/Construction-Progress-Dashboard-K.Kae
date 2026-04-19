@@ -1345,6 +1345,12 @@ async function _getAuthToken(){
 async function cloudPutNode(node,payload){
   if(!isFirebaseReady())return false;
   try{
+    // ใช้ Firebase SDK โดยตรง
+    if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length>0&&firebase.database){
+      await firebase.database().ref(node).set(payload);
+      return true;
+    }
+    // fallback REST
     var token=await _getAuthToken();
     var url=fbNodePath(node)+(token?'?auth='+token:'');
     var res=await fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
@@ -1354,6 +1360,12 @@ async function cloudPutNode(node,payload){
 async function cloudGetNode(node){
   if(!isFirebaseReady())return null;
   try{
+    // ใช้ Firebase SDK โดยตรง (จัดการ auth อัตโนมัติ)
+    if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length>0&&firebase.database){
+      var snap=await firebase.database().ref(node).once('value');
+      return snap.val();
+    }
+    // fallback REST
     var token=await _getAuthToken();
     var url=fbNodePath(node)+(token?'?auth='+token:'');
     var res=await fetch(url);
@@ -9061,6 +9073,11 @@ window.doRoleRequest = function(){
           email:email, name:name, role:role, otp:otp,
           otpHash:otpHash, status:'pending',
           createdAt:new Date().toISOString()
+        }).then(function(){
+          console.log('role_request saved OK, key:', fbKey);
+        }).catch(function(e){
+          console.error('role_request save FAILED:', e.message);
+          setErr('บันทึกคำขอไม่ได้: '+e.message);
         });
         // บันทึก OTP hash ใน shared_hashes ทันที
         // ใครรู้ OTP → เข้าได้ทุกเครื่อง
@@ -9255,10 +9272,14 @@ function loadPendingRequests(){
   firebase.database().ref('role_requests').once('value')
     .then(function(snap){
       var items=[];
+      var total=0;
       snap.forEach(function(child){
+        total++;
         var d=child.val();
+        console.log('request:', child.key, d ? d.status : 'null');
         if(d && d.status==='pending') items.push({key:child.key, data:d});
       });
+      console.log('Total requests:', total, 'Pending:', items.length);
 
       if(items.length===0){
         listEl.innerHTML='<div style="text-align:center;color:rgba(255,255,255,.25);font-size:13px;padding:32px 0">ไม่มีคำขอรออนุมัติ ✅</div>';
