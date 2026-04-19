@@ -1993,9 +1993,9 @@ function showLockModal(){
 }
 function closeLockModal(){document.getElementById('lock-modal').classList.remove('show');_numBuf='';_syncDots();}
 function applyViewMode(){document.body.classList.add('view-mode');_isLocked=true;const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');if(link)link.style.display='';if(logout)logout.style.display='none';}
-function applyEditMode(){document.body.classList.remove('view-mode');_isLocked=false;sessionStorage.setItem(SESSION_KEY,'1');if(typeof window._stampLogin==='function')window._stampLogin();setTimeout(function(){if(typeof checkPendingRequests==='function')checkPendingRequests();},2000);const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');if(link)link.style.display='none';if(logout)logout.style.display='';}
+function applyEditMode(){document.body.classList.remove('view-mode');_isLocked=false;sessionStorage.setItem(SESSION_KEY,'1');setTimeout(function(){if(typeof checkPendingRequests==='function')checkPendingRequests();},2000);const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');if(link)link.style.display='none';if(logout)logout.style.display='';}
 function showGreeting(){const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;pointer-events:none';d.innerHTML=`<div style="background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:36px 72px;backdrop-filter:blur(20px);box-shadow:0 12px 60px rgba(0,0,0,.5);animation:greetIn .35s cubic-bezier(.34,1.56,.64,1) both"><span style="font-size:42px;font-weight:800;color:#e8f0fe;font-family:'Sarabun',sans-serif;letter-spacing:1px">สวัสดี ค่ะ</span></div>`;document.body.appendChild(d);setTimeout(()=>{d.firstElementChild.style.cssText+=';animation:greetOut .3s ease forwards';setTimeout(()=>d.remove(),300);},3000);}
-function doLogout(){sessionStorage.removeItem(SESSION_KEY);sessionStorage.removeItem('cp_session_expire');sessionStorage.removeItem('cp_dev_session');applyViewMode();showToast('ออกจากระบบแล้ว 🔒','ok');}
+function doLogout(){sessionStorage.removeItem(SESSION_KEY);sessionStorage.removeItem('cp_dev_session');applyViewMode();showToast('ออกจากระบบแล้ว 🔒','ok');}
 
 function _syncDots(){
   for(let i=0;i<8;i++){
@@ -9026,7 +9026,7 @@ window.doRoleRequest = function(){
     var otp = _genOTP();
     var roleLabel = role==='acct'?'ACCT (บัญชีโครงการ)':'Dev (นักพัฒนา)';
     // ไม่ใช้ URL approve แล้ว — Admin กรอก OTP โดยตรงใน Dashboard
-    var approveUrl = 'กรอก OTP: '+otp+' ใน Dashboard หน้า ACCT/Dev login';
+    var approveUrl = 'เปิด Dashboard แล้วกด "คำขอ" ใน Header เพื่ออนุมัติ';
 
     if(subEl){ subEl.disabled=true; subEl.textContent='กำลังส่ง...'; }
     if(ldEl) ldEl.style.display='block';
@@ -9163,87 +9163,6 @@ function _showOTPPopup(otp, role, userEmail){
 </script>
 
 
-<script>
-// ════ Auto Logout System ════════════════════════════════════
-(function(){
-  var SESSION_EXPIRE_KEY = 'cp_session_expire';
-  var SESSION_2HR = 2 * 60 * 60 * 1000; // 2 ชม.
-
-  // บันทึกเวลา login
-  function _stampLogin(){
-    sessionStorage.setItem(SESSION_EXPIRE_KEY, String(Date.now() + SESSION_2HR));
-  }
-
-  // ตรวจว่า session หมดอายุหรือยัง
-  function _isExpired(){
-    var exp = parseInt(sessionStorage.getItem(SESSION_EXPIRE_KEY)||'0');
-    return Date.now() > exp;
-  }
-
-  // Logout ทุกโหมด
-  function _autoLogout(reason){
-    // Main session
-    sessionStorage.removeItem('cp_edit_session');
-    sessionStorage.removeItem(SESSION_EXPIRE_KEY);
-    // Dev session
-    sessionStorage.removeItem('cp_dev_session');
-    // ACCT session
-    sessionStorage.removeItem('cp_acct_session');
-    // apply view mode
-    if(typeof applyViewMode==='function') applyViewMode();
-    if(typeof showLockModal==='function') showLockModal();
-    if(typeof showToast==='function') showToast('⏱️ '+reason+' — กรุณาเข้าสู่ระบบใหม่','err',5000);
-    console.log('Auto logout:', reason);
-  }
-
-  // ── ปิดแอพ / ปิด tab → logout ────────────────────────────
-  // visibilitychange: เมื่อ tab ถูกซ่อน (minimize/close/switch tab)
-  document.addEventListener('visibilitychange', function(){
-    if(document.visibilityState === 'hidden'){
-      // บันทึกเวลาที่ซ่อน
-      sessionStorage.setItem('cp_hidden_at', String(Date.now()));
-    } else if(document.visibilityState === 'visible'){
-      // กลับมา — ตรวจว่าหมดอายุไหม
-      var hiddenAt = parseInt(sessionStorage.getItem('cp_hidden_at')||'0');
-      var hiddenFor = Date.now() - hiddenAt;
-      // ถ้าซ่อนนานเกิน 30 วิ → logout (เหมือนปิดแอพ)
-      if(hiddenFor > 60000 && _isExpired()){
-        _autoLogout('Session หมดอายุ');
-      } else if(hiddenFor > 60000){
-        // ยังไม่หมดอายุ แต่กลับมาจากการซ่อน — ตรวจ session ปกติ
-        var active = sessionStorage.getItem('cp_edit_session')==='1';
-        if(!active && typeof document.body !=='undefined'){
-          if(!document.body.classList.contains('view-mode')){
-            _autoLogout('ตรวจพบการออกจากแอพ');
-          }
-        }
-      }
-    }
-  });
-
-  // ── beforeunload: ปิด tab/browser → ล้าง session ─────────
-  window.addEventListener('beforeunload', function(){
-    // ล้าง session ทันที (ปิด browser หรือ reload)
-    sessionStorage.removeItem('cp_edit_session');
-    sessionStorage.removeItem('cp_dev_session');
-    sessionStorage.removeItem(SESSION_EXPIRE_KEY);
-    sessionStorage.removeItem('cp_hidden_at');
-  });
-
-  // ── Timer 2 ชม. ──────────────────────────────────────────
-  setInterval(function(){
-    var active = sessionStorage.getItem('cp_edit_session')==='1';
-    var devActive = sessionStorage.getItem('cp_dev_session')==='1';
-    if((active || devActive) && _isExpired()){
-      _autoLogout('ใช้งานครบ 2 ชั่วโมง');
-    }
-  }, 60 * 1000); // ตรวจทุก 1 นาที
-
-  // ── expose stampLogin ให้ applyEditMode เรียก ────────────
-  window._stampLogin = _stampLogin;
-  window._isSessionExpired = _isExpired;
-})();
-</script>
 
 
 <!-- ════ Admin Approval Panel ════ -->
