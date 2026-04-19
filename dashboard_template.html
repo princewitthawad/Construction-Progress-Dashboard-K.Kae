@@ -8389,14 +8389,16 @@ window.fbSetApiKey = function(key){
 document.addEventListener('DOMContentLoaded', function(){
   var tryInit=function(n){
     if(typeof firebase!=='undefined'){
-      _initFirebaseAuth();
+      // ใช้ window._doInitFirebase ถ้า IIFE expose แล้ว
+      if(typeof window._doInitFirebase==='function') window._doInitFirebase();
+      else if(typeof _initFirebaseAuth==='function') _initFirebaseAuth();
     } else if(n>0){
       setTimeout(function(){tryInit(n-1);},300);
     } else {
-      _hideAuthOverlay();
+      if(typeof _hideAuthOverlay==='function') _hideAuthOverlay();
     }
   };
-  tryInit(10); // รอสูงสุด 3 วินาที
+  tryInit(10);
 });
 
 window.addEventListener('load', function(){
@@ -8425,6 +8427,10 @@ window.saveFirebaseUrl = function(){
     }
   }, 500);
 };
+
+  // expose ออก global ให้ showRegisterModal เรียกได้
+  window._getAuthReady   = function(){ return _authReady; };
+  window._doInitFirebase = function(){ _initFirebaseAuth(); };
 
 })();
 </script>
@@ -8530,42 +8536,43 @@ window.saveFirebaseUrl = function(){
 
 <script>
 window.showRegisterModal = function(){
-  // ปิด lock modal
   var lm = document.getElementById('lock-modal');
   if(lm) lm.classList.remove('show');
 
-  // ถ้า Firebase ยังไม่ init → init ก่อนแล้วค่อยเปิด
-  if(!_authReady){
-    // แสดง loading toast
-    if(typeof showToast==='function') showToast('⏳ กำลังเชื่อมต่อ Firebase...','info',3000);
-    // init Firebase
-    _initFirebaseAuth();
-    // รอ 2 วินาทีแล้วลองเปิดอีกครั้ง
-    setTimeout(function(){
-      var ov = document.getElementById('fb-auth-ov');
-      if(ov){
-        ov.style.display='flex';
-        if(typeof fbAuthTab==='function') fbAuthTab('register');
-        setTimeout(function(){var e=document.getElementById('auth-email');if(e)e.focus();},100);
-      } else {
-        // fb-auth-ov ไม่มีใน DOM → สร้างใหม่จาก scratch ไม่ได้
-        // แสดง toast แนะนำ
-        if(typeof showToast==='function') showToast('กรุณารีเฟรชหน้าแล้วลองใหม่','err',5000);
-        if(lm) lm.classList.add('show');
-      }
-    }, 2000);
-    return;
+  function _openRegister(){
+    var ov = document.getElementById('fb-auth-ov');
+    if(ov){
+      ov.style.display='flex';
+      if(typeof fbAuthTab==='function') fbAuthTab('register');
+      setTimeout(function(){var e=document.getElementById('auth-email');if(e)e.focus();},100);
+    }else{
+      if(typeof showToast==='function') showToast('กรุณารีเฟรชหน้าแล้วลองใหม่','err',4000);
+      if(lm) lm.classList.add('show');
+    }
   }
 
-  // Firebase ready → เปิด overlay
-  var ov = document.getElementById('fb-auth-ov');
-  if(ov){
-    ov.style.display='flex';
-    if(typeof fbAuthTab==='function') fbAuthTab('register');
-    setTimeout(function(){var e=document.getElementById('auth-email');if(e)e.focus();},100);
-  } else {
-    if(typeof showToast==='function') showToast('กรุณารีเฟรชหน้าแล้วลองใหม่','err',4000);
-    if(lm) lm.classList.add('show');
+  // ตรวจ Firebase ready ผ่าน window function (ป้องกัน scope error)
+  var ready = typeof window._getAuthReady==='function' ? window._getAuthReady() : false;
+  if(!ready){
+    if(typeof showToast==='function') showToast('⏳ กำลังเชื่อมต่อ Firebase...','info',2000);
+    // init Firebase
+    if(typeof window._doInitFirebase==='function') window._doInitFirebase();
+    // poll จนกว่าจะ ready สูงสุด 5 วินาที
+    var tries=0;
+    var poll=setInterval(function(){
+      tries++;
+      var r=typeof window._getAuthReady==='function'?window._getAuthReady():false;
+      if(r){
+        clearInterval(poll);
+        _openRegister();
+      } else if(tries>=10){
+        clearInterval(poll);
+        // เปิดต่อไปเลย — ให้ user ลอง submit
+        _openRegister();
+      }
+    },500);
+  }else{
+    _openRegister();
   }
 };
 
