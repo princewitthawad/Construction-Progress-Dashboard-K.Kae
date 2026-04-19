@@ -3766,7 +3766,9 @@ function doACCTUnlock(){
   const acctOk = customAcctHash
     ? (typeof sha256==='function' && sha256(pw)===customAcctHash)
     : (pw===ACCT_HASH);
-  if(acctOk){
+  // Admin เข้า ACCT ได้ด้วยรหัส Admin
+  const adminOk = (typeof sha256==='function' && sha256(pw)===getPassHash());
+  if(acctOk || adminOk){
     closeACCTLogin();
     document.getElementById('acct-overlay').style.display='block';
     showToast('กำลังโหลดข้อมูล ACCT...','info',2000);
@@ -6567,6 +6569,39 @@ function devNmUp(el){
   el.style.background='rgba(255,255,255,.06)';
   el.style.boxShadow='';
 }
+function doDevLogin() {
+  const pw = _devBuf || (document.getElementById('dev-pw-inp')?.value || '');
+  const errEl = document.getElementById('dev-login-err');
+  if(!pw){ if(errEl) errEl.textContent='กรุณากรอกรหัสผ่าน'; return; }
+
+  // ตรวจรหัส Dev
+  if(sha256(pw) === getDevHash()){
+    closeDevLoginModal();
+    document.body.classList.add('dev-mode');
+    sessionStorage.setItem(DEV_SESSION_KEY,'1');
+    const lnk=document.getElementById('dev-login-link');
+    if(lnk){lnk.textContent='🛠️ Dev ✓';lnk.style.color='#76ff03';lnk.style.borderColor='rgba(118,255,3,.5)';lnk.style.background='rgba(118,255,3,.08)';lnk.setAttribute('onclick','event.preventDefault();doDevLogout()');}
+    showToast('เข้าสู่ Developer Mode ✅','ok');
+    return;
+  }
+
+  // ตรวจรหัส Admin (ให้ Admin เข้า Dev ได้ด้วย)
+  if(sha256(pw) === getPassHash()){
+    closeDevLoginModal();
+    document.body.classList.add('dev-mode');
+    sessionStorage.setItem(DEV_SESSION_KEY,'1');
+    const lnk=document.getElementById('dev-login-link');
+    if(lnk){lnk.textContent='🛠️ Dev ✓';lnk.style.color='#76ff03';lnk.style.borderColor='rgba(118,255,3,.5)';lnk.style.background='rgba(118,255,3,.08)';lnk.setAttribute('onclick','event.preventDefault();doDevLogout()');}
+    showToast('Admin เข้าสู่ Developer Mode ✅','ok');
+    return;
+  }
+
+  if(errEl) errEl.textContent='รหัสผ่านไม่ถูกต้อง';
+  _devBuf=''; _devSyncDots();
+  const card=document.querySelector('#dev-login-modal .lm-card');
+  if(card){card.style.animation='none';card.offsetHeight;card.style.animation='shake .4s ease';}
+}
+
 function doDevLogout() {
   sessionStorage.removeItem(DEV_SESSION_KEY);
   document.body.classList.remove('dev-mode');
