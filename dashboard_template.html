@@ -239,7 +239,7 @@ button:not(.btn):not(.lm-num):not(.ov-close):active{transform:scale(.96)}
 .mcrd-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px}
 .s3-ext{overflow:hidden;max-height:0;opacity:0;transition:max-height .6s ease,opacity .4s ease}
 .s3-ext.open{max-height:900px;opacity:1}
-body.view-mode input:not(#forgot-email):not(#auth-email):not(#auth-pass):not(#auth-pass2):not(#auth-name),body.view-mode .DCI,body.view-mode .PI{pointer-events:none!important;opacity:.45!important;cursor:not-allowed!important}
+body.view-mode input,body.view-mode .DCI,body.view-mode .PI{pointer-events:none!important;opacity:.45!important;cursor:not-allowed!important}
 body.view-mode .edit-only{display:none!important}
 #toast{position:fixed;bottom:24px;right:24px;background:#111b28;border:1px solid;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;z-index:9999;display:none;align-items:center;gap:8px;box-shadow:var(--shadow);animation:slideup .3s ease}
 @keyframes slideup{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
@@ -650,7 +650,7 @@ button:not(.btn):not(.lm-num):not(.ov-close):active{transform:scale(.96)}
 .mcrd-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px}
 .s3-ext{overflow:hidden;max-height:0;opacity:0;transition:max-height .6s ease,opacity .4s ease}
 .s3-ext.open{max-height:900px;opacity:1}
-body.view-mode input:not(#forgot-email):not(#auth-email):not(#auth-pass):not(#auth-pass2):not(#auth-name),body.view-mode .DCI,body.view-mode .PI{pointer-events:none!important;opacity:.45!important;cursor:not-allowed!important}
+body.view-mode input,body.view-mode .DCI,body.view-mode .PI{pointer-events:none!important;opacity:.45!important;cursor:not-allowed!important}
 body.view-mode .edit-only{display:none!important}
 #toast{position:fixed;bottom:24px;right:24px;background:#111b28;border:1px solid;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;z-index:9999;display:none;align-items:center;gap:8px;box-shadow:var(--shadow);animation:slideup .3s ease}
 @keyframes slideup{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
@@ -8075,6 +8075,7 @@ function _initFirebaseAuth(){
     _fbAuth = firebase.auth(_fbApp);
     _fbDB   = firebase.database(_fbApp);
     _authReady = true;
+    console.log('Firebase Auth ready ✅');
 
     // ตรวจ auth state
     _fbAuth.onAuthStateChanged(function(user){
@@ -8299,24 +8300,7 @@ window.fbAuthNext = function(){
   if(_authMode==='register' && pass!==pass2){
     _setErr('รหัสผ่านไม่ตรงกัน'); return;
   }
-  // ถ้า Firebase ยังไม่ ready → รอแล้วลองใหม่ (max 4 วินาที)
-  if(!_authReady){
-    if(typeof _initFirebaseAuth==='function') _initFirebaseAuth();
-    var _attempts=0;
-    _setErr('⏳ กำลังเชื่อมต่อ Firebase...');
-    var _waitAuth = setInterval(function(){
-      _attempts++;
-      if(_authReady){
-        clearInterval(_waitAuth);
-        _setErr('');
-        window.fbAuthNext(); // ลองใหม่หลัง ready
-      } else if(_attempts > 16){
-        clearInterval(_waitAuth);
-        _setErr('❌ เชื่อมต่อ Firebase ไม่ได้ — กรุณาตรวจสอบการเชื่อมต่ออินเตอร์เน็ต');
-      }
-    }, 250);
-    return;
-  }
+  if(!_authReady){ _setErr('ยังไม่ได้ตั้งค่า Firebase'); return; }
 
   _setLoading(true);
   if(_authMode==='login'){
@@ -8401,13 +8385,27 @@ window.fbSetApiKey = function(key){
 };
 
 // ── Init เมื่อ page โหลด ───────────────────────────────────────
+// init Firebase เร็วที่สุดเมื่อ DOM ready
+document.addEventListener('DOMContentLoaded', function(){
+  var tryInit=function(n){
+    if(typeof firebase!=='undefined'){
+      _initFirebaseAuth();
+    } else if(n>0){
+      setTimeout(function(){tryInit(n-1);},300);
+    } else {
+      _hideAuthOverlay();
+    }
+  };
+  tryInit(10); // รอสูงสุด 3 วินาที
+});
+
 window.addEventListener('load', function(){
   // รอให้ _fbUrl ถูก set ก่อน
   setTimeout(function(){
     // ถ้า Firebase SDK โหลดแล้วและมี URL → init Auth
     // Firebase config hardcoded — init เสมอ
     if(typeof firebase!=='undefined'){
-      _initFirebaseAuth();
+      if(!_authReady) _initFirebaseAuth();
     }else{
       setTimeout(function(){
         if(typeof firebase!=='undefined') _initFirebaseAuth();
@@ -8466,7 +8464,7 @@ window.saveFirebaseUrl = function(){
       <div style="margin-bottom:14px">
         <div style="font-size:9px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:5px">Email</div>
         <input type="email" id="forgot-email" placeholder="example@email.com" inputmode="email" autocomplete="email"
-          style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:12px 14px;color:#e8f0fe;font-size:15px;font-family:inherit;outline:none;-webkit-user-select:text!important;user-select:text!important;pointer-events:auto!important;touch-action:manipulation;cursor:text;opacity:1!important"
+          style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:12px 14px;color:#e8f0fe;font-size:15px;font-family:inherit;outline:none;-webkit-user-select:text;user-select:text"
           onkeydown="if(event.key==='Enter')sendForgotPass()">
       </div>
       <div id="forgot-msg" style="font-size:12px;min-height:36px;margin-bottom:12px;text-align:center;color:#ff4444;line-height:1.7"></div>
@@ -8532,51 +8530,43 @@ window.saveFirebaseUrl = function(){
 
 <script>
 window.showRegisterModal = function(){
-  // ① ปิด lock modal
+  // ปิด lock modal
   var lm = document.getElementById('lock-modal');
   if(lm) lm.classList.remove('show');
 
-  // ② เปิด overlay ทันที
-  var ov = document.getElementById('fb-auth-ov');
-  if(!ov) return;
-  ov.style.display = 'flex';
-
-  // ③ init Firebase ทันทีถ้ายังไม่ ready
-  if(!_authReady && typeof _initFirebaseAuth === 'function') {
+  // ถ้า Firebase ยังไม่ init → init ก่อนแล้วค่อยเปิด
+  if(!_authReady){
+    // แสดง loading toast
+    if(typeof showToast==='function') showToast('⏳ กำลังเชื่อมต่อ Firebase...','info',3000);
+    // init Firebase
     _initFirebaseAuth();
+    // รอ 2 วินาทีแล้วลองเปิดอีกครั้ง
+    setTimeout(function(){
+      var ov = document.getElementById('fb-auth-ov');
+      if(ov){
+        ov.style.display='flex';
+        if(typeof fbAuthTab==='function') fbAuthTab('register');
+        setTimeout(function(){var e=document.getElementById('auth-email');if(e)e.focus();},100);
+      } else {
+        // fb-auth-ov ไม่มีใน DOM → สร้างใหม่จาก scratch ไม่ได้
+        // แสดง toast แนะนำ
+        if(typeof showToast==='function') showToast('กรุณารีเฟรชหน้าแล้วลองใหม่','err',5000);
+        if(lm) lm.classList.add('show');
+      }
+    }, 2000);
+    return;
   }
 
-  // ④ switch tab register โดยตรง
-  try{ _authMode = 'register'; }catch(e){}
-  var tabs = ['login','register','reset'];
-  tabs.forEach(function(m){
-    var t = document.getElementById('auth-tab-'+m);
-    if(!t) return;
-    t.style.background = (m==='register')
-      ? 'linear-gradient(135deg,rgba(0,200,83,.4),rgba(0,230,118,.25))'
-      : 'transparent';
-    t.style.color = (m==='register') ? 'rgba(0,230,118,.9)' : 'rgba(255,255,255,.35)';
-  });
-  ['auth-pass-wrap','auth-pass2-wrap','auth-role-wrap','auth-name-wrap'].forEach(function(id){
-    var el = document.getElementById(id);
-    if(el) el.style.display = 'block';
-  });
-  var desc = document.getElementById('auth-tab-desc');
-  if(desc) desc.textContent = 'สมัครสมาชิกด้วย Email — รหัสผ่านตัวเลข 6–8 หลัก';
-  var hint = document.getElementById('auth-register-hint');
-  if(hint) hint.style.display = 'none';
-  var btn = document.getElementById('auth-submit');
-  if(btn){ btn.textContent = '✏️ สมัครสมาชิก'; btn.style.background = 'linear-gradient(135deg,rgba(0,200,83,.4),rgba(0,230,118,.25))'; }
-  var notice = document.getElementById('auth-config-notice');
-  if(notice) notice.style.display = 'none';
-  var err = document.getElementById('auth-err');
-  if(err){ err.textContent = ''; err.style.color = '#ff4444'; }
-
-  // ⑤ focus email
-  setTimeout(function(){
-    var e = document.getElementById('auth-email');
-    if(e){ e.value=''; e.focus(); }
-  }, 200);
+  // Firebase ready → เปิด overlay
+  var ov = document.getElementById('fb-auth-ov');
+  if(ov){
+    ov.style.display='flex';
+    if(typeof fbAuthTab==='function') fbAuthTab('register');
+    setTimeout(function(){var e=document.getElementById('auth-email');if(e)e.focus();},100);
+  } else {
+    if(typeof showToast==='function') showToast('กรุณารีเฟรชหน้าแล้วลองใหม่','err',4000);
+    if(lm) lm.classList.add('show');
+  }
 };
 
 window.showForgotPassModal = function(){
