@@ -248,14 +248,14 @@ body.view-mode .edit-only{display:none!important}
 #toast.info{border-color:rgba(56,139,253,.5);color:var(--blue)}
 #lock-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:transparent;padding:12px;overflow-y:auto}
 #lock-modal.show{display:flex!important}
-.lm-card{width:100%;max-width:340px;margin:auto;background:transparent;border:none;border-radius:24px;overflow:visible;box-shadow:none}
+.lm-card{width:100%;max-width:340px;margin:auto;background:rgba(0,0,0,.05);border:none;border-radius:24px;overflow:visible;box-shadow:none}
 .lm-acc{display:none}
 .lm-body{padding:26px 22px 22px;background:transparent!important}
 .lm-icon{width:46px;height:46px;background:rgba(56,139,253,.07);border:1px solid rgba(56,139,253,.18);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
 .lm-h{font-size:19px;font-weight:800;color:#dce8fb;text-align:center;margin-bottom:6px}
 .lm-p{font-size:11px;color:#25354a;font-family:var(--m);text-align:center;line-height:1.8;margin-bottom:18px}
 .lm-dots{display:flex;justify-content:center;gap:14px;margin-bottom:18px}
-.lm-dot-inp{width:13px;height:13px;border-radius:50%;background:#0d1a28;border:2px solid #1e3050;transition:all .15s}
+.lm-dot-inp{width:13px;height:13px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.3);transition:all .15s}
 .lm-dot-inp.filled{background:#388bfd;border-color:#388bfd;transform:scale(1.2)}
 .lm-numgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:310px;margin:0 auto 18px;padding:8px;overflow:visible}
 @keyframes waterFloat{
@@ -671,14 +671,14 @@ body.view-mode .edit-only{display:none!important}
 #toast.info{border-color:rgba(56,139,253,.5);color:var(--blue)}
 #lock-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:transparent;padding:12px;overflow-y:auto}
 #lock-modal.show{display:flex!important}
-.lm-card{width:100%;max-width:340px;margin:auto;background:transparent;border:none;border-radius:24px;overflow:visible;box-shadow:none}
+.lm-card{width:100%;max-width:340px;margin:auto;background:rgba(0,0,0,.05);border:none;border-radius:24px;overflow:visible;box-shadow:none}
 .lm-acc{display:none}
 .lm-body{padding:26px 22px 22px;background:transparent!important}
 .lm-icon{width:46px;height:46px;background:rgba(56,139,253,.07);border:1px solid rgba(56,139,253,.18);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
 .lm-h{font-size:19px;font-weight:800;color:#dce8fb;text-align:center;margin-bottom:6px}
 .lm-p{font-size:11px;color:#25354a;font-family:var(--m);text-align:center;line-height:1.8;margin-bottom:18px}
 .lm-dots{display:flex;justify-content:center;gap:14px;margin-bottom:18px}
-.lm-dot-inp{width:13px;height:13px;border-radius:50%;background:#0d1a28;border:2px solid #1e3050;transition:all .15s}
+.lm-dot-inp{width:13px;height:13px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.3);transition:all .15s}
 .lm-dot-inp.filled{background:#388bfd;border-color:#388bfd;transform:scale(1.2)}
 .lm-numgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:310px;margin:0 auto 18px;padding:8px;overflow:visible}
 @keyframes waterFloat{
@@ -852,6 +852,7 @@ input, textarea, [contenteditable] {
 #reg-popup{pointer-events:all}
 #reg-popup input,#reg-popup textarea,#reg-popup select{pointer-events:all!important;-webkit-user-select:text!important;user-select:text!important;cursor:text!important;opacity:1!important;z-index:10!important}
 body.view-mode #reg-popup input,body.view-mode #reg-popup textarea{pointer-events:all!important;cursor:text!important;opacity:1!important}
+
 </style>
 <script>
 // ── Stub functions — defined early so buttons work before full script loads ──
@@ -1095,10 +1096,7 @@ window.showForgotPassModal = function(){
         <div class="lm-dot-inp" id="d6"></div><div class="lm-dot-inp" id="d7"></div>
       </div>
       <div style="display:none"><input id="lm-pw" type="password" maxlength="30" autocomplete="current-password" onkeydown="if(event.key==='Enter'){event.preventDefault();doUnlock();}"></div>
-      <div id="biometric-btn" style="display:none;margin-bottom:16px">
-        <button onclick="loginBiometric()" style="width:100%;padding:12px;background:linear-gradient(135deg,rgba(76,175,80,.3),rgba(76,175,80,.1));color:#76ff03;border:1px solid rgba(118,255,3,.5);border-radius:8px;font-family:var(--f);font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px">👆 ล็อกอินด้วย Face ID / Fingerprint</button>
-        <button onclick="registerBiometric()" style="width:100%;padding:8px;background:rgba(56,139,253,.12);color:var(--blue);border:1px solid rgba(56,139,253,.3);border-radius:8px;font-family:var(--f);font-size:11px;cursor:pointer">⚙️ ลงทะเบียน Face ID / Fingerprint</button>
-      </div>
+
       <div class="lm-numgrid">
         <button class="lm-num" ontouchstart="nmDown(this,'1');event.preventDefault()" ontouchend="nmUp(this)" ontouchcancel="nmUp(this)" onmousedown="nmDown(this,'1')" onmouseup="nmUp(this)" onmouseleave="nmUp(this)">1</button>
         <button class="lm-num" ontouchstart="nmDown(this,'2');event.preventDefault()" ontouchend="nmUp(this)" ontouchcancel="nmUp(this)" onmousedown="nmDown(this,'2')" onmouseup="nmUp(this)" onmouseleave="nmUp(this)">2</button>
@@ -1987,67 +1985,30 @@ const SESSION_KEY='cp_edit_session';
 let _isLocked=false,_numBuf='',_lastTouch=0;
 function showLockModal(){
   document.getElementById('lock-modal').classList.add('show');
-  checkBiometricSupport();
 }
 function closeLockModal(){document.getElementById('lock-modal').classList.remove('show');_numBuf='';_syncDots();}
 function applyViewMode(){document.body.classList.add('view-mode');_isLocked=true;const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');if(link)link.style.display='';if(logout)logout.style.display='none';}
 function applyEditMode(){document.body.classList.remove('view-mode');_isLocked=false;sessionStorage.setItem(SESSION_KEY,'1');const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');if(link)link.style.display='none';if(logout)logout.style.display='';}
 function showGreeting(){const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;pointer-events:none';d.innerHTML=`<div style="background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:36px 72px;backdrop-filter:blur(20px);box-shadow:0 12px 60px rgba(0,0,0,.5);animation:greetIn .35s cubic-bezier(.34,1.56,.64,1) both"><span style="font-size:42px;font-weight:800;color:#e8f0fe;font-family:'Sarabun',sans-serif;letter-spacing:1px">สวัสดี ค่ะ</span></div>`;document.body.appendChild(d);setTimeout(()=>{d.firstElementChild.style.cssText+=';animation:greetOut .3s ease forwards';setTimeout(()=>d.remove(),300);},3000);}
 function doLogout(){sessionStorage.removeItem(SESSION_KEY);applyViewMode();showToast('ออกจากระบบแล้ว 🔒','ok');}
-// ── Biometric Login (Fingerprint / Face ID) ──
-async function checkBiometricSupport(){
-  if(!window.PublicKeyCredential)return;
-  const cid=document.getElementById('biometric-btn');
-  if(!cid){return;}
-  const hasCreds=await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-  if(hasCreds){cid.style.display='block';}
-}
-async function registerBiometric(){
-  if(!window.PublicKeyCredential){showToast('⚠️ จุดประสงค์นี้ไม่รองรับ','err');return;}
-  try{
-    const chal=crypto.getRandomValues(new Uint8Array(32));
-    const cred=await navigator.credentials.create({publicKey:{challenge:chal,rp:{name:'Construction Dashboard',id:window.location.hostname},user:{id:new Uint8Array(16),name:'user@dashboard.local',displayName:'Dashboard User'},pubKeyCredParams:[{alg:-7,type:'public-key'}],timeout:60000,attestation:'none',userVerification:'preferred'}});
-    if(!cred){showToast('❌ ยกเลิกการลงทะเบียน','err');return;}
-    const credId=Array.from(new Uint8Array(cred.id)).map(b=>b.toString(16).padStart(2,'0')).join('');
-    localStorage.setItem('cp_biometric_cred',credId);
-    showToast('✅ ลงทะเบียน Face ID / Fingerprint สำเร็จ','ok');
-  }catch(e){showToast('❌ ข้อผิดพลาด: '+e.message,'err');}
-}
-async function loginBiometric(){
-  if(!window.PublicKeyCredential){showToast('⚠️ จุดประสงค์นี้ไม่รองรับ','err');return;}
-  const credId=localStorage.getItem('cp_biometric_cred');
-  if(!credId){showToast('❌ ต้องลงทะเบียน Face ID / Fingerprint ก่อน','err');return;}
-  try{
-    const chal=crypto.getRandomValues(new Uint8Array(32));
-    const cred=await navigator.credentials.get({publicKey:{challenge:chal,timeout:60000,userVerification:'preferred'}});
-    if(!cred){showToast('❌ ตรวจสอบสิทธิ์ล้มเหลว','err');return;}
-    applyEditMode();
-    closeLockModal();
-    showGreeting();
-    showToast('✅ ล็อกอินด้วย Face ID / Fingerprint สำเร็จ','ok');
-  }catch(e){showToast('❌ ข้อผิดพลาด: '+e.message,'err');}
+
+function _syncDots(){
+  for(let i=0;i<8;i++){
+    const d=document.getElementById('d'+i);
+    if(d) d.classList.toggle('filled',i<_numBuf.length);
+  }
 }
 function numPress(n){
-  const now=Date.now();if(now-_lastTouch<180)return;_lastTouch=now;
-  if(_numBuf.length>=8)return;
-  _numBuf+=n;_syncDots();
-  // Wave ripple on pressed button
-  document.querySelectorAll('.lm-num').forEach(b=>{
-    if(b.textContent.trim()===n){
-      b.classList.remove('pressed');void b.offsetWidth;b.classList.add('pressed');setTimeout(()=>b.classList.remove('pressed'),200);
-    }
-  });
-  // Auto-try at the correct password length
-  const correctLen=getPassHash()===getPassHash()?_numBuf.length:6;
-  // Try unlock at each length from 4-8 silently; shake only at max
-  setTimeout(()=>{
-    if(sha256(_numBuf)===getPassHash()){doUnlock();}
-    else if(_numBuf.length>=8){doUnlock();}
-  },120);
+  if(_numBuf.length<8){
+    _numBuf+=n;
+    _syncDots();
+    // auto-submit เมื่อกรอกครบ 6-8 หลัก
+    if(_numBuf.length>=6) setTimeout(doUnlock,120);
+  }
 }
-function numDel(){_numBuf=_numBuf.slice(0,-1);_syncDots();}
 function numClear(){_numBuf='';_syncDots();}
-function _syncDots(){for(let i=0;i<8;i++){const d=document.getElementById('d'+i);if(d)d.classList.toggle('filled',i<_numBuf.length);}}
+function numDel(){_numBuf=_numBuf.slice(0,-1);_syncDots();}
+
 function doUnlock(){
   const pw=_numBuf||document.getElementById('lm-pw')?.value||'';
   if(!pw){document.getElementById('lm-err').textContent='กรุณากรอกรหัสผ่าน';return;}
@@ -3376,45 +3337,39 @@ function jupRenderSnapshots(){
 </div>
 
 <!-- ======================== ACCT LOGIN MODAL (numpad style) ======================== -->
-<div id="acct-login-overlay" style="display:none;position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.05);backdrop-filter:blur(2px);align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto">
-  <div class="lm-card" style="max-width:360px;margin:16px auto">
-    <div class="lm-acc"></div>
-    <div class="lm-body">
-      <div class="lm-icon" style="background:rgba(0,212,255,.07);border-color:rgba(0,212,255,.25)">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="7" width="20" height="15" rx="2"/>
-          <path d="M16 7V5a4 4 0 0 0-8 0v2"/>
-          <line x1="12" y1="12" x2="12" y2="16"/>
-          <circle cx="12" cy="12" r="1" fill="#00d4ff"/>
-        </svg>
-      </div>
-      <div class="lm-h" style="color:#00d4ff">💰 ACCT</div>
-      <div class="lm-p" style="color:#2d4a6a">บัญชีต้นทุนโครงการ · Admin Only</div>
-      <div class="lm-dots" id="acct-dots">
-        <div class="lm-dot-inp" id="ad0"></div><div class="lm-dot-inp" id="ad1"></div>
-        <div class="lm-dot-inp" id="ad2"></div><div class="lm-dot-inp" id="ad3"></div>
-        <div class="lm-dot-inp" id="ad4"></div><div class="lm-dot-inp" id="ad5"></div>
-        <div class="lm-dot-inp" id="ad6"></div><div class="lm-dot-inp" id="ad7"></div>
-      </div>
-      <div style="display:none"><input id="acct-pw-inp" type="password" maxlength="20"></div>
-      <div class="lm-numgrid">
-        <button class="lm-num" ontouchstart="acctNmDown(this,'1');event.preventDefault()" ontouchend="acctNmUp(this)" ontouchcancel="acctNmUp(this)" onmousedown="acctNmDown(this,'1')" onmouseup="acctNmUp(this)" onmouseleave="acctNmUp(this)">1</button>
-        <button class="lm-num" ontouchstart="acctNmDown(this,'2');event.preventDefault()" ontouchend="acctNmUp(this)" ontouchcancel="acctNmUp(this)" onmousedown="acctNmDown(this,'2')" onmouseup="acctNmUp(this)" onmouseleave="acctNmUp(this)">2</button>
-        <button class="lm-num" ontouchstart="acctNmDown(this,'3');event.preventDefault()" ontouchend="acctNmUp(this)" ontouchcancel="acctNmUp(this)" onmousedown="acctNmDown(this,'3')" onmouseup="acctNmUp(this)" onmouseleave="acctNmUp(this)">3</button>
-        <button class="lm-num" ontouchstart="acctNmDown(this,'4');event.preventDefault()" ontouchend="acctNmUp(this)" ontouchcancel="acctNmUp(this)" onmousedown="acctNmDown(this,'4')" onmouseup="acctNmUp(this)" onmouseleave="acctNmUp(this)">4</button>
-        <button class="lm-num" ontouchstart="acctNmDown(this,'5');event.preventDefault()" ontouchend="acctNmUp(this)" ontouchcancel="acctNmUp(this)" onmousedown="acctNmDown(this,'5')" onmouseup="acctNmUp(this)" onmouseleave="acctNmUp(this)">5</button>
-        <button class="lm-num" ontouchstart="acctNmDown(this,'6');event.preventDefault()" ontouchend="acctNmUp(this)" ontouchcancel="acctNmUp(this)" onmousedown="acctNmDown(this,'6')" onmouseup="acctNmUp(this)" onmouseleave="acctNmUp(this)">6</button>
-        <button class="lm-num" ontouchstart="acctNmDown(this,'7');event.preventDefault()" ontouchend="acctNmUp(this)" ontouchcancel="acctNmUp(this)" onmousedown="acctNmDown(this,'7')" onmouseup="acctNmUp(this)" onmouseleave="acctNmUp(this)">7</button>
-        <button class="lm-num" ontouchstart="acctNmDown(this,'8');event.preventDefault()" ontouchend="acctNmUp(this)" ontouchcancel="acctNmUp(this)" onmousedown="acctNmDown(this,'8')" onmouseup="acctNmUp(this)" onmouseleave="acctNmUp(this)">8</button>
-        <button class="lm-num" ontouchstart="acctNmDown(this,'9');event.preventDefault()" ontouchend="acctNmUp(this)" ontouchcancel="acctNmUp(this)" onmousedown="acctNmDown(this,'9')" onmouseup="acctNmUp(this)" onmouseleave="acctNmUp(this)">9</button>
-        <button class="lm-num lm-num-s" ontouchstart="acctNmDown(this,null,'c');event.preventDefault()" ontouchend="acctNmUp(this)" ontouchcancel="acctNmUp(this)" onmousedown="acctNmDown(this,null,'c')" onmouseup="acctNmUp(this)" onmouseleave="acctNmUp(this)">ล้าง</button>
-        <button class="lm-num" ontouchstart="acctNmDown(this,'0');event.preventDefault()" ontouchend="acctNmUp(this)" ontouchcancel="acctNmUp(this)" onmousedown="acctNmDown(this,'0')" onmouseup="acctNmUp(this)" onmouseleave="acctNmUp(this)">0</button>
-        <button class="lm-num lm-num-s" ontouchstart="acctNmDown(this,null,'d');event.preventDefault()" ontouchend="acctNmUp(this)" ontouchcancel="acctNmUp(this)" onmousedown="acctNmDown(this,null,'d')" onmouseup="acctNmUp(this)" onmouseleave="acctNmUp(this)">&#x232B;</button>
-      </div>
-      <div class="lm-err" id="acct-err"></div>
-      <button class="lm-submit" style="background:linear-gradient(135deg,#006b8f,#00bcd4)" onclick="doACCTUnlock()">เข้าสู่ ACCT</button>
+<div id="acct-login-overlay" style="display:none;position:fixed;inset:0;z-index:99998;background:transparent;align-items:center;justify-content:center;padding:12px;overflow-y:auto">
+  <div style="width:100%;max-width:340px;margin:auto;background:rgba(0,0,0,.05);border:none;border-radius:24px;overflow:visible;box-shadow:none">
+    <!-- icon + title -->
+    <div style="text-align:center;padding:28px 22px 12px">
+      <div style="width:52px;height:52px;margin:0 auto 12px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px">💰</div>
+      <div style="font-size:17px;font-weight:800;color:rgba(255,255,255,.9);margin-bottom:3px">ACCT Mode</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.3);font-family:var(--m)">บัญชีโครงการ</div>
+    </div>
+    <!-- dots -->
+    <div style="display:flex;justify-content:center;gap:12px;margin:0 0 16px" id="acct-dots-row">
+      <div class="lm-dot-inp" id="acd0"></div><div class="lm-dot-inp" id="acd1"></div>
+      <div class="lm-dot-inp" id="acd2"></div><div class="lm-dot-inp" id="acd3"></div>
+      <div class="lm-dot-inp" id="acd4"></div><div class="lm-dot-inp" id="acd5"></div>
+    </div>
+    <!-- numpad -->
+    <div class="lm-numgrid" style="max-width:290px;margin:0 auto 10px">
+      <button class="lm-num" onmousedown="acctNm(this,'1')" onmouseup="acctNmU(this)" onmouseleave="acctNmU(this)" ontouchstart="acctNm(this,'1');event.preventDefault()" ontouchend="acctNmU(this)">1</button>
+      <button class="lm-num" onmousedown="acctNm(this,'2')" onmouseup="acctNmU(this)" onmouseleave="acctNmU(this)" ontouchstart="acctNm(this,'2');event.preventDefault()" ontouchend="acctNmU(this)">2</button>
+      <button class="lm-num" onmousedown="acctNm(this,'3')" onmouseup="acctNmU(this)" onmouseleave="acctNmU(this)" ontouchstart="acctNm(this,'3');event.preventDefault()" ontouchend="acctNmU(this)">3</button>
+      <button class="lm-num" onmousedown="acctNm(this,'4')" onmouseup="acctNmU(this)" onmouseleave="acctNmU(this)" ontouchstart="acctNm(this,'4');event.preventDefault()" ontouchend="acctNmU(this)">4</button>
+      <button class="lm-num" onmousedown="acctNm(this,'5')" onmouseup="acctNmU(this)" onmouseleave="acctNmU(this)" ontouchstart="acctNm(this,'5');event.preventDefault()" ontouchend="acctNmU(this)">5</button>
+      <button class="lm-num" onmousedown="acctNm(this,'6')" onmouseup="acctNmU(this)" onmouseleave="acctNmU(this)" ontouchstart="acctNm(this,'6');event.preventDefault()" ontouchend="acctNmU(this)">6</button>
+      <button class="lm-num" onmousedown="acctNm(this,'7')" onmouseup="acctNmU(this)" onmouseleave="acctNmU(this)" ontouchstart="acctNm(this,'7');event.preventDefault()" ontouchend="acctNmU(this)">7</button>
+      <button class="lm-num" onmousedown="acctNm(this,'8')" onmouseup="acctNmU(this)" onmouseleave="acctNmU(this)" ontouchstart="acctNm(this,'8');event.preventDefault()" ontouchend="acctNmU(this)">8</button>
+      <button class="lm-num" onmousedown="acctNm(this,'9')" onmouseup="acctNmU(this)" onmouseleave="acctNmU(this)" ontouchstart="acctNm(this,'9');event.preventDefault()" ontouchend="acctNmU(this)">9</button>
+      <button class="lm-num lm-num-s" onmousedown="acctNm(this,null,'c')" onmouseup="acctNmU(this)" onmouseleave="acctNmU(this)" ontouchstart="acctNm(this,null,'c');event.preventDefault()" ontouchend="acctNmU(this)">ล้าง</button>
+      <button class="lm-num" onmousedown="acctNm(this,'0')" onmouseup="acctNmU(this)" onmouseleave="acctNmU(this)" ontouchstart="acctNm(this,'0');event.preventDefault()" ontouchend="acctNmU(this)">0</button>
+      <button class="lm-num lm-num-s" onmousedown="acctNm(this,null,'d')" onmouseup="acctNmU(this)" onmouseleave="acctNmU(this)" ontouchstart="acctNm(this,null,'d');event.preventDefault()" ontouchend="acctNmU(this)">&#x232B;</button>
+    </div>
+    <div class="lm-err" id="acct-err"></div>
+    <div style="padding:0 22px 22px">
+      <button class="lm-submit" onclick="doACCTUnlock()" style="margin-bottom:8px">เข้าสู่ ACCT</button>
       <button class="lm-ghost" onclick="closeACCTLogin()">ยกเลิก</button>
-      <div class="lm-foot"><div style="width:5px;height:5px;border-radius:50%;background:#0d1a28"></div>ACCT · Admin Only<div style="width:5px;height:5px;border-radius:50%;background:#0d1a28"></div></div>
     </div>
   </div>
 </div>
@@ -3779,8 +3734,33 @@ function acctNmUp(el){
   el.style.background='radial-gradient(circle at 35% 30%,rgba(255,255,255,.18) 0%,rgba(255,255,255,.04) 40%,transparent 70%)';
   el.style.boxShadow='0 4px 16px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.3),inset 0 -1px 0 rgba(0,0,0,.15)';
 }
+
+// ── ACCT Numpad ─────────────────────────────────────────────
+function _acctSyncDots(){
+  for(let i=0;i<6;i++){
+    const d=document.getElementById('acd'+i);
+    if(d) d.classList.toggle('filled',i<_acctBuf.length);
+  }
+}
+function acctNm(el,n,a){
+  el.style.transition='transform .1s ease,background .1s ease,box-shadow .1s ease';
+  el.style.transform='scale(1.15)';
+  el.style.background='radial-gradient(circle at 35% 30%,rgba(255,255,255,.55) 0%,rgba(255,255,255,.08) 25%,rgba(0,0,0,.5) 65%,rgba(0,0,0,.75) 100%)';
+  el.style.boxShadow='0 6px 20px rgba(0,0,0,.5),inset 0 2px 6px rgba(255,255,255,.5),inset 0 -2px 8px rgba(0,0,0,.6)';
+  if(navigator.vibrate) navigator.vibrate(20);
+  if(n){
+    if(_acctBuf.length<6){ _acctBuf+=n; _acctSyncDots(); if(_acctBuf.length>=6) setTimeout(doACCTUnlock,120); }
+  } else if(a==='c'){ _acctBuf=''; _acctSyncDots(); }
+  else if(a==='d'){ _acctBuf=_acctBuf.slice(0,-1); _acctSyncDots(); }
+}
+function acctNmU(el){
+  el.style.transition='transform .15s cubic-bezier(.34,1.56,.64,1),background .1s ease,box-shadow .1s ease';
+  el.style.transform='scale(1)';
+  el.style.background='rgba(255,255,255,.06)';
+  el.style.boxShadow='';
+}
 function doACCTUnlock(){
-  const pw=_acctBuf||(document.getElementById('acct-pw-inp')?.value.trim()||'');
+  const pw=_acctBuf||(document.getElementById('acct-pw-inp')?.value||'').trim();
   // ตรวจ custom hash ก่อน ถ้ามีใน localStorage
   const customAcctHash = localStorage.getItem('cp_acct_pass_hash');
   const acctOk = customAcctHash
@@ -5385,35 +5365,40 @@ function saveNewCatModal(){
 
 
 <!-- ═══ Dev Login Modal ═══ -->
-<div id="dev-login-modal" style="display:none;position:fixed;inset:0;z-index:99999;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);padding:16px;overflow-y:auto">
-  <div style="width:100%;max-width:340px;margin:40px auto;background:rgba(10,15,30,.97);border:1px solid rgba(120,80,255,.4);border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5)">
-    <div style="height:2px;background:linear-gradient(90deg,transparent,#9b66ff,#ce93d8,transparent)"></div>
-    <div style="padding:26px 22px 22px">
-      <div style="width:44px;height:44px;background:rgba(120,80,255,.1);border:1px solid rgba(120,80,255,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:20px">🛠️</div>
-      <div style="font-size:18px;font-weight:800;color:#c9a8ff;text-align:center;margin-bottom:4px">Developer Mode</div>
-      <div style="font-size:11px;color:#445566;font-family:var(--m);text-align:center;margin-bottom:18px">สิทธิ์แก้ไขชื่อ S และเพิ่ม S ใหม่</div>
-      <div style="display:flex;justify-content:center;gap:14px;margin-bottom:18px" id="dev-dots-row">
-        <div class="lm-dot-inp" id="dvd0"></div><div class="lm-dot-inp" id="dvd1"></div>
-        <div class="lm-dot-inp" id="dvd2"></div><div class="lm-dot-inp" id="dvd3"></div>
-      </div>
-      <div style="display:none"><input id="dev-pw-inp" type="password" maxlength="20" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();doDevLogin();}"></div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:280px;margin:0 auto 16px">
-        <button class="lm-num" onmousedown="devNmDown(this,'1')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'1');event.preventDefault()" ontouchend="devNmUp(this)">1</button>
-        <button class="lm-num" onmousedown="devNmDown(this,'2')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'2');event.preventDefault()" ontouchend="devNmUp(this)">2</button>
-        <button class="lm-num" onmousedown="devNmDown(this,'3')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'3');event.preventDefault()" ontouchend="devNmUp(this)">3</button>
-        <button class="lm-num" onmousedown="devNmDown(this,'4')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'4');event.preventDefault()" ontouchend="devNmUp(this)">4</button>
-        <button class="lm-num" onmousedown="devNmDown(this,'5')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'5');event.preventDefault()" ontouchend="devNmUp(this)">5</button>
-        <button class="lm-num" onmousedown="devNmDown(this,'6')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'6');event.preventDefault()" ontouchend="devNmUp(this)">6</button>
-        <button class="lm-num" onmousedown="devNmDown(this,'7')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'7');event.preventDefault()" ontouchend="devNmUp(this)">7</button>
-        <button class="lm-num" onmousedown="devNmDown(this,'8')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'8');event.preventDefault()" ontouchend="devNmUp(this)">8</button>
-        <button class="lm-num" onmousedown="devNmDown(this,'9')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'9');event.preventDefault()" ontouchend="devNmUp(this)">9</button>
-        <button class="lm-num lm-num-s" onmousedown="devNmDown(this,null,'c')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,null,'c');event.preventDefault()" ontouchend="devNmUp(this)">ล้าง</button>
-        <button class="lm-num" onmousedown="devNmDown(this,'0')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'0');event.preventDefault()" ontouchend="devNmUp(this)">0</button>
-        <button class="lm-num lm-num-s" onmousedown="devNmDown(this,null,'d')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,null,'d');event.preventDefault()" ontouchend="devNmUp(this)">&#x232B;</button>
-      </div>
-      <div style="min-height:16px;font-size:11px;color:#dc6060;font-family:var(--m);text-align:center;margin-bottom:14px" id="dev-login-err"></div>
-      <button onclick="doDevLogin()" style="width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#5b2eff,#9b66ff);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;font-family:var(--f)">🛠️ เข้าสู่ Developer Mode</button>
-      <button onclick="closeDevLoginModal()" style="width:100%;padding:10px;border-radius:10px;background:transparent;border:1px solid rgba(120,80,255,.2);color:#445566;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--f)">ยกเลิก</button>
+<div id="dev-login-modal" style="display:none;position:fixed;inset:0;z-index:99999;background:transparent;align-items:center;justify-content:center;padding:12px;overflow-y:auto">
+  <div style="width:100%;max-width:340px;margin:auto;background:rgba(0,0,0,.05);border:none;border-radius:24px;overflow:visible;box-shadow:none">
+    <!-- icon + title -->
+    <div style="text-align:center;padding:28px 22px 12px">
+      <div style="width:52px;height:52px;margin:0 auto 12px;background:rgba(120,80,255,.1);border:1px solid rgba(120,80,255,.25);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px">🛠️</div>
+      <div style="font-size:17px;font-weight:800;color:rgba(255,255,255,.9);margin-bottom:3px">Developer Mode</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.3);font-family:var(--m)">สิทธิ์แก้ไขชื่อ S และเพิ่ม S ใหม่</div>
+    </div>
+    <!-- dots 6 หลัก -->
+    <div style="display:flex;justify-content:center;gap:12px;margin:0 0 16px" id="dev-dots-row">
+      <div class="lm-dot-inp" id="dvd0"></div><div class="lm-dot-inp" id="dvd1"></div>
+      <div class="lm-dot-inp" id="dvd2"></div><div class="lm-dot-inp" id="dvd3"></div>
+      <div class="lm-dot-inp" id="dvd4"></div><div class="lm-dot-inp" id="dvd5"></div>
+    </div>
+    <div style="display:none"><input id="dev-pw-inp" type="password" maxlength="20" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();doDevLogin();}"></div>
+    <!-- numpad -->
+    <div class="lm-numgrid" style="max-width:290px;margin:0 auto 10px">
+      <button class="lm-num" onmousedown="devNmDown(this,'1')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'1');event.preventDefault()" ontouchend="devNmUp(this)">1</button>
+      <button class="lm-num" onmousedown="devNmDown(this,'2')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'2');event.preventDefault()" ontouchend="devNmUp(this)">2</button>
+      <button class="lm-num" onmousedown="devNmDown(this,'3')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'3');event.preventDefault()" ontouchend="devNmUp(this)">3</button>
+      <button class="lm-num" onmousedown="devNmDown(this,'4')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'4');event.preventDefault()" ontouchend="devNmUp(this)">4</button>
+      <button class="lm-num" onmousedown="devNmDown(this,'5')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'5');event.preventDefault()" ontouchend="devNmUp(this)">5</button>
+      <button class="lm-num" onmousedown="devNmDown(this,'6')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'6');event.preventDefault()" ontouchend="devNmUp(this)">6</button>
+      <button class="lm-num" onmousedown="devNmDown(this,'7')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'7');event.preventDefault()" ontouchend="devNmUp(this)">7</button>
+      <button class="lm-num" onmousedown="devNmDown(this,'8')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'8');event.preventDefault()" ontouchend="devNmUp(this)">8</button>
+      <button class="lm-num" onmousedown="devNmDown(this,'9')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'9');event.preventDefault()" ontouchend="devNmUp(this)">9</button>
+      <button class="lm-num lm-num-s" onmousedown="devNmDown(this,null,'c')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,null,'c');event.preventDefault()" ontouchend="devNmUp(this)">ล้าง</button>
+      <button class="lm-num" onmousedown="devNmDown(this,'0')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,'0');event.preventDefault()" ontouchend="devNmUp(this)">0</button>
+      <button class="lm-num lm-num-s" onmousedown="devNmDown(this,null,'d')" onmouseup="devNmUp(this)" onmouseleave="devNmUp(this)" ontouchstart="devNmDown(this,null,'d');event.preventDefault()" ontouchend="devNmUp(this)">&#x232B;</button>
+    </div>
+    <div style="min-height:16px;font-size:11px;color:rgba(255,100,100,.9);font-family:var(--m);text-align:center;margin-bottom:10px" id="dev-login-err"></div>
+    <div style="padding:0 22px 22px">
+      <button onclick="doDevLogin()" class="lm-submit" style="margin-bottom:8px;border-color:rgba(120,80,255,.5);color:rgba(180,140,255,.9)">เข้าสู่ Developer Mode</button>
+      <button onclick="closeDevLoginModal()" class="lm-ghost">ยกเลิก</button>
     </div>
   </div>
 </div>
@@ -6536,7 +6521,7 @@ function updateProjDateSummary() {
 const DEV_SESSION_KEY = 'cp_dev_session';
 const DEV_PASS_KEY = 'cp_dev_pass_hash';
 // Default hash for "111111"
-const DEV_DEFAULT_HASH = '7e66b5dd3d158d14ba3300cad5702ee6d72befaec37890eed25c91687bb649df';
+const DEV_DEFAULT_HASH = 'bcb15f821479b4d5772bd0ca866c00ad5f926e3580720659cc80d39c9d09802a'; // sha256('111111')
 
 function getDevHash() {
   return localStorage.getItem(DEV_PASS_KEY) || DEV_DEFAULT_HASH;
@@ -6558,7 +6543,7 @@ function closeDevLoginModal() {
   _devBuf = ''; _devSyncDots();
 }
 function _devSyncDots() {
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 6; i++) {
     const d = document.getElementById('dvd' + i);
     if (d) d.classList.toggle('filled', i < _devBuf.length);
   }
@@ -6566,35 +6551,21 @@ function _devSyncDots() {
   if (inp) inp.value = _devBuf;
 }
 function devNmDown(el, n, a) {
-  const now = Date.now(); if (now - _devLastTouch < 80) return; _devLastTouch = now;
-  el.style.transform = 'scale(1.15)';
-  if (navigator.vibrate) navigator.vibrate(20);
-  if (n) { if (_devBuf.length < 4) { _devBuf += n; _devSyncDots(); if (_devBuf.length >= 4) setTimeout(() => { doDevLogin(); }, 120); } }
-  else if (a === 'c') { _devBuf = ''; _devSyncDots(); }
-  else if (a === 'd') { _devBuf = _devBuf.slice(0, -1); _devSyncDots(); }
+  const now=Date.now(); if(now-_devLastTouch<80)return; _devLastTouch=now;
+  el.style.transition='transform .1s ease,background .1s ease,box-shadow .1s ease';
+  el.style.transform='scale(1.15)';
+  el.style.background='radial-gradient(circle at 35% 30%,rgba(255,255,255,.55) 0%,rgba(255,255,255,.08) 25%,rgba(0,0,0,.5) 65%,rgba(0,0,0,.75) 100%)';
+  el.style.boxShadow='0 6px 20px rgba(0,0,0,.5),inset 0 2px 6px rgba(255,255,255,.5),inset 0 -2px 8px rgba(0,0,0,.6)';
+  if(navigator.vibrate) navigator.vibrate(20);
+  if(n){ if(_devBuf.length<6){ _devBuf+=n; _devSyncDots(); if(_devBuf.length>=6) setTimeout(()=>{ doDevLogin(); },120); } }
+  else if(a==='c'){ _devBuf=''; _devSyncDots(); }
+  else if(a==='d'){ _devBuf=_devBuf.slice(0,-1); _devSyncDots(); }
 }
-function devNmUp(el) { el.style.transform = 'scale(1)'; }
-function doDevLogin() {
-  const pw = _devBuf || (document.getElementById('dev-pw-inp')?.value || '');
-  if (sha256(pw) === getDevHash()) {
-    sessionStorage.setItem(DEV_SESSION_KEY, '1');
-    document.body.classList.add('dev-mode');
-    closeDevLoginModal();
-    showToast('🛠️ Developer Mode เปิดแล้ว', 'ok');
-    // Re-render current category page if open
-    if (document.getElementById('category-overlay')?.style.display === 'block') {
-      renderCategoryPage(_currentCat);
-    }
-    // Update dev link appearance
-    const lnk = document.getElementById('dev-login-link');
-    if (lnk) { lnk.textContent = '🛠️ Dev ✓'; lnk.style.color = '#76ff03'; lnk.style.borderColor = 'rgba(118,255,3,.5)'; lnk.style.background = 'rgba(118,255,3,.08)'; lnk.setAttribute('onclick', 'event.preventDefault();doDevLogout()'); }
-  } else {
-    const err = document.getElementById('dev-login-err');
-    if (err) err.textContent = 'รหัสผ่านไม่ถูกต้อง';
-    _devBuf = ''; _devSyncDots();
-    const card = document.querySelector('#dev-login-modal > div');
-    if (card) { card.style.animation = 'none'; card.offsetHeight; card.style.animation = 'shake .4s ease'; }
-  }
+function devNmUp(el){
+  el.style.transition='transform .15s cubic-bezier(.34,1.56,.64,1),background .1s ease,box-shadow .1s ease';
+  el.style.transform='scale(1)';
+  el.style.background='rgba(255,255,255,.06)';
+  el.style.boxShadow='';
 }
 function doDevLogout() {
   sessionStorage.removeItem(DEV_SESSION_KEY);
