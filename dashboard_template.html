@@ -833,10 +833,6 @@ input, textarea, [contenteditable] {
   body { display: none !important; }
 }
 </style>
-  <!-- Firebase Auth SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
 <body>
 <div class="bg-overlay"></div>
@@ -8072,8 +8068,9 @@ function _initFirebaseAuth(){
       };
       _fbApp = firebase.initializeApp(cfg);
     }
-    _fbAuth = firebase.auth(_fbApp);
-    _fbDB   = firebase.database(_fbApp);
+    // v8 compat API
+    _fbAuth = firebase.auth ? firebase.auth() : null;
+    _fbDB   = firebase.database ? firebase.database() : null;
     _authReady = true;
     console.log('Firebase Auth ready ✅');
 
@@ -8677,6 +8674,57 @@ window.closeForgotPassModal = function(){
   if(typeof _origClose==='function') _origClose();
 };
 </script>
+<!-- Firebase SDK v9 compat — โหลดจาก CDN หลัก + fallback -->
+<script>
+(function(){
+  var loaded={app:false,auth:false,db:false};
+  var tried={app:false,auth:false,db:false};
 
+  function tryInit(){
+    if(loaded.app&&loaded.auth&&loaded.db){
+      // รอให้ firebase.auth เป็น function จริงๆ ก่อน (อาจ async)
+      var attempt=function(n){
+        if(typeof firebase!=='undefined'&&typeof firebase.auth==='function'&&typeof firebase.database==='function'){
+          if(typeof window._doInitFirebase==='function') window._doInitFirebase();
+        } else if(n>0){
+          setTimeout(function(){attempt(n-1);},200);
+        } else {
+          console.warn('Firebase SDK loaded but api not ready');
+        }
+      };
+      attempt(15); // รอสูงสุด 3 วินาที
+    }
+  }
+
+  function loadScript(url,key,fallbackUrl){
+    var s=document.createElement('script');
+    s.src=url;
+    s.onload=function(){loaded[key]=true;tryInit();};
+    s.onerror=function(){
+      // ลอง fallback URL
+      if(fallbackUrl&&!tried[key]){
+        tried[key]=true;
+        var s2=document.createElement('script');
+        s2.src=fallbackUrl;
+        s2.onload=function(){loaded[key]=true;tryInit();};
+        s2.onerror=function(){console.error('Firebase '+key+' failed to load');};
+        document.head.appendChild(s2);
+      }else{
+        console.error('Firebase '+key+' failed to load from all CDNs');
+      }
+    };
+    document.head.appendChild(s);
+  }
+
+  // Primary: gstatic | Fallback: jsdelivr
+  var VER='8.10.1'; // v8 compat — เสถียรมาก
+  var BASE='https://www.gstatic.com/firebasejs/'+VER;
+  var CDN2='https://cdn.jsdelivr.net/npm/firebase@'+VER;
+
+  loadScript(BASE+'/firebase-app.js',      'app',  CDN2+'/firebase-app.js');
+  loadScript(BASE+'/firebase-auth.js',     'auth', CDN2+'/firebase-auth.js');
+  loadScript(BASE+'/firebase-database.js', 'db',   CDN2+'/firebase-database.js');
+})();
+</script>
 </body>
 </html>
