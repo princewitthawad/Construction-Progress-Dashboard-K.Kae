@@ -925,6 +925,7 @@ window.showForgotPassModal = function(){
     <div class="view-badge">👁️ โหมดดูอย่างเดียว</div>
     <a id="dev-login-link" href="#" onclick="event.preventDefault();showDevLoginModal()" style="font-size:11px;font-weight:600;color:#9b66ff;text-decoration:none;padding:5px 10px;border-radius:6px;border:1px solid rgba(120,80,255,.3);background:rgba(120,80,255,.08);transition:color .2s" title="Developer Mode">🛠️ Dev</a>
     <a id="lockin-link" href="#" onclick="event.preventDefault();showLockModal()" style="font-size:11px;font-weight:600;color:var(--tx2);text-decoration:none;padding:5px 10px;border-radius:6px;transition:color .2s" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--tx2)'">🔓 Login</a>
+    <button id="approve-notif-btn" onclick="openApprovePanel()" style="display:none;align-items:center;gap:5px;background:rgba(255,200,0,.12);color:#ffd600;border:1px solid rgba(255,200,0,.3);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">📋 คำขอ <span class="ap-count" style="background:rgba(255,80,80,.8);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px">0</span></button>
     <button id="logout-btn" class="btn edit-only" onclick="doLogout()" style="display:none;background:rgba(255,68,68,.12);color:#ff6666;border:1px solid rgba(255,68,68,.3);font-size:11px">🔒 Logout</button>
     <button id="lock-btn" class="btn btn-o edit-only" onclick="applyViewMode()" style="display:none">🔒 ล็อก</button>
     <button class="btn edit-only" onclick="openACCT()" style="background:rgba(0,212,255,.15);color:var(--cyan);border:1px solid rgba(0,212,255,.4);font-size:11px">💰 ACCT</button>
@@ -1992,9 +1993,9 @@ function showLockModal(){
 }
 function closeLockModal(){document.getElementById('lock-modal').classList.remove('show');_numBuf='';_syncDots();}
 function applyViewMode(){document.body.classList.add('view-mode');_isLocked=true;const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');if(link)link.style.display='';if(logout)logout.style.display='none';}
-function applyEditMode(){document.body.classList.remove('view-mode');_isLocked=false;sessionStorage.setItem(SESSION_KEY,'1');const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');if(link)link.style.display='none';if(logout)logout.style.display='';}
+function applyEditMode(){document.body.classList.remove('view-mode');_isLocked=false;sessionStorage.setItem(SESSION_KEY,'1');if(typeof window._stampLogin==='function')window._stampLogin();setTimeout(function(){if(typeof checkPendingRequests==='function')checkPendingRequests();},2000);const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');if(link)link.style.display='none';if(logout)logout.style.display='';}
 function showGreeting(){const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;pointer-events:none';d.innerHTML=`<div style="background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:36px 72px;backdrop-filter:blur(20px);box-shadow:0 12px 60px rgba(0,0,0,.5);animation:greetIn .35s cubic-bezier(.34,1.56,.64,1) both"><span style="font-size:42px;font-weight:800;color:#e8f0fe;font-family:'Sarabun',sans-serif;letter-spacing:1px">สวัสดี ค่ะ</span></div>`;document.body.appendChild(d);setTimeout(()=>{d.firstElementChild.style.cssText+=';animation:greetOut .3s ease forwards';setTimeout(()=>d.remove(),300);},3000);}
-function doLogout(){sessionStorage.removeItem(SESSION_KEY);applyViewMode();showToast('ออกจากระบบแล้ว 🔒','ok');}
+function doLogout(){sessionStorage.removeItem(SESSION_KEY);sessionStorage.removeItem('cp_session_expire');sessionStorage.removeItem('cp_dev_session');applyViewMode();showToast('ออกจากระบบแล้ว 🔒','ok');}
 
 function _syncDots(){
   for(let i=0;i<8;i++){
@@ -9159,6 +9160,276 @@ function _showOTPPopup(otp, role, userEmail){
   document.body.appendChild(overlay);
 }
 
+</script>
+
+
+<script>
+// ════ Auto Logout System ════════════════════════════════════
+(function(){
+  var SESSION_EXPIRE_KEY = 'cp_session_expire';
+  var SESSION_2HR = 2 * 60 * 60 * 1000; // 2 ชม.
+
+  // บันทึกเวลา login
+  function _stampLogin(){
+    sessionStorage.setItem(SESSION_EXPIRE_KEY, String(Date.now() + SESSION_2HR));
+  }
+
+  // ตรวจว่า session หมดอายุหรือยัง
+  function _isExpired(){
+    var exp = parseInt(sessionStorage.getItem(SESSION_EXPIRE_KEY)||'0');
+    return Date.now() > exp;
+  }
+
+  // Logout ทุกโหมด
+  function _autoLogout(reason){
+    // Main session
+    sessionStorage.removeItem('cp_edit_session');
+    sessionStorage.removeItem(SESSION_EXPIRE_KEY);
+    // Dev session
+    sessionStorage.removeItem('cp_dev_session');
+    // ACCT session
+    sessionStorage.removeItem('cp_acct_session');
+    // apply view mode
+    if(typeof applyViewMode==='function') applyViewMode();
+    if(typeof showLockModal==='function') showLockModal();
+    if(typeof showToast==='function') showToast('⏱️ '+reason+' — กรุณาเข้าสู่ระบบใหม่','err',5000);
+    console.log('Auto logout:', reason);
+  }
+
+  // ── ปิดแอพ / ปิด tab → logout ────────────────────────────
+  // visibilitychange: เมื่อ tab ถูกซ่อน (minimize/close/switch tab)
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'hidden'){
+      // บันทึกเวลาที่ซ่อน
+      sessionStorage.setItem('cp_hidden_at', String(Date.now()));
+    } else if(document.visibilityState === 'visible'){
+      // กลับมา — ตรวจว่าหมดอายุไหม
+      var hiddenAt = parseInt(sessionStorage.getItem('cp_hidden_at')||'0');
+      var hiddenFor = Date.now() - hiddenAt;
+      // ถ้าซ่อนนานเกิน 30 วิ → logout (เหมือนปิดแอพ)
+      if(hiddenFor > 60000 && _isExpired()){
+        _autoLogout('Session หมดอายุ');
+      } else if(hiddenFor > 60000){
+        // ยังไม่หมดอายุ แต่กลับมาจากการซ่อน — ตรวจ session ปกติ
+        var active = sessionStorage.getItem('cp_edit_session')==='1';
+        if(!active && typeof document.body !=='undefined'){
+          if(!document.body.classList.contains('view-mode')){
+            _autoLogout('ตรวจพบการออกจากแอพ');
+          }
+        }
+      }
+    }
+  });
+
+  // ── beforeunload: ปิด tab/browser → ล้าง session ─────────
+  window.addEventListener('beforeunload', function(){
+    // ล้าง session ทันที (ปิด browser หรือ reload)
+    sessionStorage.removeItem('cp_edit_session');
+    sessionStorage.removeItem('cp_dev_session');
+    sessionStorage.removeItem(SESSION_EXPIRE_KEY);
+    sessionStorage.removeItem('cp_hidden_at');
+  });
+
+  // ── Timer 2 ชม. ──────────────────────────────────────────
+  setInterval(function(){
+    var active = sessionStorage.getItem('cp_edit_session')==='1';
+    var devActive = sessionStorage.getItem('cp_dev_session')==='1';
+    if((active || devActive) && _isExpired()){
+      _autoLogout('ใช้งานครบ 2 ชั่วโมง');
+    }
+  }, 60 * 1000); // ตรวจทุก 1 นาที
+
+  // ── expose stampLogin ให้ applyEditMode เรียก ────────────
+  window._stampLogin = _stampLogin;
+  window._isSessionExpired = _isExpired;
+})();
+</script>
+
+
+<!-- ════ Admin Approval Panel ════ -->
+<div id="approve-panel" style="display:none;position:fixed;inset:0;z-index:999990;background:rgba(0,0,0,.8);backdrop-filter:blur(12px);align-items:center;justify-content:center;padding:16px;font-family:var(--f,'Sarabun',sans-serif)">
+  <div style="background:linear-gradient(135deg,#0a1628,#0d1a2e);border:1px solid rgba(56,139,253,.35);border-radius:20px;width:100%;max-width:480px;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.8)">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,rgba(56,139,253,.2),rgba(0,212,255,.1));padding:18px 24px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div>
+        <div style="font-size:16px;font-weight:800;color:#e8f0fe">คำขอรออนุมัติ</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px">ACCT / Dev Permission Requests</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div id="approve-badge" style="background:rgba(255,80,80,.2);border:1px solid rgba(255,80,80,.4);color:#ff6b6b;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;display:none">0</div>
+        <button onclick="closeApprovePanel()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:13px">✕</button>
+      </div>
+    </div>
+
+    <!-- List -->
+    <div id="approve-list" style="overflow-y:auto;padding:16px;flex:1">
+      <div style="text-align:center;color:rgba(255,255,255,.3);font-size:13px;padding:32px 0">กำลังโหลด...</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════ Approve Confirm Popup ════ -->
+<div id="approve-confirm" style="display:none;position:fixed;inset:0;z-index:999991;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:16px;font-family:var(--f,'Sarabun',sans-serif)">
+  <div style="background:linear-gradient(135deg,#0a1628,#0d1a2e);border:1px solid rgba(0,230,118,.35);border-radius:20px;width:100%;max-width:380px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.8);text-align:center;padding:32px 28px">
+    <div style="font-size:42px;margin-bottom:12px">✅</div>
+    <div style="font-size:17px;font-weight:800;color:#e8f0fe;margin-bottom:6px">ยืนยันการอนุมัติ?</div>
+    <div id="approve-confirm-info" style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:20px;line-height:1.8"></div>
+    <div style="background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2);border-radius:12px;padding:14px;margin-bottom:20px">
+      <div style="font-size:10px;color:rgba(0,230,118,.7);margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px">รหัส OTP ที่จะมอบให้</div>
+      <div id="approve-confirm-otp" style="font-size:42px;font-weight:900;font-family:monospace;color:#00e676;letter-spacing:8px"></div>
+    </div>
+    <div style="font-size:11px;color:rgba(255,255,255,.35);margin-bottom:20px">แจ้ง OTP นี้ให้ผู้ใช้ นำไปกรอกใน ACCT/Dev login</div>
+    <div style="display:flex;gap:8px">
+      <button id="approve-confirm-btn" style="flex:1;padding:14px;background:linear-gradient(135deg,rgba(0,200,83,.4),rgba(0,230,118,.25));border:1px solid rgba(0,200,83,.5);border-radius:12px;color:#e8f0fe;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer">อนุมัติ ✅</button>
+      <button onclick="document.getElementById('approve-confirm').style.display='none'" style="padding:14px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:12px;font-family:inherit;font-size:15px;cursor:pointer">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ════ Admin Approval Panel JS ══════════════════════════════
+
+window.openApprovePanel = function(){
+  var p=document.getElementById('approve-panel');
+  if(p) p.style.display='flex';
+  loadPendingRequests();
+};
+
+window.closeApprovePanel = function(){
+  var p=document.getElementById('approve-panel');
+  if(p) p.style.display='none';
+};
+
+function loadPendingRequests(){
+  var listEl=document.getElementById('approve-list');
+  if(!listEl) return;
+  listEl.innerHTML='<div style="text-align:center;color:rgba(255,255,255,.3);font-size:13px;padding:32px 0">กำลังโหลด...</div>';
+
+  if(typeof firebase==='undefined'||!firebase.apps||!firebase.apps.length){
+    listEl.innerHTML='<div style="text-align:center;color:rgba(255,100,100,.7);font-size:13px;padding:32px 0">Firebase ไม่พร้อม</div>';
+    return;
+  }
+
+  firebase.database().ref('role_requests').orderByChild('status').equalTo('pending').once('value')
+    .then(function(snap){
+      var items=[];
+      snap.forEach(function(child){ items.push({key:child.key, data:child.val()}); });
+
+      if(items.length===0){
+        listEl.innerHTML='<div style="text-align:center;color:rgba(255,255,255,.25);font-size:13px;padding:32px 0">ไม่มีคำขอรออนุมัติ ✅</div>';
+        var badge=document.getElementById('approve-badge');
+        if(badge) badge.style.display='none';
+        return;
+      }
+
+      var badge=document.getElementById('approve-badge');
+      if(badge){ badge.textContent=items.length; badge.style.display='block'; }
+
+      listEl.innerHTML = items.map(function(item){
+        var d=item.data;
+        var roleLabel=d.role==='acct'?'ACCT':'Dev';
+        var roleColor=d.role==='acct'?'#00d4ff':'#ce93d8';
+        var date=d.createdAt?new Date(d.createdAt).toLocaleString('th-TH'):'';
+        return '<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;margin-bottom:12px">'
+          +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">'
+          +'<div style="flex:1">'
+          +'<div style="font-size:14px;font-weight:700;color:#e8f0fe;margin-bottom:4px">'+d.name+'</div>'
+          +'<div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:4px">'+d.email+'</div>'
+          +'<div style="font-size:10px;color:rgba(255,255,255,.25)">'+date+'</div>'
+          +'</div>'
+          +'<div style="text-align:right;flex-shrink:0">'
+          +'<div style="background:rgba(0,0,0,.3);border:1px solid '+roleColor+'44;color:'+roleColor+';border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;margin-bottom:8px">'+roleLabel+'</div>'
+          +'<button onclick="confirmApprove(\''+item.key+'\',\''+d.name+'\',\''+d.email+'\',\''+d.role+'\',\''+d.otp+'\')" '
+          +'style="padding:8px 14px;background:linear-gradient(135deg,rgba(0,200,83,.3),rgba(0,230,118,.15));border:1px solid rgba(0,200,83,.4);border-radius:8px;color:#00e676;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Approve ✅</button>'
+          +'</div>'
+          +'</div>'
+          +'</div>';
+      }).join('');
+    }).catch(function(e){
+      listEl.innerHTML='<div style="text-align:center;color:rgba(255,100,100,.7);font-size:13px;padding:32px 0">โหลดไม่ได้: '+e.message+'</div>';
+    });
+}
+
+window.confirmApprove = function(key, name, email, role, otp){
+  var roleLabel=role==='acct'?'ACCT (บัญชีโครงการ)':'Dev (นักพัฒนา)';
+  var infoEl=document.getElementById('approve-confirm-info');
+  var otpEl=document.getElementById('approve-confirm-otp');
+  var btnEl=document.getElementById('approve-confirm-btn');
+
+  if(infoEl) infoEl.innerHTML='<strong style="color:#e8f0fe">'+name+'</strong><br>'+email+'<br>ขอสิทธิ์ <strong style="color:'+(role==='acct'?'#00d4ff':'#ce93d8')+'">'+roleLabel+'</strong>';
+  if(otpEl) otpEl.textContent=otp;
+
+  var conf=document.getElementById('approve-confirm');
+  if(conf) conf.style.display='flex';
+
+  if(btnEl) btnEl.onclick=function(){
+    doApprove(key, name, email, role, otp);
+  };
+};
+
+function doApprove(key, name, email, role, otp){
+  var conf=document.getElementById('approve-confirm');
+  var btnEl=document.getElementById('approve-confirm-btn');
+  if(btnEl){ btnEl.disabled=true; btnEl.textContent='กำลังอนุมัติ...'; }
+
+  var otpHash=typeof sha256==='function'?sha256(otp):otp;
+  var sharedKey=role==='acct'?'acct_pass_hash':'dev_pass_hash';
+
+  try{
+    var db=firebase.database();
+    var updates={};
+    // อัพเดท status
+    updates['role_requests/'+key+'/status']='approved';
+    updates['role_requests/'+key+'/approvedAt']=new Date().toISOString();
+    // บันทึก hash
+    updates['shared_hashes/'+sharedKey]={ hash:otpHash, updatedAt:new Date().toISOString(), grantedTo:email };
+
+    db.ref().update(updates).then(function(){
+      if(conf) conf.style.display='none';
+      if(typeof showToast==='function') showToast('อนุมัติ '+name+' สิทธิ์ '+(role==='acct'?'ACCT':'Dev')+' แล้ว OTP: '+otp,'ok',8000);
+      // รีโหลด list
+      loadPendingRequests();
+    }).catch(function(e){
+      if(btnEl){ btnEl.disabled=false; btnEl.textContent='อนุมัติ ✅'; }
+      if(typeof showToast==='function') showToast('เกิดข้อผิดพลาด: '+e.message,'err',5000);
+    });
+  }catch(e){
+    if(btnEl){ btnEl.disabled=false; btnEl.textContent='อนุมัติ ✅'; }
+    if(typeof showToast==='function') showToast('Firebase error: '+e.message,'err',5000);
+  }
+}
+
+// ── ตรวจคำขอรออนุมัติ — แสดง badge ใน header ──────────────
+function checkPendingRequests(){
+  if(typeof firebase==='undefined'||!firebase.apps||!firebase.apps.length) return;
+  // เฉพาะ Admin mode เท่านั้น
+  var isAdmin = sessionStorage.getItem('cp_edit_session')==='1';
+  if(!isAdmin) return;
+
+  firebase.database().ref('role_requests').orderByChild('status').equalTo('pending').once('value')
+    .then(function(snap){
+      var count=0; snap.forEach(function(){ count++; });
+      var notifBtn=document.getElementById('approve-notif-btn');
+      if(notifBtn){
+        if(count>0){
+          notifBtn.style.display='inline-flex';
+          notifBtn.querySelector('.ap-count').textContent=count;
+        }else{
+          notifBtn.style.display='none';
+        }
+      }
+    }).catch(function(){});
+}
+
+// ตรวจทุก 30 วิ
+setInterval(checkPendingRequests, 30000);
+// ตรวจเมื่อ login
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(checkPendingRequests, 3000);
+});
 </script>
 
 <!-- Firebase SDK v9 compat — โหลดจาก CDN หลัก + fallback -->
