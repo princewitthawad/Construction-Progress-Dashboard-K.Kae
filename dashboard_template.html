@@ -9,9 +9,9 @@
 <meta name="apple-mobile-web-app-title" content="CP Dashboard">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#080d14">
-<meta name="description" content="Construction Progress Dashboard v3.0.0">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23080d14'/%3E%3Crect x='40' y='40' width='432' height='432' rx='80' fill='%230d1a2e'/%3E%3Ctext x='256' y='200' text-anchor='middle' font-family='Arial' font-weight='bold' font-size='80' fill='%23388bfd'%3ECP%3C/text%3E%3Ctext x='256' y='290' text-anchor='middle' font-family='Arial' font-size='40' fill='%2300e676'%3EDashboard%3C/text%3E%3Ctext x='256' y='360' text-anchor='middle' font-family='Arial' font-size='28' fill='%236b7a8d'%3Ev3.0.0%3C/text%3E%3Crect x='80' y='390' width='352' height='4' rx='2' fill='%23388bfd' opacity='.5'/%3E%3C/svg%3E">
-<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Construction%20Progress%20Dashboard%22%2C%22short_name%22%3A%22CP%20Dashboard%22%2C%22description%22%3A%22Construction%20Progress%20Dashboard%20v3.0.0%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23080d14%22%2C%22theme_color%22%3A%22%23080d14%22%2C%22orientation%22%3A%22any%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%2520256%2520512%27%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+<meta name="description" content="Construction Progress Dashboard v3.1.2">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23080d14'/%3E%3Crect x='40' y='40' width='432' height='432' rx='80' fill='%230d1a2e'/%3E%3Ctext x='256' y='200' text-anchor='middle' font-family='Arial' font-weight='bold' font-size='80' fill='%23388bfd'%3ECP%3C/text%3E%3Ctext x='256' y='290' text-anchor='middle' font-family='Arial' font-size='40' fill='%2300e676'%3EDashboard%3C/text%3E%3Ctext x='256' y='360' text-anchor='middle' font-family='Arial' font-size='28' fill='%236b7a8d'%3Ev3.1.2%3C/text%3E%3Crect x='80' y='390' width='352' height='4' rx='2' fill='%23388bfd' opacity='.5'/%3E%3C/svg%3E">
+<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Construction%20Progress%20Dashboard%22%2C%22short_name%22%3A%22CP%20Dashboard%22%2C%22description%22%3A%22Construction%20Progress%20Dashboard%20v3.1.2%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23080d14%22%2C%22theme_color%22%3A%22%23080d14%22%2C%22orientation%22%3A%22any%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%2520256%2520512%27%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-3d@0.1.0/dist/chartjs-plugin-3d.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -246,7 +246,7 @@ body.view-mode .edit-only{display:none!important}
 #toast.ok{border-color:rgba(0,230,118,.5);color:var(--green)}
 #toast.err{border-color:rgba(255,68,68,.5);color:var(--red)}
 #toast.info{border-color:rgba(56,139,253,.5);color:var(--blue)}
-#lock-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.10);padding:12px;overflow-y:auto}
+#lock-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(5,10,20,.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:8px;overflow-y:auto}
 #lock-modal.show{display:flex!important}
 .lm-card{width:100%;max-width:340px;margin:auto;background:rgba(0,0,0,.15);border:none;border-radius:24px;overflow:visible;box-shadow:none}
 .lm-acc{display:none}
@@ -432,9 +432,9 @@ DOCTYPE html>
 <meta name="apple-mobile-web-app-title" content="CP Dashboard">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#080d14">
-<meta name="description" content="Construction Progress Dashboard v3.0.0">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23080d14'/%3E%3Crect x='40' y='40' width='432' height='432' rx='80' fill='%230d1a2e'/%3E%3Ctext x='256' y='200' text-anchor='middle' font-family='Arial' font-weight='bold' font-size='80' fill='%23388bfd'%3ECP%3C/text%3E%3Ctext x='256' y='290' text-anchor='middle' font-family='Arial' font-size='40' fill='%2300e676'%3EDashboard%3C/text%3E%3Ctext x='256' y='360' text-anchor='middle' font-family='Arial' font-size='28' fill='%236b7a8d'%3Ev3.0.0%3C/text%3E%3Crect x='80' y='390' width='352' height='4' rx='2' fill='%23388bfd' opacity='.5'/%3E%3C/svg%3E">
-<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Construction%20Progress%20Dashboard%22%2C%22short_name%22%3A%22CP%20Dashboard%22%2C%22description%22%3A%22Construction%20Progress%20Dashboard%20v3.0.0%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23080d14%22%2C%22theme_color%22%3A%22%23080d14%22%2C%22orientation%22%3A%22any%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%2520256%2520512%27%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+<meta name="description" content="Construction Progress Dashboard v3.1.2">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23080d14'/%3E%3Crect x='40' y='40' width='432' height='432' rx='80' fill='%230d1a2e'/%3E%3Ctext x='256' y='200' text-anchor='middle' font-family='Arial' font-weight='bold' font-size='80' fill='%23388bfd'%3ECP%3C/text%3E%3Ctext x='256' y='290' text-anchor='middle' font-family='Arial' font-size='40' fill='%2300e676'%3EDashboard%3C/text%3E%3Ctext x='256' y='360' text-anchor='middle' font-family='Arial' font-size='28' fill='%236b7a8d'%3Ev3.1.2%3C/text%3E%3Crect x='80' y='390' width='352' height='4' rx='2' fill='%23388bfd' opacity='.5'/%3E%3C/svg%3E">
+<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Construction%20Progress%20Dashboard%22%2C%22short_name%22%3A%22CP%20Dashboard%22%2C%22description%22%3A%22Construction%20Progress%20Dashboard%20v3.1.2%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23080d14%22%2C%22theme_color%22%3A%22%23080d14%22%2C%22orientation%22%3A%22any%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%2520256%2520512%27%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-3d@0.1.0/dist/chartjs-plugin-3d.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -669,7 +669,7 @@ body.view-mode .edit-only{display:none!important}
 #toast.ok{border-color:rgba(0,230,118,.5);color:var(--green)}
 #toast.err{border-color:rgba(255,68,68,.5);color:var(--red)}
 #toast.info{border-color:rgba(56,139,253,.5);color:var(--blue)}
-#lock-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.10);padding:12px;overflow-y:auto}
+#lock-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(5,10,20,.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:8px;overflow-y:auto}
 #lock-modal.show{display:flex!important}
 .lm-card{width:100%;max-width:340px;margin:auto;background:rgba(0,0,0,.15);border:none;border-radius:24px;overflow:visible;box-shadow:none}
 .lm-acc{display:none}
@@ -857,21 +857,116 @@ body.view-mode #reg-popup input,body.view-mode #reg-popup textarea{pointer-event
 #firebase-modal input,#firebase-modal textarea{pointer-events:all!important;user-select:text!important;-webkit-user-select:text!important;cursor:text!important;opacity:1!important}
 body.view-mode #firebase-modal input{pointer-events:all!important;cursor:text!important;opacity:1!important}
 
-/* ── Modal Size -5% & Mobile Fit ── */
-#lock-modal .lm-card,
+/* ══ Mobile Portrait Fit — iPhone & Android ══ */
+
+/* lock-modal, acct-login-overlay, dev-login-modal */
+#lock-modal,
+#acct-login-overlay,
+#dev-login-modal {
+  padding: 8px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow-y: auto !important;
+}
+
+/* card ทั้ง 3 หน้า */
+.lm-card,
 #acct-login-overlay > div,
 #dev-login-modal > div {
-  max-width:323px!important;
-  transform:scale(0.95);
-  transform-origin:center center;
+  width: 100% !important;
+  max-width: 340px !important;
+  box-sizing: border-box !important;
 }
-@media(max-width:400px){
-  #lock-modal .lm-card,
+
+/* mobile portrait: ≤ 430px (iPhone 14 Pro Max = 430px) */
+@media screen and (max-width: 430px) and (orientation: portrait) {
+  #lock-modal,
+  #acct-login-overlay,
+  #dev-login-modal {
+    padding: 4px !important;
+    align-items: flex-start !important;
+    padding-top: 12px !important;
+  }
+
+  .lm-card,
   #acct-login-overlay > div,
   #dev-login-modal > div {
-    max-width:98vw!important;
-    transform:scale(0.93);
+    max-width: 100% !important;
+    width: calc(100vw - 16px) !important;
+    margin: 0 auto !important;
+    border-radius: 18px !important;
   }
+
+  /* ลดขนาด numpad */
+  .lm-numgrid {
+    gap: 8px !important;
+    padding: 8px !important;
+    max-width: calc(100vw - 48px) !important;
+  }
+
+  .lm-num {
+    width: 100% !important;
+    min-height: 56px !important;
+    font-size: 22px !important;
+  }
+
+  /* ลดขนาด dot */
+  .lm-dot-inp {
+    width: 11px !important;
+    height: 11px !important;
+  }
+
+  /* ลดขนาดหัวข้อ */
+  .lm-h { font-size: 16px !important; }
+  .lm-body { padding: 16px 14px 14px !important; }
+
+  /* ปุ่มล่าง */
+  .lm-submit, .lm-ghost {
+    padding: 11px !important;
+    font-size: 13px !important;
+  }
+
+  /* ACCT & Dev icon + title */
+  #acct-login-overlay > div > div:first-child,
+  #dev-login-modal > div > div:first-child {
+    padding: 16px 16px 8px !important;
+  }
+
+  /* dots row */
+  #acct-dots-row,
+  #dev-dots-row {
+    margin: 0 0 12px !important;
+  }
+}
+
+/* Android mid-range: 360–390px */
+@media screen and (max-width: 390px) and (orientation: portrait) {
+  .lm-num {
+    min-height: 50px !important;
+    font-size: 20px !important;
+  }
+  .lm-numgrid {
+    gap: 6px !important;
+  }
+}
+
+/* ── Grid overlay on ACCT & Dev screens only ── */
+#acct-login-overlay.show::before,
+#dev-login-modal.show::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(56,139,253,.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56,139,253,.18) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+#acct-login-overlay.show > *,
+#dev-login-modal.show > * {
+  position: relative;
+  z-index: 1;
 }
 </style>
 <script>
@@ -937,7 +1032,7 @@ window.showForgotPassModal = function(){
     </div>
     <div>
       <div class="ht">Construction Progress Dashboard</div>
-      <div class="hs">รายงานความคืบหน้างานก่อสร้าง · v3.0.0</div>
+      <div class="hs">รายงานความคืบหน้างานก่อสร้าง · v3.1.2</div>
     </div>
   </div>
   <div class="hbtns">
@@ -3413,7 +3508,7 @@ function jupRenderSnapshots(){
 </div>
 
 <!-- ======================== ACCT LOGIN MODAL (numpad style) ======================== -->
-<div id="acct-login-overlay" style="display:none;position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.10);align-items:center;justify-content:center;padding:12px;overflow-y:auto">
+<div id="acct-login-overlay" style="display:none;position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:8px;overflow-y:auto">
   <div style="width:100%;max-width:340px;margin:auto;background:rgba(0,0,0,.15);border:none;border-radius:24px;overflow:visible;box-shadow:none">
     <!-- icon + title -->
     <div style="text-align:center;padding:28px 22px 12px">
@@ -5470,7 +5565,7 @@ function saveNewCatModal(){
 
 
 <!-- ═══ Dev Login Modal ═══ -->
-<div id="dev-login-modal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.10);align-items:center;justify-content:center;padding:12px;overflow-y:auto">
+<div id="dev-login-modal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:8px;overflow-y:auto">
   <div style="width:100%;max-width:340px;margin:auto;background:rgba(0,0,0,.15);border:none;border-radius:24px;overflow:visible;box-shadow:none">
     <!-- icon + title -->
     <div style="text-align:center;padding:28px 22px 12px">
