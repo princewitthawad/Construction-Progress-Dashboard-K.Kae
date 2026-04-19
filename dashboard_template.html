@@ -1992,10 +1992,31 @@ function showLockModal(){
   document.getElementById('lock-modal').classList.add('show');
 }
 function closeLockModal(){document.getElementById('lock-modal').classList.remove('show');_numBuf='';_syncDots();}
-function applyViewMode(){document.body.classList.add('view-mode');_isLocked=true;const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');if(link)link.style.display='';if(logout)logout.style.display='none';}
-function applyEditMode(){document.body.classList.remove('view-mode');_isLocked=false;sessionStorage.setItem(SESSION_KEY,'1');setTimeout(function(){if(typeof checkPendingRequests==='function')checkPendingRequests();},2000);const link=document.getElementById('lockin-link'),logout=document.getElementById('logout-btn');if(link)link.style.display='none';if(logout)logout.style.display='';}
+function applyViewMode(){
+  document.body.classList.add('view-mode');
+  _isLocked=true;
+  const link=document.getElementById('lockin-link');
+  const logout=document.getElementById('logout-btn');
+  if(link)link.style.display='';
+  if(logout)logout.style.display='none';
+  var notifBtn=document.getElementById('approve-notif-btn');
+  if(notifBtn) notifBtn.style.display='none';
+}
+function applyEditMode(){
+  document.body.classList.remove('view-mode');
+  _isLocked=false;
+  sessionStorage.setItem(SESSION_KEY,'1');
+  if(typeof window._stampLogin==='function') window._stampLogin();
+  const link=document.getElementById('lockin-link');
+  const logout=document.getElementById('logout-btn');
+  if(link)link.style.display='none';
+  if(logout)logout.style.display='';
+  var notifBtn=document.getElementById('approve-notif-btn');
+  if(notifBtn) notifBtn.style.display='inline-flex';
+  setTimeout(function(){if(typeof checkPendingRequests==='function')checkPendingRequests();},1500);
+}
 function showGreeting(){const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;pointer-events:none';d.innerHTML=`<div style="background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:36px 72px;backdrop-filter:blur(20px);box-shadow:0 12px 60px rgba(0,0,0,.5);animation:greetIn .35s cubic-bezier(.34,1.56,.64,1) both"><span style="font-size:42px;font-weight:800;color:#e8f0fe;font-family:'Sarabun',sans-serif;letter-spacing:1px">สวัสดี ค่ะ</span></div>`;document.body.appendChild(d);setTimeout(()=>{d.firstElementChild.style.cssText+=';animation:greetOut .3s ease forwards';setTimeout(()=>d.remove(),300);},3000);}
-function doLogout(){sessionStorage.removeItem(SESSION_KEY);sessionStorage.removeItem('cp_dev_session');applyViewMode();showToast('ออกจากระบบแล้ว 🔒','ok');}
+function doLogout(){sessionStorage.clear();localStorage.removeItem('cp_session_expire');applyViewMode();showToast('ออกจากระบบแล้ว 🔒','ok');}
 
 function _syncDots(){
   for(let i=0;i<8;i++){
@@ -9026,7 +9047,6 @@ window.doRoleRequest = function(){
     var otp = _genOTP();
     var roleLabel = role==='acct'?'ACCT (บัญชีโครงการ)':'Dev (นักพัฒนา)';
     // ไม่ใช้ URL approve แล้ว — Admin กรอก OTP โดยตรงใน Dashboard
-    var approveUrl = 'เปิด Dashboard แล้วกด "คำขอ" ใน Header เพื่ออนุมัติ';
 
     if(subEl){ subEl.disabled=true; subEl.textContent='กำลังส่ง...'; }
     if(ldEl) ldEl.style.display='block';
@@ -9072,7 +9092,6 @@ window.doRoleRequest = function(){
       user_name:    name,
       role:         roleLabel,
       otp:          otp,
-      approve_url:  approveUrl,
     }).then(function(){
       if(ldEl) ldEl.style.display='none';
       setErr('✅ ส่งคำขอสำเร็จ! Admin จะได้รับ Email · เมื่ออนุมัติ OTP จะแสดงใน Popup','#34d399');
@@ -9349,6 +9368,66 @@ setInterval(checkPendingRequests, 30000);
 document.addEventListener('DOMContentLoaded', function(){
   setTimeout(checkPendingRequests, 3000);
 });
+</script>
+
+
+<script>
+// ════ Session Management ════════════════════════════════════
+(function(){
+  var EXPIRE_KEY = 'cp_session_expire';
+  var TWO_HOURS  = 2 * 60 * 60 * 1000;
+
+  // ── stamp: บันทึกเวลา expire ────────────────────────────
+  window._stampLogin = function(){
+    var exp = Date.now() + TWO_HOURS;
+    sessionStorage.setItem(EXPIRE_KEY, String(exp));
+    localStorage.setItem(EXPIRE_KEY, String(exp)); // backup
+  };
+
+  // ── ตรวจว่า session หมดอายุไหม ───────────────────────────
+  function _expired(){
+    var exp = parseInt(sessionStorage.getItem(EXPIRE_KEY) || localStorage.getItem(EXPIRE_KEY) || '0');
+    return Date.now() > exp;
+  }
+
+  // ── Logout ทุก session ──────────────────────────────────
+  function _forceLogout(reason){
+    sessionStorage.clear();
+    localStorage.removeItem(EXPIRE_KEY);
+    if(typeof applyViewMode === 'function') applyViewMode();
+    if(typeof showLockModal === 'function') showLockModal();
+    if(typeof showToast === 'function') showToast('⏱️ ' + reason + ' — กรุณาเข้าสู่ระบบใหม่', 'err', 5000);
+  }
+
+  // ── ปิดแอพ / ปิด Tab → ล้าง session ───────────────────
+  window.addEventListener('beforeunload', function(){
+    sessionStorage.removeItem('cp_edit_session');
+    sessionStorage.removeItem('cp_dev_session');
+    sessionStorage.removeItem('cp_acct_session');
+    sessionStorage.removeItem(EXPIRE_KEY);
+  });
+
+  // ── ตรวจ 2 ชม. (ทุก 1 นาที) ────────────────────────────
+  setInterval(function(){
+    var active = sessionStorage.getItem('cp_edit_session') === '1'
+               || sessionStorage.getItem('cp_dev_session') === '1';
+    if(active && _expired()){
+      _forceLogout('ใช้งานครบ 2 ชั่วโมง');
+    }
+  }, 60 * 1000);
+
+  // ── ตรวจเมื่อกลับมาที่ tab ─────────────────────────────
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible'){
+      var active = sessionStorage.getItem('cp_edit_session') === '1'
+                 || sessionStorage.getItem('cp_dev_session') === '1';
+      if(active && _expired()){
+        _forceLogout('Session หมดอายุ');
+      }
+    }
+  });
+
+})();
 </script>
 
 <!-- Firebase SDK v9 compat — โหลดจาก CDN หลัก + fallback -->
