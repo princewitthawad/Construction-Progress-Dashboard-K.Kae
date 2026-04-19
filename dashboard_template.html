@@ -9251,10 +9251,14 @@ function loadPendingRequests(){
     return;
   }
 
-  firebase.database().ref('role_requests').orderByChild('status').equalTo('pending').once('value')
+  // ดึงทั้งหมดแล้ว filter เอง (ไม่ต้องการ index)
+  firebase.database().ref('role_requests').once('value')
     .then(function(snap){
       var items=[];
-      snap.forEach(function(child){ items.push({key:child.key, data:child.val()}); });
+      snap.forEach(function(child){
+        var d=child.val();
+        if(d && d.status==='pending') items.push({key:child.key, data:d});
+      });
 
       if(items.length===0){
         listEl.innerHTML='<div style="text-align:center;color:rgba(255,255,255,.25);font-size:13px;padding:32px 0">ไม่มีคำขอรออนุมัติ ✅</div>';
@@ -9347,9 +9351,13 @@ function checkPendingRequests(){
   var isAdmin = sessionStorage.getItem('cp_edit_session')==='1';
   if(!isAdmin) return;
 
-  firebase.database().ref('role_requests').orderByChild('status').equalTo('pending').once('value')
+  firebase.database().ref('role_requests').once('value')
     .then(function(snap){
-      var count=0; snap.forEach(function(){ count++; });
+      var count=0;
+      snap.forEach(function(child){
+        var d=child.val();
+        if(d && d.status==='pending') count++;
+      });
       var notifBtn=document.getElementById('approve-notif-btn');
       if(notifBtn){
         if(count>0){
