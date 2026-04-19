@@ -3781,7 +3781,12 @@ function acctNmUp(el){
 }
 function doACCTUnlock(){
   const pw=_acctBuf||(document.getElementById('acct-pw-inp')?.value.trim()||'');
-  if(pw===ACCT_HASH){
+  // ตรวจ custom hash ก่อน ถ้ามีใน localStorage
+  const customAcctHash = localStorage.getItem('cp_acct_pass_hash');
+  const acctOk = customAcctHash
+    ? (typeof sha256==='function' && sha256(pw)===customAcctHash)
+    : (pw===ACCT_HASH);
+  if(acctOk){
     closeACCTLogin();
     document.getElementById('acct-overlay').style.display='block';
     showToast('กำลังโหลดข้อมูล ACCT...','info',2000);
@@ -9082,13 +9087,19 @@ function _showOTPPopup(otp, role, userEmail){
   btn.style.cssText = 'width:100%;padding:15px;background:linear-gradient(135deg,rgba(56,139,253,.5),rgba(0,212,255,.3));border:1px solid rgba(56,139,253,.6);border-radius:12px;color:#e8f0fe;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;margin-top:8px';
 
   btn.onclick = function(){
-    // บันทึก hash ลง numpad
-    if(typeof sha256==='function' && typeof setPassHash==='function'){
-      setPassHash(sha256(otp));
-      console.log('OTP hash saved:', otp);
+    if(typeof sha256!=='function'){ alert('sha256 not ready'); return; }
+    var h = sha256(otp);
+    if(role==='acct'){
+      // ACCT ใช้ localStorage 'cp_acct_pass_hash'
+      localStorage.setItem('cp_acct_pass_hash', h);
+      console.log('ACCT hash saved for otp:', otp);
+    } else if(role==='dev'){
+      // Dev ใช้ localStorage 'cp_dev_pass_hash'
+      localStorage.setItem('cp_dev_pass_hash', h);
+      console.log('Dev hash saved for otp:', otp);
     }
     overlay.remove();
-    if(typeof showToast==='function') showToast('บันทึกรหัส '+roleLabel+' เรียบร้อย ใช้รหัส '+otp+' กดเข้าระบบได้เลย','ok',8000);
+    if(typeof showToast==='function') showToast('บันทึกรหัส '+roleLabel+' สำเร็จ! ใช้รหัส '+otp+' กดเข้าระบบได้เลย','ok',10000);
   };
 
   card.innerHTML =
