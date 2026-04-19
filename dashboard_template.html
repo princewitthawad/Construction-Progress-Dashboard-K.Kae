@@ -1258,6 +1258,10 @@ function refreshSUMDEF(){
 }
 
 const DEFAULT_HASH='7f2680e7a06147bb5e6ac4615d87265d0ca4fc52f2f1172cdea2f6dc860e0013';
+// ── Admin Username ──────────────────────────────────────────
+window.getAdminUsername=function(){ return localStorage.getItem('cp_admin_username')||'admin'; };
+window.setAdminUsername=function(n){ if(n&&n.trim()) localStorage.setItem('cp_admin_username',n.trim()); };
+
 function getPassHash(){
   const stored=localStorage.getItem('cp_pass_hash');
   // Clear old default hash if still stored
@@ -3761,14 +3765,11 @@ function acctNmU(el){
 }
 function doACCTUnlock(){
   const pw=_acctBuf||(document.getElementById('acct-pw-inp')?.value||'').trim();
-  // ตรวจ custom hash ก่อน ถ้ามีใน localStorage
   const customAcctHash = localStorage.getItem('cp_acct_pass_hash');
   const acctOk = customAcctHash
     ? (typeof sha256==='function' && sha256(pw)===customAcctHash)
     : (pw===ACCT_HASH);
-  // Admin เข้า ACCT ได้ด้วยรหัส Admin
-  const adminOk = (typeof sha256==='function' && sha256(pw)===getPassHash());
-  if(acctOk || adminOk){
+  if(acctOk){
     closeACCTLogin();
     document.getElementById('acct-overlay').style.display='block';
     showToast('กำลังโหลดข้อมูล ACCT...','info',2000);
@@ -3776,11 +3777,11 @@ function doACCTUnlock(){
   } else {
     document.getElementById('acct-err').textContent='รหัสไม่ถูกต้อง';
     _acctBuf='';_acctSyncDots();
-    // shake animation on the card
     const card=document.querySelector('#acct-login-overlay .lm-card');
     if(card){card.style.animation='none';card.offsetHeight;card.style.animation='shake .4s ease';}
   }
 }
+
 // legacy alias
 function checkACCT(){doACCTUnlock();}
 function closeACCT(){
@@ -6574,7 +6575,6 @@ function doDevLogin() {
   const errEl = document.getElementById('dev-login-err');
   if(!pw){ if(errEl) errEl.textContent='กรุณากรอกรหัสผ่าน'; return; }
 
-  // ตรวจรหัส Dev
   if(sha256(pw) === getDevHash()){
     closeDevLoginModal();
     document.body.classList.add('dev-mode');
@@ -6585,22 +6585,12 @@ function doDevLogin() {
     return;
   }
 
-  // ตรวจรหัส Admin (ให้ Admin เข้า Dev ได้ด้วย)
-  if(sha256(pw) === getPassHash()){
-    closeDevLoginModal();
-    document.body.classList.add('dev-mode');
-    sessionStorage.setItem(DEV_SESSION_KEY,'1');
-    const lnk=document.getElementById('dev-login-link');
-    if(lnk){lnk.textContent='🛠️ Dev ✓';lnk.style.color='#76ff03';lnk.style.borderColor='rgba(118,255,3,.5)';lnk.style.background='rgba(118,255,3,.08)';lnk.setAttribute('onclick','event.preventDefault();doDevLogout()');}
-    showToast('Admin เข้าสู่ Developer Mode ✅','ok');
-    return;
-  }
-
   if(errEl) errEl.textContent='รหัสผ่านไม่ถูกต้อง';
   _devBuf=''; _devSyncDots();
   const card=document.querySelector('#dev-login-modal .lm-card');
   if(card){card.style.animation='none';card.offsetHeight;card.style.animation='shake .4s ease';}
 }
+
 
 function doDevLogout() {
   sessionStorage.removeItem(DEV_SESSION_KEY);
