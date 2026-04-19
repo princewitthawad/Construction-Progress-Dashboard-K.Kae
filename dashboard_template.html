@@ -246,9 +246,9 @@ body.view-mode .edit-only{display:none!important}
 #toast.ok{border-color:rgba(0,230,118,.5);color:var(--green)}
 #toast.err{border-color:rgba(255,68,68,.5);color:var(--red)}
 #toast.info{border-color:rgba(56,139,253,.5);color:var(--blue)}
-#lock-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:transparent;padding:12px;overflow-y:auto}
+#lock-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.10);padding:12px;overflow-y:auto}
 #lock-modal.show{display:flex!important}
-.lm-card{width:100%;max-width:340px;margin:auto;background:rgba(0,0,0,.05);border:none;border-radius:24px;overflow:visible;box-shadow:none}
+.lm-card{width:100%;max-width:340px;margin:auto;background:rgba(0,0,0,.15);border:none;border-radius:24px;overflow:visible;box-shadow:none}
 .lm-acc{display:none}
 .lm-body{padding:26px 22px 22px;background:transparent!important}
 .lm-icon{width:46px;height:46px;background:rgba(56,139,253,.07);border:1px solid rgba(56,139,253,.18);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
@@ -669,9 +669,9 @@ body.view-mode .edit-only{display:none!important}
 #toast.ok{border-color:rgba(0,230,118,.5);color:var(--green)}
 #toast.err{border-color:rgba(255,68,68,.5);color:var(--red)}
 #toast.info{border-color:rgba(56,139,253,.5);color:var(--blue)}
-#lock-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:transparent;padding:12px;overflow-y:auto}
+#lock-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.10);padding:12px;overflow-y:auto}
 #lock-modal.show{display:flex!important}
-.lm-card{width:100%;max-width:340px;margin:auto;background:rgba(0,0,0,.05);border:none;border-radius:24px;overflow:visible;box-shadow:none}
+.lm-card{width:100%;max-width:340px;margin:auto;background:rgba(0,0,0,.15);border:none;border-radius:24px;overflow:visible;box-shadow:none}
 .lm-acc{display:none}
 .lm-body{padding:26px 22px 22px;background:transparent!important}
 .lm-icon{width:46px;height:46px;background:rgba(56,139,253,.07);border:1px solid rgba(56,139,253,.18);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
@@ -856,6 +856,23 @@ body.view-mode #reg-popup input,body.view-mode #reg-popup textarea{pointer-event
 
 #firebase-modal input,#firebase-modal textarea{pointer-events:all!important;user-select:text!important;-webkit-user-select:text!important;cursor:text!important;opacity:1!important}
 body.view-mode #firebase-modal input{pointer-events:all!important;cursor:text!important;opacity:1!important}
+
+/* ── Modal Size -5% & Mobile Fit ── */
+#lock-modal .lm-card,
+#acct-login-overlay > div,
+#dev-login-modal > div {
+  max-width:323px!important;
+  transform:scale(0.95);
+  transform-origin:center center;
+}
+@media(max-width:400px){
+  #lock-modal .lm-card,
+  #acct-login-overlay > div,
+  #dev-login-modal > div {
+    max-width:98vw!important;
+    transform:scale(0.93);
+  }
+}
 </style>
 <script>
 // ── Stub functions — defined early so buttons work before full script loads ──
@@ -1122,7 +1139,7 @@ window.showForgotPassModal = function(){
       <button onclick="openRoleRequestPopup()" style="width:100%;margin-bottom:8px;padding:11px;background:rgba(56,139,253,.12);border:1px solid rgba(56,139,253,.35);border-radius:10px;color:#388bfd;font-family:var(--f);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;gap:6px" onmouseover="this.style.background='rgba(56,139,253,.2)'" onmouseout="this.style.background='rgba(56,139,253,.12)'">🔐 ขอสิทธิ์ ACCT / Dev</button>
 
       <button onclick="showForgotPassModal()" style="width:100%;margin-bottom:8px;padding:10px;background:rgba(255,214,0,.08);border:1px solid rgba(255,214,0,.25);border-radius:10px;color:rgba(255,214,0,.85);font-family:var(--f);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent" onmouseover="this.style.background='rgba(255,214,0,.15)';this.style.color='#ffd600'" onmouseout="this.style.background='rgba(255,214,0,.08)';this.style.color='rgba(255,214,0,.85)'">🔑 ลืมรหัสผ่าน?</button>
-      <button class="lm-ghost" onclick="closeLockModal()">ดูข้อมูลอย่างเดียว (Read Only)</button>
+      <button class="lm-ghost" onclick="closeLockModal()" style="background:rgba(255,68,68,.12)!important;border:1px solid rgba(255,68,68,.35)!important;color:rgba(255,120,120,.9)!important">ดูข้อมูลอย่างเดียว (Read Only)</button>
       <div class="lm-foot"><div style="width:5px;height:5px;border-radius:50%;background:#0d1a28"></div>Construction Dashboard · Secured<div style="width:5px;height:5px;border-radius:50%;background:#0d1a28"></div></div>
     </div>
   </div>
@@ -3396,8 +3413,8 @@ function jupRenderSnapshots(){
 </div>
 
 <!-- ======================== ACCT LOGIN MODAL (numpad style) ======================== -->
-<div id="acct-login-overlay" style="display:none;position:fixed;inset:0;z-index:99998;background:transparent;align-items:center;justify-content:center;padding:12px;overflow-y:auto">
-  <div style="width:100%;max-width:340px;margin:auto;background:rgba(0,0,0,.05);border:none;border-radius:24px;overflow:visible;box-shadow:none">
+<div id="acct-login-overlay" style="display:none;position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.10);align-items:center;justify-content:center;padding:12px;overflow-y:auto">
+  <div style="width:100%;max-width:340px;margin:auto;background:rgba(0,0,0,.15);border:none;border-radius:24px;overflow:visible;box-shadow:none">
     <!-- icon + title -->
     <div style="text-align:center;padding:28px 22px 12px">
       <div style="width:52px;height:52px;margin:0 auto 12px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px">💰</div>
@@ -3428,7 +3445,7 @@ function jupRenderSnapshots(){
     <div class="lm-err" id="acct-err"></div>
     <div style="padding:0 22px 22px">
       <button class="lm-submit" onclick="doACCTUnlock()" style="margin-bottom:8px">เข้าสู่ ACCT</button>
-      <button class="lm-ghost" onclick="closeACCTLogin()">ยกเลิก</button>
+      <button class="lm-ghost" onclick="closeACCTLogin()" style="background:rgba(255,68,68,.12)!important;border:1px solid rgba(255,68,68,.35)!important;color:rgba(255,120,120,.9)!important">ยกเลิก</button>
     </div>
   </div>
 </div>
@@ -5453,8 +5470,8 @@ function saveNewCatModal(){
 
 
 <!-- ═══ Dev Login Modal ═══ -->
-<div id="dev-login-modal" style="display:none;position:fixed;inset:0;z-index:99999;background:transparent;align-items:center;justify-content:center;padding:12px;overflow-y:auto">
-  <div style="width:100%;max-width:340px;margin:auto;background:rgba(0,0,0,.05);border:none;border-radius:24px;overflow:visible;box-shadow:none">
+<div id="dev-login-modal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.10);align-items:center;justify-content:center;padding:12px;overflow-y:auto">
+  <div style="width:100%;max-width:340px;margin:auto;background:rgba(0,0,0,.15);border:none;border-radius:24px;overflow:visible;box-shadow:none">
     <!-- icon + title -->
     <div style="text-align:center;padding:28px 22px 12px">
       <div style="width:52px;height:52px;margin:0 auto 12px;background:rgba(120,80,255,.1);border:1px solid rgba(120,80,255,.25);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px">🛠️</div>
@@ -5486,7 +5503,7 @@ function saveNewCatModal(){
     <div style="min-height:16px;font-size:11px;color:rgba(255,100,100,.9);font-family:var(--m);text-align:center;margin-bottom:10px" id="dev-login-err"></div>
     <div style="padding:0 22px 22px">
       <button onclick="doDevLogin()" class="lm-submit" style="margin-bottom:8px;border-color:rgba(120,80,255,.5);color:rgba(180,140,255,.9)">เข้าสู่ Developer Mode</button>
-      <button onclick="closeDevLoginModal()" class="lm-ghost">ยกเลิก</button>
+      <button onclick="closeDevLoginModal()" class="lm-ghost" style="background:rgba(255,68,68,.12)!important;border:1px solid rgba(255,68,68,.35)!important;color:rgba(255,120,120,.9)!important">ยกเลิก</button>
     </div>
   </div>
 </div>
