@@ -3765,11 +3765,12 @@ function acctNmU(el){
 }
 function doACCTUnlock(){
   const pw=_acctBuf||(document.getElementById('acct-pw-inp')?.value||'').trim();
-  const customAcctHash = localStorage.getItem('cp_acct_pass_hash');
-  const acctOk = customAcctHash
-    ? (typeof sha256==='function' && sha256(pw)===customAcctHash)
-    : (pw===ACCT_HASH);
-  if(acctOk){
+
+  function _doACCTCheck(hashToUse){
+    const acctOk = hashToUse
+      ? (typeof sha256==='function' && sha256(pw)===hashToUse)
+      : (pw===ACCT_HASH);
+    if(acctOk){
     closeACCTLogin();
     document.getElementById('acct-overlay').style.display='block';
     showToast('กำลังโหลดข้อมูล ACCT...','info',2000);
@@ -3777,8 +3778,29 @@ function doACCTUnlock(){
   } else {
     document.getElementById('acct-err').textContent='รหัสไม่ถูกต้อง';
     _acctBuf='';_acctSyncDots();
-    const card=document.querySelector('#acct-login-overlay .lm-card');
-    if(card){card.style.animation='none';card.offsetHeight;card.style.animation='shake .4s ease';}
+      const card=document.querySelector('#acct-login-overlay .lm-card');
+      if(card){card.style.animation='none';card.offsetHeight;card.style.animation='shake .4s ease';}
+    }
+  }
+
+  // ตรวจ localStorage ก่อน → ถ้าไม่มี ดึงจาก Firebase
+  const localHash = localStorage.getItem('cp_acct_pass_hash');
+  if(localHash){
+    _doACCTCheck(localHash);
+  } else {
+    // ดึง hash จาก Firebase
+    try{
+      if(typeof firebase!=='undefined' && firebase.apps && firebase.apps.length){
+        firebase.database().ref('shared_hashes/acct_pass_hash').once('value')
+          .then(function(snap){
+            var fbHash = snap.val() ? snap.val().hash : null;
+            if(fbHash) localStorage.setItem('cp_acct_pass_hash', fbHash); // cache ไว้
+            _doACCTCheck(fbHash);
+          }).catch(function(){ _doACCTCheck(null); });
+      } else {
+        _doACCTCheck(null);
+      }
+    }catch(e){ _doACCTCheck(null); }
   }
 }
 
@@ -6575,20 +6597,49 @@ function doDevLogin() {
   const errEl = document.getElementById('dev-login-err');
   if(!pw){ if(errEl) errEl.textContent='กรุณากรอกรหัสผ่าน'; return; }
 
-  if(sha256(pw) === getDevHash()){
+  // ตรวจ Dev hash (local + Firebase)
+  function _checkDevHash(h){ return h && sha256(pw)===h; }
+  function _doDevSuccess(){
     closeDevLoginModal();
     document.body.classList.add('dev-mode');
     sessionStorage.setItem(DEV_SESSION_KEY,'1');
     const lnk=document.getElementById('dev-login-link');
     if(lnk){lnk.textContent='🛠️ Dev ✓';lnk.style.color='#76ff03';lnk.style.borderColor='rgba(118,255,3,.5)';lnk.style.background='rgba(118,255,3,.08)';lnk.setAttribute('onclick','event.preventDefault();doDevLogout()');}
     showToast('เข้าสู่ Developer Mode ✅','ok');
+  }
+  function _doDevFail(){
+    if(errEl) errEl.textContent='รหัสผ่านไม่ถูกต้อง';
+    _devBuf=''; _devSyncDots();
+    const card=document.querySelector('#dev-login-modal .lm-card');
+    if(card){card.style.animation='none';card.offsetHeight;card.style.animation='shake .4s ease';}
+  }
+
+  if(sha256(pw) === getDevHash()){
+    closeDevLoginModal();
+    document.body.classList.add('dev-mode');
+    sessionStorage.setItem(DEV_SESSION_KEY,'1');
+    const lnk=document.getElementById('dev-login-link');
+    if(lnk){lnk.textContent='🛠️ Dev ✓';lnk.style.color='#76ff03';lnk.style.borderColor='rgba(118,255,3,.5)';lnk.style.background='rgba(118,255,3,.08)';lnk.setAttribute('onclick','event.preventDefault();doDevLogout()');}
+    _doDevSuccess();
     return;
   }
 
-  if(errEl) errEl.textContent='รหัสผ่านไม่ถูกต้อง';
-  _devBuf=''; _devSyncDots();
-  const card=document.querySelector('#dev-login-modal .lm-card');
-  if(card){card.style.animation='none';card.offsetHeight;card.style.animation='shake .4s ease';}
+  // ตรวจ localStorage → Firebase
+  const localDevHash = localStorage.getItem('cp_dev_pass_hash');
+  if(localDevHash){
+    if(_checkDevHash(localDevHash)){ _doDevSuccess(); } else { _doDevFail(); }
+  } else {
+    try{
+      if(typeof firebase!=='undefined' && firebase.apps && firebase.apps.length){
+        firebase.database().ref('shared_hashes/dev_pass_hash').once('value')
+          .then(function(snap){
+            var fbHash = snap.val() ? snap.val().hash : null;
+            if(fbHash) localStorage.setItem('cp_dev_pass_hash', fbHash);
+            if(_checkDevHash(fbHash)){ _doDevSuccess(); } else { _doDevFail(); }
+          }).catch(function(){ _doDevFail(); });
+      } else { _doDevFail(); }
+    }catch(e){ _doDevFail(); }
+  }
 }
 
 
@@ -9085,15 +9136,23 @@ function _showOTPPopup(otp, role, userEmail){
   btn.onclick = function(){
     if(typeof sha256!=='function'){ alert('sha256 not ready'); return; }
     var h = sha256(otp);
-    if(role==='acct'){
-      // ACCT ใช้ localStorage 'cp_acct_pass_hash'
-      localStorage.setItem('cp_acct_pass_hash', h);
-      console.log('ACCT hash saved for otp:', otp);
-    } else if(role==='dev'){
-      // Dev ใช้ localStorage 'cp_dev_pass_hash'
-      localStorage.setItem('cp_dev_pass_hash', h);
-      console.log('Dev hash saved for otp:', otp);
-    }
+    var lsKey = role==='acct' ? 'cp_acct_pass_hash' : 'cp_dev_pass_hash';
+    var fbKey = role==='acct' ? 'acct_pass_hash' : 'dev_pass_hash';
+
+    // บันทึกใน localStorage (เครื่องนี้)
+    localStorage.setItem(lsKey, h);
+
+    // บันทึกใน Firebase (ทุกเครื่องเข้าได้)
+    try{
+      if(typeof firebase!=='undefined' && firebase.apps && firebase.apps.length){
+        firebase.database().ref('shared_hashes/'+fbKey).set({
+          hash: h,
+          updatedAt: new Date().toISOString()
+        });
+        console.log(roleLabel+' hash saved to Firebase');
+      }
+    }catch(e){ console.warn('Firebase save hash:', e); }
+
     overlay.remove();
     if(typeof showToast==='function') showToast('บันทึกรหัส '+roleLabel+' สำเร็จ! ใช้รหัส '+otp+' กดเข้าระบบได้เลย','ok',10000);
   };
