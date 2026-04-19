@@ -248,8 +248,8 @@ body.view-mode .edit-only{display:none!important}
 #toast.info{border-color:rgba(56,139,253,.5);color:var(--blue)}
 #lock-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:transparent;padding:12px;overflow-y:auto}
 #lock-modal.show{display:flex!important}
-.lm-card{width:100%;max-width:340px;margin:auto;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-top:1px solid rgba(255,255,255,.2);border-radius:24px;overflow:visible;box-shadow:0 2px 20px rgba(0,0,0,.08);backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px)}
-.lm-acc{height:1px;background:linear-gradient(90deg,transparent,rgba(56,139,253,.5) 30%,rgba(120,220,255,.5) 60%,transparent)}
+.lm-card{width:100%;max-width:340px;margin:auto;background:transparent;border:none;border-radius:24px;overflow:visible;box-shadow:none}
+.lm-acc{display:none}
 .lm-body{padding:26px 22px 22px;background:transparent!important}
 .lm-icon{width:46px;height:46px;background:rgba(56,139,253,.07);border:1px solid rgba(56,139,253,.18);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
 .lm-h{font-size:19px;font-weight:800;color:#dce8fb;text-align:center;margin-bottom:6px}
@@ -292,14 +292,14 @@ body.view-mode .edit-only{display:none!important}
 
 
 .lm-num{aspect-ratio:1/1;width:100%;border-radius:50%;
-  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.18) 0%,rgba(255,255,255,.04) 40%,transparent 70%);
-  border:1px solid rgba(255,255,255,.25);
-  color:#ffffff;font-size:28px;font-weight:300;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.18);
+  color:rgba(255,255,255,.9);font-size:28px;font-weight:300;
   cursor:pointer;display:flex;align-items:center;justify-content:center;
   touch-action:manipulation;-webkit-tap-highlight-color:transparent;
-  transition:transform .7s cubic-bezier(.34,1.56,.64,1), box-shadow .7s ease, background .7s ease;
+  transition:all .15s ease;
   user-select:none;position:relative;overflow:visible;letter-spacing:-.5px;
-  box-shadow:0 4px 16px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.3),inset 0 -1px 0 rgba(0,0,0,.15);
+  box-shadow:none;
   will-change:transform;transform:scale(1) translateZ(0)}
 .lm-num:active{
   transform:scale(1.2) translateZ(0)!important;
@@ -671,8 +671,8 @@ body.view-mode .edit-only{display:none!important}
 #toast.info{border-color:rgba(56,139,253,.5);color:var(--blue)}
 #lock-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:transparent;padding:12px;overflow-y:auto}
 #lock-modal.show{display:flex!important}
-.lm-card{width:100%;max-width:340px;margin:auto;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-top:1px solid rgba(255,255,255,.2);border-radius:24px;overflow:visible;box-shadow:0 2px 20px rgba(0,0,0,.08);backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px)}
-.lm-acc{height:1px;background:linear-gradient(90deg,transparent,rgba(56,139,253,.5) 30%,rgba(120,220,255,.5) 60%,transparent)}
+.lm-card{width:100%;max-width:340px;margin:auto;background:transparent;border:none;border-radius:24px;overflow:visible;box-shadow:none}
+.lm-acc{display:none}
 .lm-body{padding:26px 22px 22px;background:transparent!important}
 .lm-icon{width:46px;height:46px;background:rgba(56,139,253,.07);border:1px solid rgba(56,139,253,.18);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
 .lm-h{font-size:19px;font-weight:800;color:#dce8fb;text-align:center;margin-bottom:6px}
@@ -715,14 +715,14 @@ body.view-mode .edit-only{display:none!important}
 
 
 .lm-num{aspect-ratio:1/1;width:100%;border-radius:50%;
-  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.18) 0%,rgba(255,255,255,.04) 40%,transparent 70%);
-  border:1px solid rgba(255,255,255,.25);
-  color:#ffffff;font-size:28px;font-weight:300;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.18);
+  color:rgba(255,255,255,.9);font-size:28px;font-weight:300;
   cursor:pointer;display:flex;align-items:center;justify-content:center;
   touch-action:manipulation;-webkit-tap-highlight-color:transparent;
-  transition:transform .7s cubic-bezier(.34,1.56,.64,1), box-shadow .7s ease, background .7s ease;
+  transition:all .15s ease;
   user-select:none;position:relative;overflow:visible;letter-spacing:-.5px;
-  box-shadow:0 4px 16px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.3),inset 0 -1px 0 rgba(0,0,0,.15);
+  box-shadow:none;
   will-change:transform;transform:scale(1) translateZ(0)}
 .lm-num:active{
   transform:scale(1.2) translateZ(0)!important;
@@ -847,7 +847,11 @@ input, textarea, [contenteditable] {
 
 /* ── Firebase Auth Overlay ── */
 #fb-auth-ov{display:none!important}
-#fb-auth-ov.show{display:block!important}
+#fb-auth-ov.show{display:block!important;z-index:100000!important}
+
+#reg-popup{pointer-events:all}
+#reg-popup input,#reg-popup textarea,#reg-popup select{pointer-events:all!important;-webkit-user-select:text!important;user-select:text!important;cursor:text!important;opacity:1!important;z-index:10!important}
+body.view-mode #reg-popup input,body.view-mode #reg-popup textarea{pointer-events:all!important;cursor:text!important;opacity:1!important}
 </style>
 <script>
 // ── Stub functions — defined early so buttons work before full script loads ──
@@ -874,6 +878,8 @@ window.showForgotPassModal = function(){
   setTimeout(function(){clearInterval(t);},5000);
 };
 </script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>if(typeof emailjs!=="undefined")emailjs.init("fg4sDrtWqZlZhslOz");</script>
 </head>
 <body>
 <div class="bg-overlay"></div>
@@ -1109,7 +1115,9 @@ window.showForgotPassModal = function(){
       </div>
       <div class="lm-err" id="lm-err"></div>
       <button class="lm-submit" onclick="doUnlock()">เข้าสู่ระบบ</button>
-      <button onclick="showRegisterModal()" style="width:100%;margin-bottom:8px;padding:11px;background:rgba(0,200,83,.15);border:1px solid rgba(0,200,83,.4);border-radius:10px;color:#00c853;font-family:var(--f);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;gap:6px" onmouseover="this.style.background='rgba(0,200,83,.25)'" onmouseout="this.style.background='rgba(0,200,83,.15)'">✏️ สมัครสมาชิก</button>
+      <button onclick="openRegPopup()" style="width:100%;margin-bottom:6px;padding:11px;background:rgba(0,200,83,.15);border:1px solid rgba(0,200,83,.4);border-radius:10px;color:#00c853;font-family:var(--f);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;gap:6px" onmouseover="this.style.background='rgba(0,200,83,.25)'" onmouseout="this.style.background='rgba(0,200,83,.15)'">✏️ สมัครสมาชิก (Viewer)</button>
+      <button onclick="openRoleRequestPopup()" style="width:100%;margin-bottom:8px;padding:11px;background:rgba(56,139,253,.12);border:1px solid rgba(56,139,253,.35);border-radius:10px;color:#388bfd;font-family:var(--f);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;gap:6px" onmouseover="this.style.background='rgba(56,139,253,.2)'" onmouseout="this.style.background='rgba(56,139,253,.12)'">🔐 ขอสิทธิ์ ACCT / Dev</button>
+
       <button onclick="showForgotPassModal()" style="width:100%;margin-bottom:8px;padding:10px;background:rgba(255,214,0,.08);border:1px solid rgba(255,214,0,.25);border-radius:10px;color:rgba(255,214,0,.85);font-family:var(--f);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent" onmouseover="this.style.background='rgba(255,214,0,.15)';this.style.color='#ffd600'" onmouseout="this.style.background='rgba(255,214,0,.08)';this.style.color='rgba(255,214,0,.85)'">🔑 ลืมรหัสผ่าน?</button>
       <button class="lm-ghost" onclick="closeLockModal()">ดูข้อมูลอย่างเดียว (Read Only)</button>
       <div class="lm-foot"><div style="width:5px;height:5px;border-radius:50%;background:#0d1a28"></div>Construction Dashboard · Secured<div style="width:5px;height:5px;border-radius:50%;background:#0d1a28"></div></div>
@@ -2150,192 +2158,6 @@ function exportChecklistPDF(){
   <div class="page"><div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #1565c0"><div style="font-size:15px;font-weight:800">📋 Checklist (ต่อ)</div><div style="font-size:11px;color:#9ca3af">${today}</div></div>${p2}${rptHTML}${ftr}</div>
   \u003cscript\u003ewindow.onload=()=>{window.print();}\u003c/script\u003e
 
-<!-- ════ FIREBASE AUTH OVERLAY ════ -->
-<div id="fb-auth-ov" style="position:fixed;inset:0;z-index:99000;padding:16px;overflow-y:auto;font-family:'Sarabun',sans-serif">
-
-  <!-- Animated background -->
-  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(14,30,60,.98),rgba(5,8,15,1));backdrop-filter:blur(24px)"></div>
-  <div style="position:relative;z-index:1;min-height:100%;display:flex;align-items:flex-start;justify-content:center;padding:20px 0">
-  <div style="width:100%;max-width:400px">
-  <div style="position:absolute;inset:0;background-image:radial-gradient(circle at 20% 80%,rgba(56,139,253,.06) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(0,212,255,.05) 0%,transparent 50%);pointer-events:none"></div>
-
-  <!-- Card -->
-  <div style="position:relative;width:100%;max-width:400px;margin:auto;animation:authFadeIn .4s ease">
-
-    <style>
-      @keyframes authFadeIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-      @keyframes authPulse{0%,100%{opacity:.4}50%{opacity:1}}
-      #fb-auth-ov input:focus{outline:none}
-      #fb-auth-ov .ainp{
-        width:100%;background:rgba(255,255,255,.05);
-        border:1.5px solid rgba(255,255,255,.1);border-radius:12px;
-        padding:14px 16px;color:#e8f0fe;font-size:15px;
-        font-family:inherit;transition:all .25s;
-        -webkit-user-select:text;user-select:text;
-        box-sizing:border-box;
-      }
-      #fb-auth-ov .ainp:focus{
-        border-color:rgba(56,139,253,.7);
-        background:rgba(56,139,253,.08);
-        box-shadow:0 0 0 3px rgba(56,139,253,.12);
-      }
-      #fb-auth-ov .ainp::placeholder{color:rgba(255,255,255,.2)}
-      #fb-auth-ov .albl{
-        font-size:10px;font-weight:700;letter-spacing:.9px;
-        text-transform:uppercase;color:rgba(255,255,255,.35);
-        margin-bottom:6px;display:block;
-      }
-      #fb-auth-ov .afield{margin-bottom:14px}
-      #fb-auth-ov .asel{
-        width:100%;background:rgba(255,255,255,.05);
-        border:1.5px solid rgba(255,255,255,.1);border-radius:12px;
-        padding:14px 16px;color:#e8f0fe;font-size:14px;
-        font-family:inherit;cursor:pointer;
-        color-scheme:dark;-webkit-appearance:none;appearance:none;
-        transition:border .25s;box-sizing:border-box;
-      }
-      #fb-auth-ov .asel:focus{border-color:rgba(56,139,253,.7);outline:none}
-      #fb-auth-ov .atab-btn{
-        flex:1;padding:10px 4px;border:none;border-radius:9px;
-        font-family:inherit;font-size:12px;font-weight:700;
-        cursor:pointer;transition:all .2s;
-        -webkit-tap-highlight-color:transparent;
-        background:transparent;color:rgba(255,255,255,.3);
-      }
-      #fb-auth-ov .atab-btn.active{
-        background:rgba(255,255,255,.08);
-        color:#e8f0fe;
-        box-shadow:0 2px 8px rgba(0,0,0,.3);
-      }
-      #fb-auth-ov .atab-btn.active[data-tab="login"]{color:#60a8ff}
-      #fb-auth-ov .atab-btn.active[data-tab="register"]{color:#34d399}
-      #fb-auth-ov .atab-btn.active[data-tab="reset"]{color:#fbbf24}
-    </style>
-
-    <!-- Logo area -->
-    <div style="text-align:center;padding:32px 28px 20px">
-      <div style="width:64px;height:64px;margin:0 auto 14px;background:linear-gradient(135deg,rgba(56,139,253,.2),rgba(0,212,255,.1));border:1px solid rgba(56,139,253,.3);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 8px 32px rgba(56,139,253,.15)">🏗️</div>
-      <div style="font-size:20px;font-weight:800;color:#e8f0fe;letter-spacing:.2px">Construction Dashboard</div>
-      <div id="auth-tab-desc" style="font-size:11px;color:rgba(255,255,255,.35);margin-top:6px;line-height:1.6;transition:all .3s">กรอก Email และรหัสผ่านเพื่อเข้าใช้งาน</div>
-    </div>
-
-    <!-- White card body -->
-    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:20px;overflow:hidden;margin:0 4px;backdrop-filter:blur(8px)">
-
-      <!-- Tabs -->
-      <div style="display:flex;gap:3px;padding:6px;background:rgba(0,0,0,.2);border-bottom:1px solid rgba(255,255,255,.05)">
-        <button class="atab-btn active" data-tab="login" id="auth-tab-login" onclick="fbAuthTab('login')">🔓 เข้าสู่ระบบ</button>
-        <button class="atab-btn" data-tab="register" id="auth-tab-register" onclick="fbAuthTab('register')">✏️ สมัครสมาชิก</button>
-        <button class="atab-btn" data-tab="reset" id="auth-tab-reset" onclick="fbAuthTab('reset')">🔑 ลืมรหัส</button>
-      </div>
-
-      <!-- Form -->
-      <div style="padding:22px 24px 8px">
-
-        <!-- Email -->
-        <div class="afield">
-          <label class="albl">📧 Email</label>
-          <input type="email" id="auth-email" class="ainp" placeholder="your@email.com"
-            inputmode="email" autocomplete="email"
-            onkeydown="if(event.key==='Enter')fbAuthNext()">
-        </div>
-
-        <!-- Password -->
-        <div class="afield" id="auth-pass-wrap">
-          <label class="albl">🔢 รหัสผ่าน <span style="font-size:9px;text-transform:none;font-weight:400;color:rgba(255,255,255,.2)">(ตัวเลข 6–8 หลัก)</span></label>
-          <div style="position:relative">
-            <input type="password" id="auth-pass" class="ainp" placeholder="••••••••"
-              inputmode="numeric" maxlength="8" autocomplete="current-password"
-              style="padding-right:48px;font-size:22px;letter-spacing:8px;font-family:monospace"
-              oninput="fbPassValidate(this)"
-              onkeydown="if(event.key==='Enter')fbAuthNext()">
-            <button onclick="fbTogglePass('auth-pass',this)"
-              style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:17px;padding:4px;-webkit-tap-highlight-color:transparent">
-              👁
-            </button>
-          </div>
-        </div>
-
-        <!-- Confirm Password -->
-        <div class="afield" id="auth-pass2-wrap" style="display:none">
-          <label class="albl">🔢 ยืนยันรหัสผ่าน</label>
-          <input type="password" id="auth-pass2" class="ainp" placeholder="••••••••"
-            inputmode="numeric" maxlength="8" autocomplete="new-password"
-            style="font-size:22px;letter-spacing:8px;font-family:monospace"
-            oninput="fbPassValidate(this)"
-            onkeydown="if(event.key==='Enter')fbAuthNext()">
-        </div>
-
-        <!-- Full Name -->
-        <div class="afield" id="auth-name-wrap" style="display:none">
-          <label class="albl">👤 ชื่อ-นามสกุล</label>
-          <input type="text" id="auth-name" class="ainp" placeholder="ชื่อ นามสกุล"
-            autocomplete="name"
-            onkeydown="if(event.key==='Enter')fbAuthNext()">
-        </div>
-
-        <!-- Role -->
-        <div class="afield" id="auth-role-wrap" style="display:none">
-          <label class="albl">🏷️ ประเภทบัญชี</label>
-          <div style="position:relative">
-            <select id="auth-role" class="asel">
-              <option value="viewer">👁️ ดูอย่างเดียว (Viewer)</option>
-              <option value="admin">✏️ แก้ไขข้อมูล (Admin)</option>
-              <option value="acct">💰 บัญชีโครงการ (ACCT)</option>
-              <option value="dev">🛠️ นักพัฒนา (Dev)</option>
-            </select>
-            <div style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:rgba(255,255,255,.4);font-size:12px">▾</div>
-          </div>
-        </div>
-
-        <!-- Role Description -->
-        <div id="auth-role-desc" style="display:none;margin:-8px 0 14px;padding:8px 12px;background:rgba(56,139,253,.07);border:1px solid rgba(56,139,253,.15);border-radius:9px;font-size:10px;color:rgba(255,255,255,.45);line-height:1.7"></div>
-
-        <!-- Error -->
-        <div id="auth-err" style="font-size:12px;color:#f87171;min-height:20px;margin-bottom:10px;text-align:center;line-height:1.6;transition:all .3s"></div>
-
-        <!-- Submit -->
-        <button id="auth-submit" onclick="fbAuthNext()"
-          style="width:100%;padding:15px;border:none;border-radius:12px;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;transition:all .25s;-webkit-tap-highlight-color:transparent;letter-spacing:.3px;margin-bottom:12px;background:linear-gradient(135deg,#1d4ed8,#0891b2);color:#fff;box-shadow:0 4px 20px rgba(29,78,216,.35)"
-          onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 8px 28px rgba(29,78,216,.45)'"
-          onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(29,78,216,.35)'">
-          🔓 เข้าสู่ระบบ
-        </button>
-
-        <!-- Loading -->
-        <div id="auth-loading" style="display:none;text-align:center;padding:10px 0 16px;color:rgba(255,255,255,.4);font-size:12px">
-          <div style="width:24px;height:24px;border:2.5px solid rgba(56,139,253,.25);border-top-color:#3b82f6;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 8px"></div>
-          กำลังดำเนินการ...
-        </div>
-
-        <!-- Register hint -->
-        <div id="auth-register-hint" style="text-align:center;font-size:12px;color:rgba(255,255,255,.25);padding-bottom:16px">
-          ยังไม่มีบัญชี?
-          <button onclick="fbAuthTab('register')"
-            style="background:none;border:none;color:#60a8ff;font-size:12px;font-weight:700;cursor:pointer;padding:0 4px;font-family:inherit;-webkit-tap-highlight-color:transparent">
-            สมัครสมาชิก →
-          </button>
-        </div>
-
-      </div><!-- /form -->
-
-    </div><!-- /card body -->
-
-    <!-- Config notice -->
-    <div id="auth-config-notice" style="display:none;margin:12px 4px 0;padding:11px 14px;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2);border-radius:12px;font-size:11px;color:rgba(251,191,36,.85);text-align:center;line-height:1.8">
-      ⚠️ ยังไม่ได้เชื่อมต่อ Firebase<br>
-      <button onclick="fbAuthSkip()"
-        style="margin-top:7px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#e8f0fe;border-radius:7px;padding:5px 16px;cursor:pointer;font-family:inherit;font-size:11px;-webkit-tap-highlight-color:transparent">
-        ข้ามและใช้แบบออฟไลน์
-      </button>
-    </div>
-
-    <!-- Footer -->
-    <div style="text-align:center;padding:16px 0 8px">
-      <div style="font-size:10px;color:rgba(255,255,255,.15);letter-spacing:.3px">🔒 ข้อมูลถูกเข้ารหัสด้วย Firebase Auth</div>
-    </div>
-
-  </div><!-- /card -->
 </div></div></div>
 </body></html>`);
   win.document.close();
@@ -5868,7 +5690,7 @@ function initSSystem() {
         // Push overall_pct หลัง sync เสร็จ เพื่อให้ index_realtime_3 อ่านได้ถูกต้อง
         setTimeout(pushOverallPct, 500);
       }
-    }catch(e){ if(e&&e.message&&!e.message.includes('Failed to fetch'))console.warn('initSSystem cloud sync:',e); }
+    }catch(e){/* cloud sync skipped — not logged in or network unavailable */}
   }, 1800);
 }
 
@@ -8272,54 +8094,57 @@ function _isValidPass(p){
 
 // ── Public API ─────────────────────────────────────────────────
 window.fbAuthTab = function(mode){
-  _authMode = mode;
-  _setErr('');
-  // อัพเดท tab active state
+  _authMode=mode; _setErr('');
+  var tabStyles={
+    active:'linear-gradient(135deg,rgba(56,139,253,.4),rgba(0,212,255,.2))',
+    activeLogin:'color:#60a8ff',
+    activeReg:'background:linear-gradient(135deg,rgba(0,200,83,.4),rgba(0,230,118,.2));color:#34d399',
+    activeReset:'background:linear-gradient(135deg,rgba(255,214,0,.3),rgba(255,149,0,.2));color:#fbbf24',
+    inactive:'background:transparent;color:rgba(255,255,255,.35)'
+  };
   ['login','register','reset'].forEach(function(m){
     var t=document.getElementById('auth-tab-'+m);
     if(!t)return;
-    t.classList.toggle('active', m===mode);
+    if(m===mode){
+      if(m==='login'){t.style.background='linear-gradient(135deg,rgba(56,139,253,.4),rgba(0,212,255,.2))';t.style.color='#60a8ff';}
+      else if(m==='register'){t.style.background='linear-gradient(135deg,rgba(0,200,83,.4),rgba(0,230,118,.2))';t.style.color='#34d399';}
+      else{t.style.background='linear-gradient(135deg,rgba(255,214,0,.3),rgba(255,149,0,.2))';t.style.color='#fbbf24';}
+    }else{
+      t.style.background='transparent';t.style.color='rgba(255,255,255,.35)';
+    }
   });
   var pw=document.getElementById('auth-pass-wrap');
   var pw2=document.getElementById('auth-pass2-wrap');
-  var rw=document.getElementById('auth-role-wrap');
   var nw=document.getElementById('auth-name-wrap');
-  var rd=document.getElementById('auth-role-desc');
+  var rw=document.getElementById('auth-role-wrap');
   var btn=document.getElementById('auth-submit');
   var desc=document.getElementById('auth-tab-desc');
   var hint=document.getElementById('auth-register-hint');
-
   if(mode==='login'){
     if(pw)pw.style.display='block';
     if(pw2)pw2.style.display='none';
-    if(rw)rw.style.display='none';
     if(nw)nw.style.display='none';
-    if(rd)rd.style.display='none';
-    if(btn){btn.textContent='🔓 เข้าสู่ระบบ';btn.style.background='linear-gradient(135deg,#1d4ed8,#0891b2)';btn.style.boxShadow='0 4px 20px rgba(29,78,216,.35)';}
+    if(rw&&rw.tagName==='DIV')rw.style.display='none';
+    if(btn){btn.textContent='🔓 เข้าสู่ระบบ';btn.style.background='linear-gradient(135deg,rgba(56,139,253,.5),rgba(0,212,255,.3))';}
     if(desc)desc.textContent='กรอก Email และรหัสผ่านเพื่อเข้าใช้งาน';
     if(hint)hint.style.display='block';
-    var p=document.getElementById('auth-pass');
-    if(p)p.setAttribute('autocomplete','current-password');
+    var p=document.getElementById('auth-pass');if(p)p.setAttribute('autocomplete','current-password');
   }else if(mode==='register'){
     if(pw)pw.style.display='block';
     if(pw2)pw2.style.display='block';
-    if(rw)rw.style.display='block';
     if(nw)nw.style.display='block';
-    if(rd)rd.style.display='block';
-    if(btn){btn.textContent='✏️ สมัครสมาชิก';btn.style.background='linear-gradient(135deg,#065f46,#0891b2)';btn.style.boxShadow='0 4px 20px rgba(6,95,70,.35)';}
-    if(desc)desc.textContent='สมัครบัญชีใหม่ · รหัสผ่านเป็นตัวเลข 6–8 หลัก';
+    if(rw&&rw.tagName==='DIV')rw.style.display='none';
+    if(btn){btn.textContent='✏️ สมัครสมาชิก';btn.style.background='linear-gradient(135deg,rgba(0,200,83,.4),rgba(0,230,118,.25))';}
+    if(desc)desc.textContent='สมัครบัญชีใหม่ · ทุกบัญชีใหม่ได้รับสิทธิ์ Viewer';
     if(hint)hint.style.display='none';
-    if(rd)rd.innerHTML='<strong style="color:rgba(255,255,255,.5)">ประเภทบัญชี:</strong><br>👁️ Viewer = ดูอย่างเดียว · ✏️ Admin = แก้ไขได้ · 💰 ACCT = บัญชี · 🛠️ Dev = ทุกอย่าง';
-    var p=document.getElementById('auth-pass');
-    if(p)p.setAttribute('autocomplete','new-password');
+    var p=document.getElementById('auth-pass');if(p)p.setAttribute('autocomplete','new-password');
   }else if(mode==='reset'){
     if(pw)pw.style.display='none';
     if(pw2)pw2.style.display='none';
-    if(rw)rw.style.display='none';
     if(nw)nw.style.display='none';
-    if(rd)rd.style.display='none';
-    if(btn){btn.textContent='📧 ส่งลิงก์รีเซ็ตรหัสผ่าน';btn.style.background='linear-gradient(135deg,#78350f,#b45309)';btn.style.boxShadow='0 4px 20px rgba(120,53,15,.35)';}
-    if(desc)desc.textContent='กรอก Email ที่ลงทะเบียน · ระบบจะส่งลิงก์รีเซ็ตให้ทันที';
+    if(rw&&rw.tagName==='DIV')rw.style.display='none';
+    if(btn){btn.textContent='📧 ส่งลิงก์รีเซ็ตรหัสผ่าน';btn.style.background='linear-gradient(135deg,rgba(255,214,0,.3),rgba(255,149,0,.2))';}
+    if(desc)desc.textContent='กรอก Email ที่ลงทะเบียน ระบบจะส่งลิงก์รีเซ็ตให้';
     if(hint)hint.style.display='none';
   }
   setTimeout(function(){var e=document.getElementById('auth-email');if(e)e.focus();},80);
@@ -8419,10 +8244,18 @@ window.fbAuthNext = function(){
           }).catch(function(){});
           // ส่ง email verification
           uc.user.sendEmailVerification().catch(function(){});
-          // แสดงข้อความสำเร็จ
+          // บันทึก role = viewer + pending status
+          if(_fbDB) _fbDB.ref('users/'+uc.user.uid).set({
+            role:'viewer', email:email, name:displayName,
+            status:'pending', // รอ Admin approve role อื่น
+            createdAt:new Date().toISOString()
+          }).catch(function(){});
           _setErr('');
           var errEl=document.getElementById('auth-err');
-          if(errEl){errEl.style.color='#00e676';errEl.textContent='✅ สมัครสมาชิกสำเร็จ! กรุณาตรวจสอบ Email เพื่อยืนยันตัวตน';}
+          if(errEl){
+            errEl.style.color='#00e676';
+            errEl.textContent='สมัครสมาชิกสำเร็จ! กรุณาตรวจสอบ Email เพื่อยืนยันตัวตน บัญชีของคุณได้รับสิทธิ์ Viewer หากต้องการสิทธิ์เพิ่มเติม กรุณาติดต่อ Admin';
+          }
         });
       })
       .catch(function(e){ _setLoading(false); _setErr(_friendlyError(e.code)); });
@@ -8747,6 +8580,537 @@ window.closeForgotPassModal = function(){
   if(typeof _origClose==='function') _origClose();
 };
 </script>
+
+
+
+
+
+<script>
+// ── Register Popup ──────────────────────────────────────────
+window.openRegPopup = function(){
+  // ซ่อน lock-modal ด้วย display:none จริงๆ
+  var lm=document.getElementById('lock-modal');
+  if(lm){ lm.classList.remove('show'); lm.style.setProperty('display','none','important'); }
+  // ลบ view-mode ชั่วคราวเพื่อให้ input กรอกได้
+  var wasViewMode=document.body.classList.contains('view-mode');
+  if(wasViewMode){ document.body.classList.remove('view-mode'); document.body._regWasViewMode=true; }
+
+  // ลบ popup เก่าถ้ามี
+  var old=document.getElementById('reg-popup');
+  if(old) old.remove();
+
+  // สร้าง popup ใหม่ append ท้าย body
+  var p=document.createElement('div');
+  p.id='reg-popup';
+  p.style.cssText='position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:16px;font-family:var(--f,"Sarabun",sans-serif);isolation:isolate;contain:layout style';
+
+  p.innerHTML=
+    '<div style="background:linear-gradient(135deg,#0a1628,#0d1a2e);border:1px solid rgba(56,139,253,.35);border-radius:20px;width:100%;max-width:400px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.8)">'
+    // Header
+    +'<div style="background:linear-gradient(135deg,rgba(56,139,253,.2),rgba(0,212,255,.1));padding:18px 24px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between">'
+    +'<div><div style="font-size:16px;font-weight:800;color:#e8f0fe">ลงทะเบียนใหม่</div>'
+    +'<div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px">สร้างบัญชีด้วย Email</div></div>'
+    +'<button id="reg-close-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:13px">✕ ปิด</button>'
+    +'</div>'
+    // Form
+    +'<div style="padding:20px 24px">'
+    +_regField('reg-email','Email','your@email.com','email','email','15px','')
+    +_regField('reg-pass','รหัสผ่าน (ตัวเลข 6–8 หลัก)','••••••••','password','numeric','22px','letter-spacing:8px;font-family:monospace;padding-right:46px')
+    +_regField('reg-pass2','ยืนยันรหัสผ่าน','••••••••','password','numeric','22px','letter-spacing:8px;font-family:monospace')
+    +_regField('reg-name','ชื่อ-นามสกุล','ชื่อ นามสกุล','text','','15px','')
+    +'<div id="reg-err" style="font-size:12px;min-height:16px;margin-bottom:10px;text-align:center;color:#f87171;line-height:1.6"></div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<button id="reg-submit" style="flex:1;padding:14px;background:linear-gradient(135deg,rgba(0,200,83,.4),rgba(0,230,118,.25));border:1px solid rgba(0,200,83,.5);border-radius:12px;color:#e8f0fe;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer">ลงทะเบียน</button>'
+    +'<button id="reg-cancel-btn" style="padding:14px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:12px;font-family:inherit;font-size:15px;cursor:pointer">ยกเลิก</button>'
+    +'</div>'
+    +'<div id="reg-loading" style="display:none;text-align:center;padding:12px 0 0;color:rgba(255,255,255,.4);font-size:12px">'
+    +'<div style="width:20px;height:20px;border:2px solid rgba(56,139,253,.3);border-top-color:#388bfd;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 6px"></div>กำลังลงทะเบียน...</div>'
+    +'<div style="margin-top:12px;padding:9px 12px;background:rgba(255,214,0,.06);border:1px solid rgba(255,214,0,.15);border-radius:9px;font-size:10px;color:rgba(255,214,0,.7);line-height:1.8;text-align:center">'
+    +'บัญชีใหม่จะได้รับสิทธิ์ <strong>Viewer</strong> · หากต้องการสิทธิ์ ACCT/Dev กรุณาติดต่อ Admin</div>'
+    +'</div></div>';
+
+  document.body.appendChild(p);
+
+  // bind events หลัง append
+  document.getElementById('reg-close-btn').onclick=window.closeRegPopup;
+  document.getElementById('reg-cancel-btn').onclick=window.closeRegPopup;
+  document.getElementById('reg-submit').onclick=window.doRegister;
+
+  // force all inputs to be interactive
+  p.querySelectorAll('input').forEach(function(inp){
+    inp.style.pointerEvents='auto';
+    inp.style.userSelect='text';
+    inp.style.webkitUserSelect='text';
+    inp.removeAttribute('disabled');
+    inp.removeAttribute('readonly');
+    inp.tabIndex=0;
+  });
+
+  // bind input events
+  var ep=document.getElementById('reg-pass');
+  if(ep){
+    ep.oninput=function(){window.regPassValidate(this);};
+    // เพิ่มปุ่ม toggle
+    var eyeBtn=document.createElement('button');
+    eyeBtn.textContent='👁️';
+    eyeBtn.style.cssText='position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:16px;padding:4px';
+    eyeBtn.onclick=function(){window.regTogglePass('reg-pass',this);};
+    ep.parentNode.style.position='relative';
+    ep.parentNode.appendChild(eyeBtn);
+  }
+  var ep2=document.getElementById('reg-pass2');
+  if(ep2) ep2.oninput=function(){window.regPassValidate(this);};
+
+  // focus email
+  setTimeout(function(){
+    var e=document.getElementById('reg-email');
+    if(e) e.focus();
+  },100);
+};
+
+function _regField(id,label,ph,type,mode,fs,extra){
+  return '<div style="margin-bottom:12px">'
+    +'<div style="font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:5px">'+label+'</div>'
+    +'<input type="'+type+'" id="'+id+'" placeholder="'+ph+'" inputmode="'+(mode||'')+'" autocomplete="'+(type==='email'?'email':type==='text'?'name':'new-password')+'" '
+    +'style="width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14);border-radius:10px;padding:13px 14px;color:#e8f0fe;font-size:'+fs+';font-family:inherit;outline:none;box-sizing:border-box;transition:border .2s;'+extra+'" '
+    +'onfocus="this.style.borderColor=\'rgba(56,139,253,.7)\'" '
+    +'onblur="this.style.borderColor=\'rgba(255,255,255,.14)\'">'
+    +'</div>';
+}
+
+window.closeRegPopup = function(){
+  var p=document.getElementById('reg-popup');
+  if(p) p.remove();
+  // คืน view-mode ถ้าเคยเป็น
+  if(document.body._regWasViewMode){
+    document.body.classList.add('view-mode');
+    document.body._regWasViewMode=false;
+  }
+  // คืน lock-modal
+  var lm=document.getElementById('lock-modal');
+  if(lm){ lm.style.removeProperty('display'); lm.classList.add('show'); }
+};
+
+window.regPassValidate = function(inp){
+  inp.value=inp.value.replace(/\D/g,'').slice(0,8);
+  inp.style.borderColor=inp.value.length===0?'rgba(255,255,255,.12)':
+    /^\d{6,8}$/.test(inp.value)?'rgba(0,200,83,.6)':'rgba(255,149,0,.6)';
+};
+
+window.regTogglePass = function(id,btn){
+  var el=document.getElementById(id);
+  if(!el)return;
+  el.type=el.type==='password'?'text':'password';
+  if(btn)btn.textContent=el.type==='password'?'👁️':'🙈';
+};
+
+window.doRegister = function(){
+  var emailEl=document.getElementById('reg-email');
+  var passEl=document.getElementById('reg-pass');
+  var pass2El=document.getElementById('reg-pass2');
+  var nameEl=document.getElementById('reg-name');
+  var errEl=document.getElementById('reg-err');
+  var subEl=document.getElementById('reg-submit');
+  var ldEl=document.getElementById('reg-loading');
+
+  // ตรวจว่า elements มีจริงไหม
+  if(!emailEl||!passEl||!pass2El||!nameEl){
+    alert('ไม่พบ input fields — กรุณารีเฟรช');
+    return;
+  }
+
+  var email=emailEl.value.trim();
+  var pass=passEl.value;
+  var pass2=pass2El.value;
+  var name=nameEl.value.trim();
+
+  function setErr(msg,col){
+    if(errEl){errEl.style.color=col||'#f87171';errEl.textContent=msg;}
+  }
+  setErr('');
+
+  // Validate
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setErr('กรุณากรอก Email ที่ถูกต้อง');return;}
+  if(!/^\d{6,8}$/.test(pass)){setErr('รหัสผ่านต้องเป็นตัวเลข 6–8 หลัก');return;}
+  if(pass!==pass2){setErr('รหัสผ่านไม่ตรงกัน');return;}
+  if(!name){setErr('กรุณากรอกชื่อ-นามสกุล');return;}
+
+  // ตรวจ Firebase
+  if(typeof firebase==='undefined'){
+    setErr('Firebase ยังไม่โหลด กรุณารอสักครู่','rgba(255,214,0,.9)');
+    if(typeof window._doInitFirebase==='function') window._doInitFirebase();
+    return;
+  }
+  if(!firebase.apps||!firebase.apps.length){
+    setErr('Firebase ยังไม่ init กรุณารอแล้วลองใหม่','rgba(255,214,0,.9)');
+    if(typeof window._doInitFirebase==='function') window._doInitFirebase();
+    return;
+  }
+
+  var auth;
+  try{ auth=firebase.auth(); }catch(e){ setErr('Firebase Auth error: '+e.message); return; }
+
+  // Loading
+  if(subEl){subEl.disabled=true; subEl.textContent='กำลังลงทะเบียน...';}
+  if(ldEl) ldEl.style.display='block';
+
+  // สร้างบัญชี
+  auth.createUserWithEmailAndPassword(email, pass)
+    .then(function(uc){
+      var user=uc.user;
+      // update displayName
+      return user.updateProfile({displayName:name})
+        .then(function(){
+          // ส่ง verification email
+          user.sendEmailVerification().catch(function(){});
+          // บันทึกรหัสผ่านใหม่ลง numpad
+          if(typeof sha256==='function'&&typeof setPassHash==='function'){
+            setPassHash(sha256(pass));
+          }
+          // บันทึก DB
+          try{
+            var db=firebase.database();
+            if(db) db.ref('users/'+user.uid).set({
+              role:'viewer', email:email, name:name,
+              status:'active', createdAt:new Date().toISOString()
+            });
+          }catch(e2){}
+          // สำเร็จ
+          if(ldEl) ldEl.style.display='none';
+          setErr('✅ สำเร็จ! รหัสผ่านใหม่พร้อมใช้งาน กลับหน้าหลักแล้วกรอกรหัสได้เลย','#34d399');
+          if(subEl) subEl.textContent='✅ สำเร็จ';
+          setTimeout(function(){
+            window.closeRegPopup();
+            if(typeof showToast==='function') showToast('ลงทะเบียนสำเร็จ ✅ ใช้รหัสใหม่เข้าได้เลย','ok',5000);
+          }, 2500);
+        });
+    })
+    .catch(function(e){
+      if(ldEl) ldEl.style.display='none';
+      if(subEl){subEl.disabled=false; subEl.textContent='ลงทะเบียน';}
+
+      if(e.code==='auth/email-already-in-use'){
+        // บัญชีมีแล้ว → ลอง login ด้วยรหัสที่กรอก แล้ว save hash
+        setErr('⏳ บัญชีมีอยู่แล้ว กำลังอัพเดทรหัสผ่าน...','rgba(255,214,0,.9)');
+        auth.signInWithEmailAndPassword(email, pass)
+          .then(function(uc2){
+            // login สำเร็จ → save hash ใหม่
+            if(typeof sha256==='function'&&typeof setPassHash==='function'){
+              setPassHash(sha256(pass));
+            }
+            // อัพเดท displayName ถ้ากรอกมา
+            if(name) uc2.user.updateProfile({displayName:name}).catch(function(){});
+            setErr('✅ อัพเดทรหัสผ่านสำเร็จ! กลับหน้าหลักแล้วกรอกรหัสใหม่ได้เลย','#34d399');
+            if(subEl) subEl.textContent='✅ สำเร็จ';
+            setTimeout(function(){
+              window.closeRegPopup();
+              if(typeof showToast==='function') showToast('อัพเดทรหัสผ่านสำเร็จ ✅','ok',5000);
+            },2000);
+          })
+          .catch(function(e2){
+            // login ไม่ได้ → รหัสผ่านผิด
+            if(e2.code==='auth/wrong-password'||e2.code==='auth/invalid-credential'){
+              setErr('Email นี้มีบัญชีอยู่แล้ว และรหัสผ่านไม่ตรง กรุณาใช้รหัสเดิม');
+            }else{
+              setErr('Email นี้มีบัญชีอยู่แล้ว: '+e2.message);
+            }
+          });
+        return;
+      }
+
+      var errs={
+        'auth/weak-password':'รหัสผ่านไม่ปลอดภัยพอ',
+        'auth/invalid-email':'รูปแบบ Email ไม่ถูกต้อง',
+        'auth/network-request-failed':'เชื่อมต่อ Network ไม่ได้',
+        'auth/too-many-requests':'พยายามมากเกินไป กรุณารอสักครู่',
+        'auth/operation-not-allowed':'Email/Password ยังไม่เปิดใน Firebase Console',
+      };
+      setErr(errs[e.code]||('เกิดข้อผิดพลาด: '+e.code));
+    });
+};
+
+// close on backdrop click
+document.addEventListener('click',function(e){
+  var p=document.getElementById('reg-popup');
+  if(p&&e.target===p) window.closeRegPopup();
+});
+</script>
+
+
+
+<script>
+// ════ ACCT/Dev Role Request System ════════════════════════════
+var _EJS_SVC  = 'service_6xymydz';
+var _EJS_TPL  = 'template_agimn59';
+
+// สร้าง OTP 6 หลัก
+function _genOTP(){
+  return String(Math.floor(100000+Math.random()*900000));
+}
+
+// เปิด popup ขอสิทธิ์ ACCT/Dev
+window.openRoleRequestPopup = function(){
+  var lm=document.getElementById('lock-modal');
+  if(lm){ lm.classList.remove('show'); lm.style.setProperty('display','none','important'); }
+  var wasVM=document.body.classList.contains('view-mode');
+  if(wasVM){ document.body.classList.remove('view-mode'); document.body._rrWasVM=true; }
+
+  var old=document.getElementById('role-req-popup');
+  if(old) old.remove();
+
+  var p=document.createElement('div');
+  p.id='role-req-popup';
+  p.style.cssText='position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:16px;font-family:var(--f,"Sarabun",sans-serif)';
+
+  p.innerHTML=
+    '<div style="background:linear-gradient(135deg,#0a1628,#0d1a2e);border:1px solid rgba(56,139,253,.4);border-radius:20px;width:100%;max-width:420px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.8)">'
+    +'<div style="background:linear-gradient(135deg,rgba(56,139,253,.2),rgba(0,212,255,.1));padding:18px 24px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between">'
+    +'<div><div style="font-size:16px;font-weight:800;color:#e8f0fe">🔐 ขอสิทธิ์ ACCT / Dev</div>'
+    +'<div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px">Admin จะได้รับ Email เพื่ออนุมัติ</div></div>'
+    +'<button id="rr-close" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit;font-size:13px">✕ ปิด</button>'
+    +'</div>'
+    +'<div style="padding:20px 24px">'
+    // Email
+    +'<div style="margin-bottom:12px"><div style="font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:5px">Email ของคุณ</div>'
+    +'<input type="email" id="rr-email" placeholder="your@email.com" inputmode="email" autocomplete="email" '
+    +'style="width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14);border-radius:10px;padding:13px 14px;color:#e8f0fe;font-size:15px;font-family:inherit;outline:none;box-sizing:border-box;transition:border .2s;pointer-events:all!important;cursor:text!important" '
+    +'onfocus="this.style.borderColor=\'rgba(56,139,253,.7)\'" onblur="this.style.borderColor=\'rgba(255,255,255,.14)\'">'
+    +'</div>'
+    // ชื่อ
+    +'<div style="margin-bottom:12px"><div style="font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:5px">ชื่อ-นามสกุล</div>'
+    +'<input type="text" id="rr-name" placeholder="ชื่อ นามสกุล" autocomplete="name" '
+    +'style="width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.14);border-radius:10px;padding:13px 14px;color:#e8f0fe;font-size:15px;font-family:inherit;outline:none;box-sizing:border-box;transition:border .2s;pointer-events:all!important;cursor:text!important" '
+    +'onfocus="this.style.borderColor=\'rgba(56,139,253,.7)\'" onblur="this.style.borderColor=\'rgba(255,255,255,.14)\'">'
+    +'</div>'
+    // Role
+    +'<div style="margin-bottom:16px"><div style="font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:5px">สิทธิ์ที่ต้องการ</div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<button id="rr-acct-btn" onclick="rrSelectRole(\'acct\',this)" style="flex:1;padding:12px;border-radius:10px;border:1.5px solid rgba(0,212,255,.4);background:rgba(0,212,255,.1);color:#00d4ff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s">💰 ACCT</button>'
+    +'<button id="rr-dev-btn" onclick="rrSelectRole(\'dev\',this)" style="flex:1;padding:12px;border-radius:10px;border:1.5px solid rgba(155,89,182,.4);background:rgba(155,89,182,.1);color:#ce93d8;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s">🛠️ Dev</button>'
+    +'</div>'
+    +'<input type="hidden" id="rr-role" value="">'
+    +'</div>'
+    // Error
+    +'<div id="rr-err" style="font-size:12px;min-height:16px;margin-bottom:10px;text-align:center;color:#f87171;line-height:1.6"></div>'
+    // Buttons
+    +'<div style="display:flex;gap:8px">'
+    +'<button id="rr-submit" style="flex:1;padding:14px;background:linear-gradient(135deg,rgba(56,139,253,.4),rgba(0,212,255,.25));border:1px solid rgba(56,139,253,.5);border-radius:12px;color:#e8f0fe;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer">ส่งคำขอ</button>'
+    +'<button id="rr-cancel" style="padding:14px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:12px;font-family:inherit;font-size:15px;cursor:pointer">ยกเลิก</button>'
+    +'</div>'
+    +'<div id="rr-load" style="display:none;text-align:center;padding:12px 0 0;color:rgba(255,255,255,.4);font-size:12px">'
+    +'<div style="width:20px;height:20px;border:2px solid rgba(56,139,253,.3);border-top-color:#388bfd;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 6px"></div>กำลังส่งคำขอ...</div>'
+    +'<div style="margin-top:12px;padding:9px 12px;background:rgba(255,214,0,.06);border:1px solid rgba(255,214,0,.15);border-radius:9px;font-size:10px;color:rgba(255,214,0,.7);line-height:1.8;text-align:center">'
+    +'Admin จะได้รับ Email · เมื่ออนุมัติแล้ว OTP จะปรากฏเป็น Popup ในโปรแกรมครั้งเดียว</div>'
+    +'</div></div>';
+
+  document.body.appendChild(p);
+
+  // bind events
+  document.getElementById('rr-close').onclick  = window.closeRoleRequestPopup;
+  document.getElementById('rr-cancel').onclick = window.closeRoleRequestPopup;
+  document.getElementById('rr-submit').onclick = window.doRoleRequest;
+  p.onclick = function(e){ if(e.target===p) window.closeRoleRequestPopup(); };
+
+  // force inputs
+  p.querySelectorAll('input').forEach(function(el){
+    el.style.pointerEvents='auto';
+    el.style.userSelect='text';
+    el.style.webkitUserSelect='text';
+    el.tabIndex=0;
+  });
+  setTimeout(function(){ var e=document.getElementById('rr-email'); if(e)e.focus(); },100);
+};
+
+window.rrSelectRole = function(role, btn){
+  document.getElementById('rr-role').value = role;
+  // highlight selected
+  var acctBtn=document.getElementById('rr-acct-btn');
+  var devBtn=document.getElementById('rr-dev-btn');
+  if(role==='acct'){
+    acctBtn.style.background='rgba(0,212,255,.3)'; acctBtn.style.borderColor='rgba(0,212,255,.8)';
+    devBtn.style.background='rgba(155,89,182,.1)'; devBtn.style.borderColor='rgba(155,89,182,.4)';
+  }else{
+    devBtn.style.background='rgba(155,89,182,.3)'; devBtn.style.borderColor='rgba(155,89,182,.8)';
+    acctBtn.style.background='rgba(0,212,255,.1)'; acctBtn.style.borderColor='rgba(0,212,255,.4)';
+  }
+};
+
+window.closeRoleRequestPopup = function(){
+  var p=document.getElementById('role-req-popup');
+  if(p) p.remove();
+  if(document.body._rrWasVM){ document.body.classList.add('view-mode'); document.body._rrWasVM=false; }
+  var lm=document.getElementById('lock-modal');
+  if(lm){ lm.style.removeProperty('display'); lm.classList.add('show'); }
+};
+
+window.doRoleRequest = function(){
+  var email = (document.getElementById('rr-email').value||'').trim();
+  var name  = (document.getElementById('rr-name').value||'').trim();
+  var role  = document.getElementById('rr-role').value;
+  var errEl = document.getElementById('rr-err');
+  var subEl = document.getElementById('rr-submit');
+  var ldEl  = document.getElementById('rr-load');
+
+  function setErr(msg,col){ errEl.style.color=col||'#f87171'; errEl.textContent=msg; }
+  setErr('');
+
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ setErr('กรุณากรอก Email ที่ถูกต้อง'); return; }
+  if(!name){ setErr('กรุณากรอกชื่อ-นามสกุล'); return; }
+  if(!role){ setErr('กรุณาเลือกสิทธิ์ที่ต้องการ'); return; }
+
+  // ดึง admin email จาก Firebase (email ของ user ที่มี role=admin)
+  // หรือ fallback ใช้ email ที่ login อยู่
+  var adminEmail = '';
+  try{
+    if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length){
+      var cu=firebase.auth().currentUser;
+      if(cu) adminEmail=cu.email;
+    }
+  }catch(e2){}
+
+  // ดึงจาก Firebase DB — users ที่ role=admin
+  function sendRequest(toAdmin){
+    var otp = _genOTP();
+    var roleLabel = role==='acct'?'ACCT (บัญชีโครงการ)':'Dev (นักพัฒนา)';
+    var approveUrl = window.location.href.split('?')[0]+'?approve=1&uid='+btoa(email)+'&role='+role+'&otp='+otp;
+
+    if(subEl){ subEl.disabled=true; subEl.textContent='กำลังส่ง...'; }
+    if(ldEl) ldEl.style.display='block';
+
+    // บันทึกคำขอใน Firebase
+    try{
+      if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length){
+        firebase.database().ref('role_requests/'+btoa(email).replace(/[^a-zA-Z0-9]/g,'_')).set({
+          email:email, name:name, role:role, otp:otp,
+          status:'pending', createdAt:new Date().toISOString()
+        });
+      }
+    }catch(e3){}
+
+    // ส่ง Email ผ่าน EmailJS
+    if(typeof emailjs==='undefined'){
+      setErr('EmailJS ยังไม่โหลด กรุณารอสักครู่','rgba(255,214,0,.9)');
+      if(subEl){subEl.disabled=false; subEl.textContent='ส่งคำขอ';}
+      if(ldEl) ldEl.style.display='none';
+      return;
+    }
+
+    // ใช้ admin email จริง — fallback เป็น email ของ user ที่ส่งคำขอ
+    var finalAdmin = toAdmin && toAdmin.indexOf('@')>0 ? toAdmin : email;
+    console.log('Sending to admin:', finalAdmin);
+    emailjs.send(_EJS_SVC, _EJS_TPL, {
+      admin_email:  finalAdmin,
+      to_email:     finalAdmin,
+      user_email:   email,
+      user_name:    name,
+      role:         roleLabel,
+      otp:          otp,
+      approve_url:  approveUrl,
+    }).then(function(){
+      if(ldEl) ldEl.style.display='none';
+      setErr('✅ ส่งคำขอสำเร็จ! Admin จะได้รับ Email · เมื่ออนุมัติ OTP จะแสดงใน Popup','#34d399');
+      if(subEl) subEl.textContent='✅ ส่งแล้ว';
+      // บันทึก pending OTP ไว้ตรวจ
+      try{
+        localStorage.setItem('cp_pending_otp_'+btoa(email).replace(/=/g,''),
+          JSON.stringify({email:email,role:role,otp:otp,ts:Date.now()}));
+      }catch(e4){}
+      // ปิด popup หลัง 3 วิ
+      setTimeout(function(){
+        window.closeRoleRequestPopup();
+        if(typeof showToast==='function') showToast('ส่งคำขอสิทธิ์ '+roleLabel+' แล้ว รอ Admin อนุมัติ','ok',6000);
+      }, 3000);
+    }).catch(function(err){
+      if(ldEl) ldEl.style.display='none';
+      if(subEl){subEl.disabled=false; subEl.textContent='ส่งคำขอ';}
+      setErr('ส่ง Email ไม่ได้: '+JSON.stringify(err));
+    });
+  }
+
+  // hardcode admin email
+  sendRequest('witthawad1@gmail.com');
+};
+
+// ════ Check Approve URL on load ════════════════════════════════
+// เมื่อ Admin กด approve link → popup แสดง OTP ครั้งเดียว
+(function(){
+  var params=new URLSearchParams(window.location.search);
+  if(params.get('approve')==='1'){
+    var uid=params.get('uid')||'';
+    var role=params.get('role')||'';
+    var otp=params.get('otp')||'';
+    if(!uid||!role||!otp) return;
+
+    // รอ page โหลดเสร็จก่อน
+    window.addEventListener('load',function(){
+      setTimeout(function(){
+        // อัพเดท Firebase role
+        try{
+          if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length){
+            var key=uid.replace(/[^a-zA-Z0-9]/g,'_');
+            firebase.database().ref('role_requests/'+key).update({status:'approved',approvedAt:new Date().toISOString()});
+            // อัพเดท user role ถ้ามีใน Firebase Auth
+          }
+        }catch(e){}
+
+        // แสดง OTP popup ครั้งเดียว
+        _showOTPPopup(otp, role, atob(uid));
+
+        // ลบ query params ออก
+        window.history.replaceState({},'',window.location.pathname);
+      }, 1500);
+    });
+  }
+})();
+
+function _showOTPPopup(otp, role, userEmail){
+  var roleLabel = role==='acct' ? 'ACCT' : 'Dev';
+
+  var overlay = document.createElement('div');
+  overlay.id = 'otp-popup';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;padding:16px;font-family:var(--f,"Sarabun",sans-serif)';
+
+  var card = document.createElement('div');
+  card.style.cssText = 'background:linear-gradient(135deg,#0a1628,#0d1a2e);border:2px solid rgba(56,139,253,.5);border-radius:20px;width:100%;max-width:380px;text-align:center;padding:32px 28px;box-shadow:0 24px 80px rgba(0,0,0,.9)';
+
+  var otpBox = document.createElement('div');
+  otpBox.style.cssText = 'font-size:48px;font-weight:900;font-family:monospace;color:#ffd600;letter-spacing:8px;background:rgba(255,214,0,.08);border:2px solid rgba(255,214,0,.3);border-radius:14px;padding:16px;margin:16px 0';
+  otpBox.textContent = otp;
+
+  var btn = document.createElement('button');
+  btn.textContent = 'รับทราบและบันทึกรหัส';
+  btn.style.cssText = 'width:100%;padding:15px;background:linear-gradient(135deg,rgba(56,139,253,.5),rgba(0,212,255,.3));border:1px solid rgba(56,139,253,.6);border-radius:12px;color:#e8f0fe;font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;margin-top:8px';
+
+  btn.onclick = function(){
+    // บันทึก hash ลง numpad
+    if(typeof sha256==='function' && typeof setPassHash==='function'){
+      setPassHash(sha256(otp));
+      console.log('OTP hash saved:', otp);
+    }
+    overlay.remove();
+    if(typeof showToast==='function') showToast('บันทึกรหัส '+roleLabel+' เรียบร้อย ใช้รหัส '+otp+' กดเข้าระบบได้เลย','ok',8000);
+  };
+
+  card.innerHTML =
+    '<div style="font-size:42px;margin-bottom:12px">🔓</div>'
+    +'<div style="font-size:18px;font-weight:800;color:#e8f0fe;margin-bottom:6px">Admin อนุมัติแล้ว!</div>'
+    +'<div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:4px">สิทธิ์ <strong style="color:#388bfd">'+roleLabel+'</strong></div>'
+    +'<div style="font-size:11px;color:rgba(255,255,255,.35);margin-bottom:4px">'+userEmail+'</div>'
+    +'<div style="font-size:11px;color:rgba(255,214,0,.8);margin-top:16px;margin-bottom:6px">รหัสผ่านของคุณ (แสดงครั้งเดียว)</div>';
+
+  card.appendChild(otpBox);
+
+  var noteDiv = document.createElement('div');
+  noteDiv.style.cssText = 'font-size:11px;color:rgba(255,255,255,.4);margin-bottom:16px;line-height:1.8';
+  noteDiv.innerHTML = 'กรุณาจดรหัสนี้ไว้<br>ใช้กดเข้าระบบในหน้า Restricted Access';
+  card.appendChild(noteDiv);
+  card.appendChild(btn);
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+}
+
+</script>
+
 <!-- Firebase SDK v9 compat — โหลดจาก CDN หลัก + fallback -->
 <script>
 (function(){
