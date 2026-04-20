@@ -1588,7 +1588,7 @@ function showToast(msg,type='ok',dur=3500){
 }
 function setSvStatus(st,msg,time=''){
   const d=document.getElementById('sv-dot'),m=document.getElementById('sv-msg'),tm=document.getElementById('sv-time');
-  d.className='sv-dot '+st;m.textContent=msg;
+  if(d) d.className='sv-dot '+st; if(m) m.textContent=msg;
   if(time&&tm)tm.textContent='อัพเดท: '+time;
 }
 
@@ -9819,6 +9819,58 @@ setTimeout(function(){
   loadScript(BASE+'/firebase-auth.js',     'auth', CDN2+'/firebase-auth.js');
   loadScript(BASE+'/firebase-database.js', 'db',   CDN2+'/firebase-database.js');
 })();
+</script>
+
+
+
+<script>
+// ════ SIMON Copy Protection ════════════════════════════════
+document.addEventListener('DOMContentLoaded', function(){
+
+  // ปิด right-click
+  document.addEventListener('contextmenu', function(e){
+    e.preventDefault(); return false;
+  });
+
+  // ปิด Ctrl+C, Ctrl+U, Ctrl+S, Ctrl+A, Ctrl+P, F12
+  document.addEventListener('keydown', function(e){
+    var ctrl = e.ctrlKey || e.metaKey;
+    var k = e.key.toLowerCase();
+    if(ctrl && ['c','u','s','p','a'].indexOf(k) !== -1){
+      e.preventDefault(); return false;
+    }
+    if(e.key === 'F12'){
+      e.preventDefault(); return false;
+    }
+    if(ctrl && e.shiftKey && ['i','j','c'].indexOf(k) !== -1){
+      e.preventDefault(); return false;
+    }
+  });
+
+  // ปิด select ข้อความ (ยกเว้น input)
+  document.addEventListener('selectstart', function(e){
+    if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+  });
+
+  // ปิด drag
+  document.addEventListener('dragstart', function(e){
+    if(e.target.tagName !== 'INPUT') e.preventDefault();
+  });
+
+  // ปิด print
+  window.addEventListener('beforeprint', function(e){
+    e.preventDefault();
+  });
+
+  // CSS user-select
+  var s = document.createElement('style');
+  s.textContent = 'body{-webkit-user-select:none!important;user-select:none!important}'
+    + 'input,textarea{-webkit-user-select:text!important;user-select:text!important}'
+    + '@media print{body{visibility:hidden!important}}';
+  document.head.appendChild(s);
+
+});
 </script>
 </body>
 </html>
