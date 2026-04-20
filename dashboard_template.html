@@ -4,6 +4,68 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
 <title>Construction Dashboard</title>
+
+<script>
+// ════ Project Isolation — แยก localStorage ตาม Firebase URL ════
+(function(){
+  function _getProjectId(){
+    var url = localStorage.getItem('cp_fb_url') || '';
+    if(!url) return 'default';
+    // ดึง project id จาก URL เช่น "test-prince-2f92f"
+    var m = url.match(/https:\/\/([^.]+)/);
+    return m ? m[1] : 'default';
+  }
+
+  // Keys ที่ต้องแยกตามโปรเจค (ข้อมูลและรหัสผ่าน)
+  var PROJECT_KEYS = [
+    'cp_pass_hash','cp_acct_pass_hash','cp_dev_pass_hash',
+    'cp_backup','cp_s_data_v3','cp_s_names_v3',
+    'cp_daily_log','cp_custom_items_v3','cp_jup_snapshots',
+    'cp_jup_7day','cp_labor','cp_personnel_v2',
+    'cp_cl_report','cp_invite_code',
+    'cp_session_expire'
+  ];
+
+  // Keys ที่ใช้ร่วมกันทุกโปรเจค (ไม่ต้อง prefix)
+  // cp_fb_url, cp_admin_username, cp_api_key ฯลฯ
+
+  var _origGet = localStorage.getItem.bind(localStorage);
+  var _origSet = localStorage.setItem.bind(localStorage);
+  var _origRemove = localStorage.removeItem.bind(localStorage);
+
+  function _prefix(key){
+    if(PROJECT_KEYS.indexOf(key) === -1) return key;
+    var pid = _getProjectId();
+    if(pid === 'default') return key;
+    return pid + '__' + key;
+  }
+
+  // Override getItem
+  var _nativeGet = Storage.prototype.getItem;
+  Storage.prototype.getItem = function(key){
+    if(this === localStorage) return _nativeGet.call(this, _prefix(key));
+    return _nativeGet.call(this, key);
+  };
+
+  // Override setItem
+  var _nativeSet = Storage.prototype.setItem;
+  Storage.prototype.setItem = function(key, value){
+    if(this === localStorage) return _nativeSet.call(this, _prefix(key), value);
+    return _nativeSet.call(this, key, value);
+  };
+
+  // Override removeItem
+  var _nativeRemove = Storage.prototype.removeItem;
+  Storage.prototype.removeItem = function(key){
+    if(this === localStorage) return _nativeRemove.call(this, _prefix(key));
+    return _nativeRemove.call(this, key);
+  };
+
+  window._getProjectId = _getProjectId;
+  console.log('Project isolation active, project:', _getProjectId());
+})();
+</script>
+
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CP Dashboard">
@@ -1041,6 +1103,7 @@ window.showForgotPassModal = function(){
     <a id="dev-login-link" href="#" onclick="event.preventDefault();showDevLoginModal()" style="font-size:11px;font-weight:600;color:#9b66ff;text-decoration:none;padding:5px 10px;border-radius:6px;border:1px solid rgba(120,80,255,.3);background:rgba(120,80,255,.08);transition:color .2s" title="Developer Mode">🛠️ Dev</a>
     <a id="lockin-link" href="#" onclick="event.preventDefault();showLockModal()" style="font-size:11px;font-weight:600;color:#a8e063;text-decoration:none;padding:5px 10px;border-radius:6px;border:1px solid rgba(168,224,99,.35);background:rgba(168,224,99,.1);transition:all .2s;-webkit-tap-highlight-color:transparent" onmouseover="this.style.background='rgba(168,224,99,.2)';this.style.borderColor='rgba(168,224,99,.6)'" onmouseout="this.style.background='rgba(168,224,99,.1)';this.style.borderColor='rgba(168,224,99,.35)'">🔓 Login</a>
     <button onclick="openFirebaseModal()" id="cloud-register-btn" style="font-size:11px;font-weight:600;color:rgba(56,139,253,.8);padding:5px 10px;border-radius:6px;border:1px solid rgba(56,139,253,.3);background:rgba(56,139,253,.08);cursor:pointer;font-family:var(--f);transition:all .2s;-webkit-tap-highlight-color:transparent" onmouseover="this.style.background='rgba(56,139,253,.15)'" onmouseout="this.style.background='rgba(56,139,253,.08)'">☁️ ลงทะเบียน</button>
+    <button onclick="openInvitePanel()" id="invite-btn" class="edit-only" style="display:none;font-size:11px;font-weight:700;color:rgba(255,214,0,.8);padding:5px 10px;border-radius:6px;border:1px solid rgba(255,214,0,.3);background:rgba(255,214,0,.08);cursor:pointer;font-family:var(--f);-webkit-tap-highlight-color:transparent" onmouseover="this.style.background='rgba(255,214,0,.15)'" onmouseout="this.style.background='rgba(255,214,0,.08)'">🔑 Invite</button>
     <button id="approve-notif-btn" onclick="openApprovePanel()" style="display:none;align-items:center;gap:5px;background:rgba(255,200,0,.12);color:#ffd600;border:1px solid rgba(255,200,0,.3);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">📋 คำขอ <span class="ap-count" style="background:rgba(255,80,80,.8);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px">0</span></button>
     <button id="logout-btn" class="btn edit-only" onclick="doLogout()" style="display:none;background:rgba(255,68,68,.12);color:#ff6666;border:1px solid rgba(255,68,68,.3);font-size:11px">🔒 Logout</button>
     <button id="lock-btn" class="btn btn-o edit-only" onclick="applyViewMode()" style="display:none">🔒 ล็อก</button>
@@ -1229,7 +1292,6 @@ window.showForgotPassModal = function(){
         <button class="lm-num lm-num-s" ontouchstart="nmDown(this,null,'d');event.preventDefault()" ontouchend="nmUp(this)" ontouchcancel="nmUp(this)" onmousedown="nmDown(this,null,'d')" onmouseup="nmUp(this)" onmouseleave="nmUp(this)">&#x232B;</button>
       </div>
       <div class="lm-err" id="lm-err"></div>
-      <button class="lm-submit" onclick="doUnlock()">เข้าสู่ระบบ</button>
       <button onclick="openRegPopup()" style="width:100%;margin-bottom:6px;padding:11px;background:rgba(0,200,83,.15);border:1px solid rgba(0,200,83,.4);border-radius:10px;color:#00c853;font-family:var(--f);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;gap:6px" onmouseover="this.style.background='rgba(0,200,83,.25)'" onmouseout="this.style.background='rgba(0,200,83,.15)'">✏️ สมัครสมาชิก (Viewer)</button>
       <button onclick="openRoleRequestPopup()" style="width:100%;margin-bottom:8px;padding:11px;background:rgba(56,139,253,.12);border:1px solid rgba(56,139,253,.35);border-radius:10px;color:#388bfd;font-family:var(--f);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;gap:6px" onmouseover="this.style.background='rgba(56,139,253,.2)'" onmouseout="this.style.background='rgba(56,139,253,.12)'">🔐 ขอสิทธิ์ ACCT / Dev</button>
 
@@ -2146,6 +2208,8 @@ function applyViewMode(){
   if(logout)logout.style.display='none';
   var notifBtn=document.getElementById('approve-notif-btn');
   if(notifBtn) notifBtn.style.display='none';
+  var invBtn=document.getElementById('invite-btn');
+  if(invBtn) invBtn.style.display='none';
 }
 function applyEditMode(){
   document.body.classList.remove('view-mode');
@@ -2158,6 +2222,8 @@ function applyEditMode(){
   if(logout)logout.style.display='';
   var notifBtn=document.getElementById('approve-notif-btn');
   if(notifBtn) notifBtn.style.display='inline-flex';
+  var invBtn=document.getElementById('invite-btn');
+  if(invBtn) invBtn.style.display='inline-flex';
   setTimeout(function(){if(typeof checkPendingRequests==='function')checkPendingRequests();},1500);
 }
 function showGreeting(){const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;pointer-events:none';d.innerHTML=`<div style="background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:36px 72px;backdrop-filter:blur(20px);box-shadow:0 12px 60px rgba(0,0,0,.5);animation:greetIn .35s cubic-bezier(.34,1.56,.64,1) both"><span style="font-size:42px;font-weight:800;color:#e8f0fe;font-family:'Sarabun',sans-serif;letter-spacing:1px">สวัสดี ค่ะ</span></div>`;document.body.appendChild(d);setTimeout(()=>{d.firstElementChild.style.cssText+=';animation:greetOut .3s ease forwards';setTimeout(()=>d.remove(),300);},3000);}
@@ -3539,7 +3605,6 @@ function jupRenderSnapshots(){
     </div>
     <div class="lm-err" id="acct-err"></div>
     <div style="padding:0 22px 22px">
-      <button class="lm-submit" onclick="doACCTUnlock()" style="margin-bottom:8px">เข้าสู่ ACCT</button>
       <button class="lm-ghost" onclick="closeACCTLogin()" style="background:rgba(255,68,68,.12)!important;border:1px solid rgba(255,68,68,.35)!important;color:rgba(255,120,120,.9)!important">ยกเลิก</button>
     </div>
   </div>
@@ -5597,7 +5662,6 @@ function saveNewCatModal(){
     </div>
     <div style="min-height:16px;font-size:11px;color:rgba(255,100,100,.9);font-family:var(--m);text-align:center;margin-bottom:10px" id="dev-login-err"></div>
     <div style="padding:0 22px 22px">
-      <button onclick="doDevLogin()" class="lm-submit" style="margin-bottom:8px;border-color:rgba(120,80,255,.5);color:rgba(180,140,255,.9)">เข้าสู่ Developer Mode</button>
       <button onclick="closeDevLoginModal()" class="lm-ghost" style="background:rgba(255,68,68,.12)!important;border:1px solid rgba(255,68,68,.35)!important;color:rgba(255,120,120,.9)!important">ยกเลิก</button>
     </div>
   </div>
@@ -8867,6 +8931,7 @@ window.openRegPopup = function(){
     +_regField('reg-email','Email','your@email.com','email','email','15px','')
     +_regField('reg-pass','รหัสผ่าน (ตัวเลข 6–8 หลัก)','••••••••','password','numeric','22px','letter-spacing:8px;font-family:monospace;padding-right:46px')
     +_regField('reg-pass2','ยืนยันรหัสผ่าน','••••••••','password','numeric','22px','letter-spacing:8px;font-family:monospace')
+    +_regField('reg-invite','Invite Code (ไม่ต้องกรอกถ้าเป็นการสมัครครั้งแรก)','XXXXXX','text','','20px','letter-spacing:6px;font-family:monospace;text-align:center;text-transform:uppercase;color:#ffd600;border-color:rgba(255,214,0,.3);background:rgba(255,214,0,.06)')
     +_regField('reg-name','ชื่อ-นามสกุล','ชื่อ นามสกุล','text','','15px','')
     +'<div id="reg-err" style="font-size:12px;min-height:16px;margin-bottom:10px;text-align:center;color:#f87171;line-height:1.6"></div>'
     +'<div style="display:flex;gap:8px">'
@@ -8978,6 +9043,17 @@ window.doRegister = function(){
     if(errEl){errEl.style.color=col||'#f87171';errEl.textContent=msg;}
   }
   setErr('');
+
+  // ตรวจ Invite Code
+  var inviteEl=document.getElementById('reg-invite');
+  var inviteVal=inviteEl?inviteEl.value.trim().toUpperCase():'';
+  var savedInvite=(localStorage.getItem('cp_invite_code')||'').toUpperCase();
+  if(savedInvite){
+    // มี Code แล้ว → ต้องกรอกให้ถูก
+    if(!inviteVal){setErr('กรุณากรอก Invite Code จาก Admin');return;}
+    if(inviteVal!==savedInvite){setErr('Invite Code ไม่ถูกต้อง');return;}
+  }
+  // ไม่มี Code = สมัครคนแรก (Admin) → ผ่านได้เลย
 
   // Validate
   if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setErr('กรุณากรอก Email ที่ถูกต้อง');return;}
@@ -9623,6 +9699,45 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 
 })();
+</script>
+
+<script>
+// ════ Invite Code System ════════════════════════════════════
+var _INVITE_KEY='cp_invite_code';
+window.generateInviteCode=function(){
+  var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var code=''; for(var i=0;i<6;i++) code+=chars[Math.floor(Math.random()*chars.length)];
+  localStorage.setItem(_INVITE_KEY,code);
+  try{ if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length)
+    firebase.database().ref('invite_code').set({code:code,updatedAt:new Date().toISOString()}); }catch(e){}
+  return code;
+};
+window.getInviteCode=function(){ return localStorage.getItem(_INVITE_KEY)||''; };
+window.openInvitePanel=function(){
+  var code=getInviteCode(); if(!code) code=generateInviteCode();
+  var old=document.getElementById('invite-panel'); if(old) old.remove();
+  var p=document.createElement('div'); p.id='invite-panel';
+  p.style.cssText='position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:16px;font-family:var(--f)';
+  p.innerHTML='<div style="background:linear-gradient(135deg,#0a1628,#0d1a2e);border:1px solid rgba(255,214,0,.35);border-radius:20px;width:100%;max-width:360px;text-align:center;padding:32px 28px;box-shadow:0 24px 80px rgba(0,0,0,.8)">'
+    +'<div style="font-size:36px;margin-bottom:10px">🔑</div>'
+    +'<div style="font-size:17px;font-weight:800;color:#e8f0fe;margin-bottom:4px">Invite Code</div>'
+    +'<div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:20px">แจ้งโค้ดนี้ให้ผู้ที่ต้องการสมัครสมาชิก</div>'
+    +'<div id="invite-code-display" style="font-size:42px;font-weight:900;font-family:monospace;color:#ffd600;letter-spacing:8px;background:rgba(255,214,0,.08);border:2px solid rgba(255,214,0,.3);border-radius:14px;padding:16px;margin-bottom:12px">'+code+'</div>'
+    +'<div style="font-size:10px;color:rgba(255,255,255,.25);margin-bottom:20px">ใช้ได้ไม่จำกัดครั้ง จนกว่า Admin จะสร้างใหม่</div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<button onclick="(function(){var nc=window.generateInviteCode();document.getElementById(\'invite-code-display\').textContent=nc;if(typeof showToast===\'function\')showToast(\'Invite Code ใหม่: \'+nc,\'ok\',6000);})()" style="flex:1;padding:12px;background:rgba(255,214,0,.15);border:1px solid rgba(255,214,0,.4);border-radius:10px;color:#ffd600;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">🔄 สร้างใหม่</button>'
+    +'<button onclick="document.getElementById(\'invite-panel\').remove()" style="flex:1;padding:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:rgba(255,255,255,.5);font-family:inherit;font-size:13px;cursor:pointer">ปิด</button>'
+    +'</div></div>';
+  document.body.appendChild(p);
+  p.onclick=function(e){if(e.target===p)p.remove();};
+};
+// โหลด Invite Code จาก Firebase
+setTimeout(function(){
+  try{ if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length)
+    firebase.database().ref('invite_code').once('value').then(function(snap){
+      var d=snap.val(); if(d&&d.code) localStorage.setItem(_INVITE_KEY,d.code);
+    }).catch(function(){}); }catch(e){}
+},3000);
 </script>
 
 <!-- Firebase SDK v9 compat — โหลดจาก CDN หลัก + fallback -->
