@@ -7242,14 +7242,9 @@ function sCSS(){
   s+='#sched-ov .sfg{display:grid;grid-template-columns:1fr 1fr;gap:8px}';
   // iPad
   s+='@media(max-width:1024px) and (min-width:601px){';
-  s+='#sched-ov .sthd,#sched-ov .sr{grid-template-columns:26px 38px 1fr 70px 70px 70px 56px 0 52px}';
-  s+='#sched-ov .sth:nth-child(8),#sched-ov .std:nth-child(8){display:none}';
+  s+='#sched-ov .sthd,#sched-ov .sr{grid-template-columns:26px 42px 1fr 82px 82px 82px 62px 60px 52px}';
   s+='}';
-  s+='@media(max-width:820px) and (min-width:601px){';
-  s+='#sched-ov .sthd,#sched-ov .sr{grid-template-columns:24px 34px 1fr 66px 66px 0 0 0 52px}';
-  s+='#sched-ov .sth:nth-child(5),#sched-ov .std:nth-child(5),#sched-ov .sth:nth-child(6),#sched-ov .std:nth-child(6),#sched-ov .sth:nth-child(7),#sched-ov .std:nth-child(7),#sched-ov .sth:nth-child(8),#sched-ov .std:nth-child(8){display:none}';
-  s+='}';
-  // Mobile portrait
+    // Mobile portrait
   s+='@media(max-width:600px){';
   s+='#sched-ov .sh{padding:8px 10px;gap:6px}';
   s+='#sched-ov .sub-ttl{display:none}';
@@ -7550,7 +7545,8 @@ function sSt(ap,pp,planStart){
 // ════ Table ════
 function sTbl(){
   var el=document.getElementById('s-tbl');if(!el)return;
-  var h='<div class="sthd">';
+  var h='<div class="stbl-wrap"><div class="stbl">';
+  h+='<div class="sthd">';
   h+='<div class="sth c"></div><div class="sth">ID</div><div class="sth">ชื่องาน / Sub-task</div>';
   h+='<div class="sth c">เริ่ม</div><div class="sth c">เสร็จ</div>';
   h+='<div class="sth c">% แผน/จริง</div><div class="sth c">% จริง</div>';
@@ -7624,6 +7620,7 @@ function sTbl(){
     });
     h+='</div>';
   });
+  h+='</div></div>'; // close stbl + stbl-wrap
   el.innerHTML=h||'<div style="padding:20px;text-align:center;color:rgba(255,255,255,.3)">ไม่มีข้อมูล</div>';
 }
 
