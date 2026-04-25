@@ -1122,7 +1122,10 @@ window.showForgotPassModal = function(){
     </div>
     <div style="margin-left:12px">
       <div class="ht">System Intelligent Management on Network</div>
-      <div class="hs">รายงานความคืบหน้างานก่อสร้าง · v3.1.2</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="hs" id="proj-name-display">รายงานความคืบหน้างานก่อสร้าง · v3.1.2</div>
+        <button id="proj-name-edit-btn" onclick="openProjNameEditor()" style="display:none;background:transparent;border:none;color:rgba(255,255,255,.3);font-size:11px;cursor:pointer;padding:2px 4px;border-radius:4px;transition:color .2s" onmouseover="this.style.color='#ffd600'" onmouseout="this.style.color='rgba(255,255,255,.3)'">✏️</button>
+      </div>
     </div>
   </div>
   <div class="hbtns">
@@ -2238,6 +2241,8 @@ function applyViewMode(){
   if(notifBtn) notifBtn.style.display='none';
   var invBtn=document.getElementById('invite-btn');
   if(invBtn) invBtn.style.display='none';
+  var editNameBtn=document.getElementById('proj-name-edit-btn');
+  if(editNameBtn) editNameBtn.style.display='none';
 }
 function applyEditMode(){
   document.body.classList.remove('view-mode');
@@ -2252,6 +2257,8 @@ function applyEditMode(){
   if(notifBtn) notifBtn.style.display='inline-flex';
   var invBtn=document.getElementById('invite-btn');
   if(invBtn) invBtn.style.display='inline-flex';
+  var editNameBtn=document.getElementById('proj-name-edit-btn');
+  if(editNameBtn) editNameBtn.style.display='inline-flex';
   setTimeout(function(){if(typeof checkPendingRequests==='function')checkPendingRequests();},1500);
 }
 function showGreeting(){const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;pointer-events:none';d.innerHTML=`<div style="background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:36px 72px;backdrop-filter:blur(20px);box-shadow:0 12px 60px rgba(0,0,0,.5);animation:greetIn .35s cubic-bezier(.34,1.56,.64,1) both"><span style="font-size:42px;font-weight:800;color:#e8f0fe;font-family:'Sarabun',sans-serif;letter-spacing:1px">สวัสดี ค่ะ</span></div>`;document.body.appendChild(d);setTimeout(()=>{d.firstElementChild.style.cssText+=';animation:greetOut .3s ease forwards';setTimeout(()=>d.remove(),300);},3000);}
@@ -9885,6 +9892,90 @@ setTimeout(function(){
     }
   }catch(e){}
 }, 3500);
+</script>
+
+
+<script>
+// ════ Project Name Editor ════════════════════════════════════
+var _PROJ_NAME_KEY = 'cp_project_name';
+
+function _loadProjName(){
+  return localStorage.getItem(_PROJ_NAME_KEY) || 'รายงานความคืบหน้างานก่อสร้าง';
+}
+
+function _updateProjNameDisplay(){
+  var el = document.getElementById('proj-name-display');
+  if(el) el.textContent = _loadProjName() + ' · v3.1.2';
+}
+
+window.openProjNameEditor = function(){
+  var old = document.getElementById('proj-name-popup');
+  if(old) old.remove();
+
+  var p = document.createElement('div');
+  p.id = 'proj-name-popup';
+  p.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:16px;font-family:var(--f,"Sarabun",sans-serif)';
+
+  p.innerHTML =
+    '<div style="background:linear-gradient(135deg,#0a1628,#0d1a2e);border:1px solid rgba(255,214,0,.35);border-radius:20px;width:100%;max-width:420px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.8)">'
+    +'<div style="background:rgba(255,214,0,.08);padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between">'
+    +'<div style="font-size:15px;font-weight:800;color:#ffd600">✏️ ชื่อโปรเจค</div>'
+    +'<button onclick="document.getElementById(\'proj-name-popup\').remove()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:8px;padding:5px 10px;cursor:pointer;font-family:inherit">✕</button>'
+    +'</div>'
+    +'<div style="padding:20px">'
+    +'<div style="font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px">ชื่อโปรเจค / รายงาน</div>'
+    +'<input type="text" id="proj-name-input" value="'+_loadProjName()+'" maxlength="80" '
+    +'style="width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,214,0,.3);border-radius:10px;padding:13px 14px;color:#e8f0fe;font-size:14px;font-family:inherit;outline:none;box-sizing:border-box;transition:border .2s;pointer-events:all;-webkit-user-select:text;user-select:text" '
+    +'onfocus="this.style.borderColor=\'rgba(255,214,0,.8)\'" onblur="this.style.borderColor=\'rgba(255,214,0,.3)\'" '
+    +'onkeydown="if(event.key===\'Enter\')window.saveProjName()" placeholder="เช่น งานก่อสร้างอาคาร A">'
+    +'<div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:6px">ชื่อนี้แสดงใน Header · รายงาน LINE · Schedule</div>'
+    +'<div style="display:flex;gap:8px;margin-top:16px">'
+    +'<button onclick="window.saveProjName()" style="flex:1;padding:13px;background:rgba(255,214,0,.2);border:1px solid rgba(255,214,0,.5);border-radius:12px;color:#ffd600;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer">💾 บันทึก</button>'
+    +'<button onclick="document.getElementById(\'proj-name-popup\').remove()" style="padding:13px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:12px;font-family:inherit;font-size:14px;cursor:pointer">ยกเลิก</button>'
+    +'</div>'
+    +'</div></div>';
+
+  document.body.appendChild(p);
+  setTimeout(function(){ var inp=document.getElementById('proj-name-input'); if(inp){inp.focus();inp.select();} }, 100);
+  p.onclick = function(e){ if(e.target===p) p.remove(); };
+};
+
+window.saveProjName = function(){
+  var inp = document.getElementById('proj-name-input');
+  if(!inp) return;
+  var name = inp.value.trim();
+  if(!name){ if(typeof showToast==='function') showToast('กรุณากรอกชื่อโปรเจค','err',3000); return; }
+
+  localStorage.setItem(_PROJ_NAME_KEY, name);
+
+  // บันทึก Firebase
+  try{
+    if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length){
+      firebase.database().ref('project_info').set({name:name, updatedAt:new Date().toISOString()});
+    }
+  }catch(e){}
+
+  _updateProjNameDisplay();
+  var pop = document.getElementById('proj-name-popup');
+  if(pop) pop.remove();
+  if(typeof showToast==='function') showToast('บันทึกชื่อโปรเจค: '+name+' ✅','ok',4000);
+};
+
+// โหลดชื่อเมื่อเปิดแอพ
+document.addEventListener('DOMContentLoaded', function(){
+  _updateProjNameDisplay();
+  // sync Firebase
+  setTimeout(function(){
+    try{
+      if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length){
+        firebase.database().ref('project_info').once('value').then(function(snap){
+          var d=snap.val();
+          if(d&&d.name){ localStorage.setItem(_PROJ_NAME_KEY,d.name); _updateProjNameDisplay(); }
+        }).catch(function(){});
+      }
+    }catch(e){}
+  }, 3000);
+});
 </script>
 
 <!-- Firebase SDK v9 compat — โหลดจาก CDN หลัก + fallback -->
