@@ -7164,8 +7164,8 @@ function sCSS(){
   s+='#sched-ov .sh{position:sticky;top:0;z-index:10;background:rgba(5,8,15,.98);border-bottom:1px solid rgba(255,255,255,.07);padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;backdrop-filter:blur(16px)}';
   s+='#sched-ov .sh::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00bcd4,#388bfd,transparent)}';
   s+='#sched-ov .sh-l{display:flex;align-items:center;gap:8px;flex:1;min-width:160px}';
-  s+='#sched-ov .sh-r{display:flex;gap:4px;flex-wrap:wrap;align-items:center;justify-content:flex-end}';
-  s+='#sched-ov .sb{padding:6px 10px;border:none;border-radius:7px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;transition:all .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}';
+  s+='#sched-ov .sh-r{display:flex;gap:5px;flex-wrap:wrap;align-items:center}';
+  s+='#sched-ov .sb{padding:7px 12px;border:none;border-radius:7px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;transition:all .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}';
   s+='#sched-ov .sb:active{transform:scale(.95)}';
   s+='#sched-ov .sb-red{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.4)}';
   s+='#sched-ov .sb-line{background:rgba(0,185,0,.2);color:#00c300;border:1px solid rgba(0,185,0,.45)}';
@@ -7193,8 +7193,8 @@ function sCSS(){
   s+='#sched-ov .cat-h{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.06);-webkit-tap-highlight-color:transparent;user-select:none}';
   s+='#sched-ov .cat-h:active{background:rgba(255,255,255,.04)}';
   // desktop grid: expand|id|name|start|end|pct-bar|pct%|gap|edit
-  s+='#sched-ov .sthd{display:grid;grid-template-columns:26px 46px 1fr 86px 86px 84px 70px 66px 44px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07)}';
-  s+='#sched-ov .sr{display:grid;grid-template-columns:26px 46px 1fr 86px 86px 84px 70px 66px 44px;align-items:center;border-bottom:1px solid rgba(255,255,255,.04);min-height:40px}';
+  s+='#sched-ov .sthd{display:grid;grid-template-columns:26px 46px 1fr 86px 86px 84px 70px 66px 52px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07)}';
+  s+='#sched-ov .sr{display:grid;grid-template-columns:26px 46px 1fr 86px 86px 84px 70px 66px 52px;align-items:center;border-bottom:1px solid rgba(255,255,255,.04);min-height:40px}';
   s+='#sched-ov .sr:last-child{border-bottom:none}';
   s+='#sched-ov .sr:hover{background:rgba(255,255,255,.025)}';
   s+='#sched-ov .sr.sub{background:rgba(255,255,255,.01)}';
@@ -7242,12 +7242,12 @@ function sCSS(){
   s+='#sched-ov .sfg{display:grid;grid-template-columns:1fr 1fr;gap:8px}';
   // iPad
   s+='@media(max-width:1024px) and (min-width:601px){';
-  s+='#sched-ov .sthd,#sched-ov .sr{grid-template-columns:26px 42px 1fr 78px 78px 78px 64px 0 40px}';
+  s+='#sched-ov .sthd,#sched-ov .sr{grid-template-columns:26px 42px 1fr 78px 78px 78px 64px 0 52px}';
   s+='#sched-ov .sth:nth-child(8),#sched-ov .std:nth-child(8){display:none}';
   s+='}';
   // Mobile portrait
   s+='@media(max-width:600px){';
-  s+='#sched-ov .sh{padding:8px 10px;gap:6px}@media(max-width:430px){.sb{padding:5px 7px!important;font-size:10px!important}.svtb{padding:4px 8px!important;font-size:10px!important}.sh-r{gap:3px!important}}';
+  s+='#sched-ov .sh{padding:8px 10px;gap:6px}';
   s+='#sched-ov .sub-ttl{display:none}';
   s+='#sched-ov .sw{padding:8px 10px}';
   s+='#sched-ov .sst{grid-template-columns:repeat(3,1fr);gap:5px}';
@@ -7267,27 +7267,7 @@ function sCSS(){
 
 function sHTML(){
   var h=sCSS();
-  h+='<div class="sh" style="flex-direction:column;gap:0;padding:8px 10px">';
-  h+='<div style="display:flex;align-items:center;justify-content:space-between;width:100%;margin-bottom:6px">';
-  h+='<div style="display:flex;align-items:center;gap:8px">';
-  h+='<div style="width:28px;height:28px;background:rgba(0,188,212,.15);border:1px solid rgba(0,188,212,.3);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">📅</div>';
-  h+='<div><div style="font-size:13px;font-weight:800;color:#e8f0fe">Construction Schedule</div>';
-  h+='<div style="font-size:9px;color:rgba(255,255,255,.3)">Master vs Actual</div></div>';
-  h+='</div>';
-  h+='<div style="display:flex;align-items:center;gap:6px">';
-  h+='<span style="font-size:9px;color:rgba(255,255,255,.3);display:flex;align-items:center;gap:3px"><span class="fbd ld" id="s-fbd"></span><span id="s-fbm">โหลด...</span></span>';
-  h+='<button class="sb sb-red" onclick="window.closeSchedulePage()" style="padding:5px 10px;font-size:11px">✕ ปิด</button>';
-  h+='</div></div>';
-  h+='<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;width:100%">';
-  h+='<div class="svt">';
-  h+='<button class="svtb act" onclick="window.sSwV(\'table\',this)">📋 ตาราง</button>';
-  h+='<button class="svtb" onclick="window.sSwV(\'gantt\',this)">📊 Gantt</button>';
-  h+='</div>';
-  h+='<button class="sb sb-line" onclick="window.sLine()">💚 LINE</button>';
-  h+='<button class="sb" onclick="window.openProjDateEditor()" style="background:rgba(255,214,0,.15);border:1px solid rgba(255,214,0,.4);color:#ffd600">📅 แก้ไขวัน</button>';
-  h+='</div>';
-h+='</div>';
-h+='<div class="sh">';
+  h+='<div class="sh">';
   h+='<div class="sh-l">';
   h+='<div style="width:30px;height:30px;background:rgba(0,188,212,.15);border:1px solid rgba(0,188,212,.3);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">📅</div>';
   h+='<div><div style="font-size:13px;font-weight:800;color:#e8f0fe;white-space:nowrap">Construction Schedule</div>';
@@ -7612,7 +7592,7 @@ function sTbl(){
       h+='<div class="std c"><span style="font-size:13px;font-weight:800;font-family:var(--m,monospace);color:'+st.c+'">'+ap.toFixed(0)+'%</span>';
       h+='<div style="font-size:9px;color:'+st.c+'">'+st.t+'</div></div>';
       h+='<div class="std c"><div class="gap '+(gap>0?'gp':gap<0?'gn':'gz')+'">'+(gap>0?'+':'')+gap.toFixed(1)+'%</div></div>';
-      h+='<div class="std c"><button onclick="window.sOEdt(\''+item.id+'\')" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);border-radius:5px;padding:4px 7px;cursor:pointer;font-size:11px;-webkit-tap-highlight-color:transparent;touch-action:manipulation">✏️</button></div>';
+      h+='<div class="std c"><button onclick="window.sOEdt(\''+item.id+'\')" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);border-radius:5px;padding:5px 8px;cursor:pointer;font-size:13px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-width:36px;white-space:nowrap">✏️</button></div>';
       h+='</div>';
       if(isExp){
         (d.subs||[]).forEach(function(sub,si){
