@@ -2262,7 +2262,13 @@ function applyEditMode(){
   setTimeout(function(){if(typeof checkPendingRequests==='function')checkPendingRequests();},1500);
 }
 function showGreeting(){const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;pointer-events:none';d.innerHTML=`<div style="background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:36px 72px;backdrop-filter:blur(20px);box-shadow:0 12px 60px rgba(0,0,0,.5);animation:greetIn .35s cubic-bezier(.34,1.56,.64,1) both"><span style="font-size:42px;font-weight:800;color:#e8f0fe;font-family:'Sarabun',sans-serif;letter-spacing:1px">สวัสดี ค่ะ</span></div>`;document.body.appendChild(d);setTimeout(()=>{d.firstElementChild.style.cssText+=';animation:greetOut .3s ease forwards';setTimeout(()=>d.remove(),300);},3000);}
-function doLogout(){sessionStorage.clear();localStorage.removeItem('cp_session_expire');applyViewMode();showToast('ออกจากระบบแล้ว 🔒','ok');}
+function doLogout(){
+  sessionStorage.clear();
+  localStorage.removeItem('cp_session_expire');
+  // ไม่ signOut Firebase — เพื่อให้ข้อมูลยังโหลดได้
+  applyViewMode();
+  showToast('ออกจากระบบแล้ว 🔒','ok');
+}
 
 function _syncDots(){
   for(let i=0;i<8;i++){
@@ -9678,52 +9684,62 @@ document.addEventListener('DOMContentLoaded', function(){
   var EXPIRE_KEY = 'cp_session_expire';
   var TWO_HOURS  = 2 * 60 * 60 * 1000;
 
-  // ── stamp: บันทึกเวลา expire ────────────────────────────
+  // stamp เวลา login
   window._stampLogin = function(){
     var exp = Date.now() + TWO_HOURS;
     sessionStorage.setItem(EXPIRE_KEY, String(exp));
-    localStorage.setItem(EXPIRE_KEY, String(exp)); // backup
+    localStorage.setItem(EXPIRE_KEY, String(exp));
   };
 
-  // ── ตรวจว่า session หมดอายุไหม ───────────────────────────
+  // ตรวจ expire
   function _expired(){
-    var exp = parseInt(sessionStorage.getItem(EXPIRE_KEY) || localStorage.getItem(EXPIRE_KEY) || '0');
+    var exp = parseInt(
+      sessionStorage.getItem(EXPIRE_KEY) ||
+      localStorage.getItem(EXPIRE_KEY) || '0'
+    );
     return Date.now() > exp;
   }
 
-  // ── Logout ทุก session ──────────────────────────────────
+  // logout ทุก session
   function _forceLogout(reason){
-    sessionStorage.clear();
+    // ล้าง session storage
+    sessionStorage.removeItem('cp_edit_session');
+    sessionStorage.removeItem('cp_dev_session');
+    sessionStorage.removeItem('cp_acct_session');
+    sessionStorage.removeItem(EXPIRE_KEY);
+    // ล้าง localStorage expire
     localStorage.removeItem(EXPIRE_KEY);
-    if(typeof applyViewMode === 'function') applyViewMode();
-    if(typeof showLockModal === 'function') showLockModal();
-    if(typeof showToast === 'function') showToast('⏱️ ' + reason + ' — กรุณาเข้าสู่ระบบใหม่', 'err', 5000);
+    // ไม่ signOut Firebase เพื่อให้ยังอ่านข้อมูลได้
+    // แต่ _onAuthSuccess จะตรวจ session expire และ block auto-login
+    // แสดง UI
+    if(typeof applyViewMode==='function') applyViewMode();
+    if(typeof showLockModal==='function') showLockModal();
+    if(typeof showToast==='function') showToast('⏱️ '+reason+' — กรุณาเข้าสู่ระบบใหม่','err',5000);
   }
 
-  // ── ปิดแอพ / ปิด Tab → ล้าง session ───────────────────
+  // ── ปิดแอพ/ปิด Tab → ล้าง session ───────────────────────
   window.addEventListener('beforeunload', function(){
     sessionStorage.removeItem('cp_edit_session');
     sessionStorage.removeItem('cp_dev_session');
     sessionStorage.removeItem('cp_acct_session');
     sessionStorage.removeItem(EXPIRE_KEY);
-    // ล้าง localStorage expire ด้วย → บังคับ login ใหม่ทุกครั้งที่เปิดแอพ
     localStorage.removeItem(EXPIRE_KEY);
   });
 
-  // ── ตรวจ 2 ชม. (ทุก 1 นาที) ────────────────────────────
+  // ── Timer ตรวจทุก 1 นาที ─────────────────────────────────
   setInterval(function(){
-    var active = sessionStorage.getItem('cp_edit_session') === '1'
-               || sessionStorage.getItem('cp_dev_session') === '1';
+    var active = sessionStorage.getItem('cp_edit_session')==='1'
+               || sessionStorage.getItem('cp_dev_session')==='1';
     if(active && _expired()){
       _forceLogout('ใช้งานครบ 2 ชั่วโมง');
     }
   }, 60 * 1000);
 
-  // ── ตรวจเมื่อกลับมาที่ tab ─────────────────────────────
+  // ── กลับมาที่ Tab → ตรวจ expire ──────────────────────────
   document.addEventListener('visibilitychange', function(){
     if(document.visibilityState === 'visible'){
-      var active = sessionStorage.getItem('cp_edit_session') === '1'
-                 || sessionStorage.getItem('cp_dev_session') === '1';
+      var active = sessionStorage.getItem('cp_edit_session')==='1'
+                 || sessionStorage.getItem('cp_dev_session')==='1';
       if(active && _expired()){
         _forceLogout('Session หมดอายุ');
       }
