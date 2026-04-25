@@ -8381,20 +8381,16 @@ function _setLoading(v){
 
 // ── On auth success → apply role ───────────────────────────────
 function _onAuthSuccess(user, role){
-  // ตรวจว่า session ยังมีอยู่ไหม (ไม่ใช่เปิดใหม่)
-  var exp = parseInt(localStorage.getItem('cp_session_expire')||'0');
+  // ตรวจ session — ถ้าไม่มีหรือหมดอายุ → signOut ทันที
+  var exp = parseInt(sessionStorage.getItem('cp_session_expire')||localStorage.getItem('cp_session_expire')||'0');
   var hasSession = exp > Date.now();
   if(!hasSession){
-    // เปิดใหม่ / session หมดอายุ → ต้องกรอกรหัสใหม่
-    // signOut Firebase แต่ยังแสดง lock modal
     try{ if(_fbAuth) _fbAuth.signOut().catch(function(){}); }catch(e){}
     _currentUser = null; _currentRole = null;
-    // แสดง lock modal แทน
     if(typeof showLockModal==='function') showLockModal();
     return;
   }
   _hideAuthOverlay();
-  // อัพเดท UI ตาม role
   _applyRole(role);
   if(typeof showToast==='function'){
     showToast('✅ เข้าสู่ระบบแล้ว ('+user.email+')', 'ok', 4000);
@@ -10034,5 +10030,55 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 
+
+<script>
+// ════ SIMON Copy Protection ════════════════════════════════
+document.addEventListener('DOMContentLoaded', function(){
+
+  // ปิด right-click
+  document.addEventListener('contextmenu', function(e){
+    e.preventDefault(); return false;
+  });
+
+  // ปิด keyboard shortcuts
+  document.addEventListener('keydown', function(e){
+    var ctrl = e.ctrlKey || e.metaKey;
+    var k = e.key ? e.key.toLowerCase() : '';
+    if(ctrl && ['c','u','s','p','a'].indexOf(k) !== -1){
+      e.preventDefault(); return false;
+    }
+    if(e.key === 'F12'){ e.preventDefault(); return false; }
+    if(ctrl && e.shiftKey && ['i','j','c'].indexOf(k) !== -1){
+      e.preventDefault(); return false;
+    }
+  });
+
+  // ปิด select ข้อความ
+  document.addEventListener('selectstart', function(e){
+    if(['INPUT','TEXTAREA'].indexOf(e.target.tagName) !== -1) return;
+    e.preventDefault();
+  });
+
+  // ปิด drag
+  document.addEventListener('dragstart', function(e){
+    if(e.target.tagName !== 'INPUT') e.preventDefault();
+  });
+
+  // ปิด print
+  window.addEventListener('beforeprint', function(e){
+    e.preventDefault();
+  });
+
+  // CSS
+  var s = document.createElement('style');
+  s.textContent = [
+    'body{-webkit-user-select:none!important;user-select:none!important}',
+    'input,textarea{-webkit-user-select:text!important;user-select:text!important}',
+    '@media print{body{visibility:hidden!important}}'
+  ].join('');
+  document.head.appendChild(s);
+
+});
+</script>
 </body>
 </html>
