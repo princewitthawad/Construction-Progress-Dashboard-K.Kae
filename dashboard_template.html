@@ -18,11 +18,12 @@
 
   // Keys ที่ต้องแยกตามโปรเจค (ข้อมูลและรหัสผ่าน)
   var PROJECT_KEYS = [
-    'cp_pass_hash','cp_acct_pass_hash','cp_dev_pass_hash',
+    'cp_pass_hash',
+    // cp_acct_pass_hash และ cp_dev_pass_hash ไม่ prefix — ใช้ร่วมทุกเครื่องผ่าน Firebase
     'cp_backup','cp_s_data_v3','cp_s_names_v3',
     'cp_daily_log','cp_custom_items_v3','cp_jup_snapshots',
     'cp_jup_7day','cp_labor','cp_personnel_v2',
-    'cp_cl_report','cp_invite_code',
+    'cp_cl_report','cp_invite_code','cp_acct_data',
     'cp_session_expire'
   ];
 
@@ -65,6 +66,55 @@
   console.log('Project isolation active, project:', _getProjectId());
 })();
 </script>
+
+<script>
+// ════ Data Migration — กู้ข้อมูลเก่าก่อน project isolation ════
+(function(){
+  var pid = typeof window._getProjectId==='function' ? window._getProjectId() : 'default';
+  if(!pid || pid==='default') return; // ไม่มี prefix ไม่ต้อง migrate
+
+  var migrateKeys = [
+    'cp_backup','cp_s_data_v3','cp_s_names_v3',
+    'cp_daily_log','cp_custom_items_v3','cp_jup_snapshots',
+    'cp_jup_7day','cp_labor','cp_personnel_v2',
+    'cp_cl_report','cp_acct_data'
+  ];
+
+  var _nativeGet = Storage.prototype._origGet || localStorage.__proto__.getItem;
+  var migrated = 0;
+
+  migrateKeys.forEach(function(key){
+    var prefixedKey = pid + '__' + key;
+    // ถ้ายังไม่มีข้อมูลแบบ prefix
+    var hasNew = window._storage_native_get ? window._storage_native_get(prefixedKey) :
+                 Object.prototype.hasOwnProperty.call(localStorage, prefixedKey) ?
+                 localStorage[prefixedKey] : null;
+
+    if(!hasNew){
+      // ดึงข้อมูลเก่า (key ปกติ ไม่มี prefix)
+      var oldVal = null;
+      try{ oldVal = window.localStorage.__nativeGet ?
+        window.localStorage.__nativeGet(key) :
+        // bypass override โดยใช้ getItem บน Object โดยตรง
+        Object.getOwnPropertyDescriptor(Storage.prototype,'getItem')
+          .value.call(localStorage, key);
+      }catch(e){}
+
+      if(oldVal){
+        // copy ไปยัง key แบบ prefix
+        try{
+          Object.getOwnPropertyDescriptor(Storage.prototype,'setItem')
+            .value.call(localStorage, prefixedKey, oldVal);
+          migrated++;
+        }catch(e){}
+      }
+    }
+  });
+
+  if(migrated > 0) console.log('Migrated', migrated, 'keys to project:', pid);
+})();
+</script>
+
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1669,15 +1719,24 @@ function pushOverallPct(){
   clearTimeout(_ovPushTimer);
   _ovPushTimer=setTimeout(function(){
     try{
-      // ตรวจสอบว่า _sData โหลดแล้วจริง ๆ ก่อน push
       if(typeof _sData==='undefined'||!Object.keys(_sData).length) return;
       const ov=typeof calcAllOverall==='function'?calcAllOverall():0;
-      // Push overall_pct (ใช้โดย index_realtime_3)
+      // Push overall_pct
       cloudPutNode('overall_pct',{pct:parseFloat(ov.toFixed(2)),updatedAt:new Date().toISOString()}).catch(function(){});
-      // Push s_data_v3 แยก node (ใช้โดย device อื่น sync ข้าม)
+      // Push donut data แต่ละ category (ให้ Admin Portal ดึงตรง)
+      if(typeof CAT_WEIGHTS!=='undefined'&&typeof calcCatOverall==='function'){
+        var donutData={};
+        Object.keys(CAT_WEIGHTS).forEach(function(cat){
+          donutData[cat]=parseFloat(calcCatOverall(cat).toFixed(2));
+        });
+        donutData.weighted=parseFloat(ov.toFixed(2));
+        donutData.updatedAt=new Date().toISOString();
+        cloudPutNode('donut_pct',donutData).catch(function(){});
+      }
+      // Push s_data_v3
       cloudPutNode('s_data_v3',_sData).catch(function(){});
     }catch(e){}
-  },2000); // 2s debounce
+  },2000);
 }
 
 function scheduleAutoSave(){
@@ -4059,8 +4118,15 @@ function doACCTUnlock(){
     if(acctOk){
     closeACCTLogin();
     document.getElementById('acct-overlay').style.display='block';
-    showToast('กำลังโหลดข้อมูล ACCT...','info',2000);
-    refreshACCTFromCloud().finally(()=>{renderACCT();showToast('เข้าสู่ระบบ ACCT ✅','ok');});
+    showToast('กำลังโหลดข้อมูล ACCT...','info',3000);
+    // โหลดจาก Firebase ก่อนเสมอ
+    refreshACCTFromCloud().then(function(){
+      renderACCT();
+      showToast('เข้าสู่ระบบ ACCT ✅','ok');
+    }).catch(function(){
+      renderACCT();
+      showToast('เข้าสู่ระบบ ACCT ✅','ok');
+    });
   } else {
     document.getElementById('acct-err').textContent='รหัสไม่ถูกต้อง';
     _acctBuf='';_acctSyncDots();
@@ -4118,14 +4184,18 @@ async function syncACCTNow(){
 async function refreshACCTFromCloud(){
   try{
     const d=await cloudGetNode('acct_data');
-    if(d&&d.updatedAt){
+    if(d && typeof d === 'object' && Object.keys(d).length > 0){
       const local=loadACCTData();
-      if(!local.updatedAt||d.updatedAt>local.updatedAt){
-        localStorage.setItem(ACCT_KEY,JSON.stringify(d));
-        if(document.getElementById('acct-overlay')?.style.display==='block')renderACCT();
+      // โหลดจาก Firebase ถ้า:
+      // 1. ไม่มีข้อมูล local
+      // 2. Firebase ใหม่กว่า
+      if(!local.updatedAt || (d.updatedAt && d.updatedAt > local.updatedAt)){
+        localStorage.setItem(ACCT_KEY, JSON.stringify(d));
+        if(document.getElementById('acct-overlay')?.style.display==='block') renderACCT();
+        console.log('ACCT data loaded from Firebase');
       }
     }
-  }catch(e){}
+  }catch(e){ console.warn('refreshACCTFromCloud:', e); }
 }
 function getACCT(){
   const d=loadACCTData();
@@ -10073,54 +10143,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 
-<script>
-// ════ SIMON Copy Protection ════════════════════════════════
-document.addEventListener('DOMContentLoaded', function(){
 
-  // ปิด right-click
-  document.addEventListener('contextmenu', function(e){
-    e.preventDefault(); return false;
-  });
-
-  // ปิด keyboard shortcuts
-  document.addEventListener('keydown', function(e){
-    var ctrl = e.ctrlKey || e.metaKey;
-    var k = e.key ? e.key.toLowerCase() : '';
-    if(ctrl && ['c','u','s','p','a'].indexOf(k) !== -1){
-      e.preventDefault(); return false;
-    }
-    if(e.key === 'F12'){ e.preventDefault(); return false; }
-    if(ctrl && e.shiftKey && ['i','j','c'].indexOf(k) !== -1){
-      e.preventDefault(); return false;
-    }
-  });
-
-  // ปิด select ข้อความ
-  document.addEventListener('selectstart', function(e){
-    if(['INPUT','TEXTAREA'].indexOf(e.target.tagName) !== -1) return;
-    e.preventDefault();
-  });
-
-  // ปิด drag
-  document.addEventListener('dragstart', function(e){
-    if(e.target.tagName !== 'INPUT') e.preventDefault();
-  });
-
-  // ปิด print
-  window.addEventListener('beforeprint', function(e){
-    e.preventDefault();
-  });
-
-  // CSS
-  var s = document.createElement('style');
-  s.textContent = [
-    'body{-webkit-user-select:none!important;user-select:none!important}',
-    'input,textarea{-webkit-user-select:text!important;user-select:text!important}',
-    '@media print{body{visibility:hidden!important}}'
-  ].join('');
-  document.head.appendChild(s);
-
-});
-</script>
 </body>
 </html>
