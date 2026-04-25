@@ -2806,9 +2806,7 @@ function init(){
       setSvStatus('','💡 กด ⚙️ Cloud เพื่อตั้งค่า Firebase');
     }
     startAutoRefresh();
-    setTimeout(()=>{
-      applyEditMode();
-    },300);
+    // ไม่ auto applyEditMode — รอ user กรอกรหัสเอง
   },150);
 }
 
@@ -8327,6 +8325,19 @@ function _initFirebaseAuth(){
     // ตรวจ auth state
     _fbAuth.onAuthStateChanged(function(user){
       if(user){
+        // ตรวจ session expire ก่อน — ถ้าไม่มีให้ signOut ทันที
+        var exp = parseInt(
+          sessionStorage.getItem('cp_session_expire') ||
+          localStorage.getItem('cp_session_expire') || '0'
+        );
+        var hasSession = exp > Date.now();
+        if(!hasSession){
+          // ไม่มี session → ไม่ auto-show lock modal รอ user กดปุ่ม Login
+          _currentUser = null;
+          _currentRole = null;
+          return;
+        }
+        // มี session → เข้าได้
         _currentUser = user;
         _loadUserRole(user.uid, function(role){
           _currentRole = role || 'viewer';
@@ -8335,7 +8346,7 @@ function _initFirebaseAuth(){
       }else{
         _currentUser = null;
         _currentRole = null;
-        _showAuthOverlay();
+        // ไม่ auto-show lock modal
       }
     });
   }catch(e){
@@ -8391,9 +8402,8 @@ function _onAuthSuccess(user, role){
   var exp = parseInt(sessionStorage.getItem('cp_session_expire')||localStorage.getItem('cp_session_expire')||'0');
   var hasSession = exp > Date.now();
   if(!hasSession){
-    try{ if(_fbAuth) _fbAuth.signOut().catch(function(){}); }catch(e){}
+    // session หมดอายุ → ไม่ auto-show lock modal รอ user กดปุ่ม Login
     _currentUser = null; _currentRole = null;
-    if(typeof showLockModal==='function') showLockModal();
     return;
   }
   _hideAuthOverlay();
