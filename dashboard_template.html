@@ -7242,8 +7242,12 @@ function sCSS(){
   s+='#sched-ov .sfg{display:grid;grid-template-columns:1fr 1fr;gap:8px}';
   // iPad
   s+='@media(max-width:1024px) and (min-width:601px){';
-  s+='#sched-ov .sthd,#sched-ov .sr{grid-template-columns:26px 42px 1fr 78px 78px 78px 64px 0 52px}';
+  s+='#sched-ov .sthd,#sched-ov .sr{grid-template-columns:26px 38px 1fr 70px 70px 70px 56px 0 52px}';
   s+='#sched-ov .sth:nth-child(8),#sched-ov .std:nth-child(8){display:none}';
+  s+='}';
+  s+='@media(max-width:820px) and (min-width:601px){';
+  s+='#sched-ov .sthd,#sched-ov .sr{grid-template-columns:24px 34px 1fr 66px 66px 0 0 0 52px}';
+  s+='#sched-ov .sth:nth-child(5),#sched-ov .std:nth-child(5),#sched-ov .sth:nth-child(6),#sched-ov .std:nth-child(6),#sched-ov .sth:nth-child(7),#sched-ov .std:nth-child(7),#sched-ov .sth:nth-child(8),#sched-ov .std:nth-child(8){display:none}';
   s+='}';
   // Mobile portrait
   s+='@media(max-width:600px){';
