@@ -1552,32 +1552,41 @@ async function _getAuthToken(){
 async function cloudPutNode(node,payload){
   if(!isFirebaseReady())return false;
   try{
-    // ใช้ Firebase SDK โดยตรง
-    if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length>0&&firebase.database){
-      await firebase.database().ref(node).set(payload);
+    var db=(typeof _fbDB!=='undefined'&&_fbDB)?_fbDB:
+           (typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length>0&&firebase.database?firebase.database():null);
+    if(db){
+      await db.ref(node).set(payload);
       return true;
     }
-    // fallback REST
+  }catch(sdkErr){
+    console.warn('SDK put failed, trying REST:', sdkErr.message);
+  }
+  // fallback REST
+  try{
     var token=await _getAuthToken();
     var url=fbNodePath(node)+(token?'?auth='+token:'');
+    console.log('REST PUT:', url.split('?')[0]);
     var res=await fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(!res.ok){ var et=await res.text(); console.error('REST put failed:',res.status,et); }
     return res.ok;
-  }catch(e){return false;}
+  }catch(e){ console.error('cloudPutNode error:',e); return false; }
 }
 async function cloudGetNode(node){
   if(!isFirebaseReady())return null;
   try{
-    // ใช้ Firebase SDK โดยตรง (จัดการ auth อัตโนมัติ)
-    if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length>0&&firebase.database){
-      var snap=await firebase.database().ref(node).once('value');
+    var db2=(typeof _fbDB!=='undefined'&&_fbDB)?_fbDB:
+            (typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length>0&&firebase.database?firebase.database():null);
+    if(db2){
+      var snap=await db2.ref(node).once('value');
       return snap.val();
     }
-    // fallback REST
+  }catch(sdkErr){ console.warn('SDK get failed, trying REST:', sdkErr.message); }
+  try{
     var token=await _getAuthToken();
     var url=fbNodePath(node)+(token?'?auth='+token:'');
     var res=await fetch(url);
     return res.ok?await res.json():null;
-  }catch(e){return null;}
+  }catch(e){ console.error('cloudGetNode error:',e); return null; }
 }
 function isFirebaseReady(){return _fbUrl&&_fbUrl.startsWith('https://');}
 
@@ -1735,10 +1744,16 @@ function saveFirebaseUrl(){
   if(!url.startsWith('https://')){ showToast('URL ต้องขึ้นต้นด้วย https://','err'); return; }
   _fbUrl = url;
   localStorage.setItem('cp_fb_url', _fbUrl);
+  // reinit firebase.database ด้วย URL ใหม่
+  try{
+    if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length>0){
+      _fbDB = firebase.database(_fbUrl.includes('firebasedatabase.app')?
+        {databaseURL:_fbUrl}:undefined);
+    }
+  }catch(e){ console.warn('Firebase database reinit:', e); }
   updateFbStatus();
   showToast('✅ บันทึก Firebase URL สำเร็จ!','ok',4000);
   closeFirebaseModal();
-  // Auto-load if already have session
   if(isAdminMode() || sessionStorage.getItem('cp_edit_session')==='1'){
     setTimeout(loadData, 500);
   }
