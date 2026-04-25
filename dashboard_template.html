@@ -7270,6 +7270,7 @@ function sHTML(){
   h+='<button class="svtb" onclick="window.sSwV(\'gantt\',this)">📊 Gantt</button>';
   h+='</div>';
   h+='<button class="sb sb-line" onclick="window.sLine()">💚 LINE</button>';
+  h+='<button class="sb" onclick="window.openProjDateEditor()" style="background:rgba(255,214,0,.15);border:1px solid rgba(255,214,0,.4);color:#ffd600">📅 แก้ไขวัน</button>';
   h+='<button class="sb sb-red" onclick="window.closeSchedulePage()">✕ ปิด</button>';
   h+='</div></div>';
   h+='<div class="sw">';
@@ -9768,6 +9769,124 @@ setTimeout(function(){
 },3000);
 </script>
 
+
+<script>
+// ════ Project Date Editor ════════════════════════════════════
+window.openProjDateEditor = function(){
+  var dates = typeof getProjectDates==='function' ? getProjectDates() :
+    {startDate:'2026-03-17', deadlineDate:'2026-04-22', fastDeadlineDate:'2026-04-11'};
+  var old = document.getElementById('proj-date-editor');
+  if(old) old.remove();
+
+  var p = document.createElement('div');
+  p.id = 'proj-date-editor';
+  p.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:16px;font-family:var(--f,"Sarabun",sans-serif)';
+
+  function fld(id, label, val, color){
+    return '<div style="margin-bottom:14px">'
+      +'<div style="font-size:10px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:6px">'+label+'</div>'
+      +'<input type="date" id="'+id+'" value="'+val+'" '
+      +'style="width:100%;background:rgba(255,255,255,.06);border:1.5px solid '+color+'44;border-radius:10px;padding:11px 14px;color:'+color+';font-size:15px;font-family:monospace;outline:none;box-sizing:border-box;cursor:pointer;-webkit-appearance:none" '
+      +'onfocus="this.style.borderColor=\''+color+'cc\'" onblur="this.style.borderColor=\''+color+'44\'">'
+      +'</div>';
+  }
+
+  p.innerHTML =
+    '<div style="background:linear-gradient(135deg,#0a1628,#0d1a2e);border:1px solid rgba(255,214,0,.35);border-radius:20px;width:100%;max-width:420px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.8)">'
+    +'<div style="background:rgba(255,214,0,.1);padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between">'
+    +'<div><div style="font-size:15px;font-weight:800;color:#ffd600">📅 แก้ไขวันโครงการ</div>'
+    +'<div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px">ฐานคำนวณ: Jupiter AI · กราฟ 7 วัน · AI Decision · Gantt</div></div>'
+    +'<button onclick="document.getElementById(\'proj-date-editor\').remove()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);border-radius:8px;padding:5px 10px;cursor:pointer;font-family:inherit">✕</button>'
+    +'</div>'
+    +'<div style="padding:20px">'
+    + fld('pde-start',    'วันเริ่มโครงการ',            dates.startDate,        '#ffd600')
+    + fld('pde-deadline', 'วันกำหนดส่งงาน (Deadline)',  dates.deadlineDate,     '#ff8a80')
+    + fld('pde-fast',     'วันกำหนดส่งเร็ว (Fast Track)', dates.fastDeadlineDate, '#ffb74d')
+    +'<div style="background:rgba(56,139,253,.08);border:1px solid rgba(56,139,253,.2);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:11px;color:rgba(255,255,255,.45);line-height:1.9">'
+    +'วันเหล่านี้ใช้คำนวณ:<br>'
+    +'• Jupiter AI — วิเคราะห์แผนการทำงาน<br>'
+    +'• กราฟ 7 วัน — แสดงความคืบหน้า<br>'
+    +'• AI Decision — ประเมินสถานะโครงการ<br>'
+    +'• Schedule — Gantt Chart'
+    +'</div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<button onclick="window.saveProjDates()" style="flex:1;padding:13px;background:rgba(255,214,0,.2);border:1px solid rgba(255,214,0,.5);border-radius:12px;color:#ffd600;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer">💾 บันทึก</button>'
+    +'<button onclick="document.getElementById(\'proj-date-editor\').remove()" style="padding:13px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);border-radius:12px;font-family:inherit;font-size:14px;cursor:pointer">ยกเลิก</button>'
+    +'</div>'
+    +'</div></div>';
+
+  document.body.appendChild(p);
+  p.onclick = function(e){ if(e.target===p) p.remove(); };
+};
+
+window.saveProjDates = function(){
+  var s = document.getElementById('pde-start');
+  var d = document.getElementById('pde-deadline');
+  var f = document.getElementById('pde-fast');
+  if(!s||!d||!f) return;
+
+  var start = s.value, deadline = d.value, fast = f.value;
+  if(!start||!deadline||!fast){
+    if(typeof showToast==='function') showToast('กรุณากรอกวันให้ครบ','err',3000);
+    return;
+  }
+  if(new Date(start) >= new Date(deadline)){
+    if(typeof showToast==='function') showToast('วันเริ่มต้องน้อยกว่าวันกำหนดส่ง','err',3000);
+    return;
+  }
+
+  var key = typeof PROJ_DATES_KEY!=='undefined' ? PROJ_DATES_KEY : 'cp_project_dates';
+  var obj = {startDate:start, deadlineDate:deadline, fastDeadlineDate:fast};
+  localStorage.setItem(key, JSON.stringify(obj));
+
+  // บันทึก Firebase
+  try{
+    if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length){
+      firebase.database().ref('project_dates').set(
+        Object.assign({}, obj, {updatedAt:new Date().toISOString()})
+      );
+    }
+  }catch(e){}
+
+  var p = document.getElementById('proj-date-editor');
+  if(p) p.remove();
+
+  if(typeof showToast==='function')
+    showToast('บันทึกวันโครงการแล้ว ✅ กำลังอัพเดทการคำนวณ...','ok',5000);
+
+  // recalculate ทุก component
+  if(typeof ra==='function') ra();
+  if(typeof renderJupiterAI==='function') renderJupiterAI();
+  if(typeof sRen==='function') sRen();
+};
+
+// sync วันจาก Firebase เมื่อเปิดแอพ
+setTimeout(function(){
+  try{
+    if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length){
+      firebase.database().ref('project_dates').once('value').then(function(snap){
+        var d = snap.val();
+        if(d&&d.startDate&&d.deadlineDate){
+          var key = typeof PROJ_DATES_KEY!=='undefined'?PROJ_DATES_KEY:'cp_project_dates';
+          var cur = localStorage.getItem(key);
+          var curObj = cur ? JSON.parse(cur) : {};
+          // อัพเดทเฉพาะถ้า Firebase ใหม่กว่า
+          if(!curObj.startDate || d.updatedAt > (curObj.updatedAt||'')){
+            localStorage.setItem(key, JSON.stringify({
+              startDate:d.startDate,
+              deadlineDate:d.deadlineDate,
+              fastDeadlineDate:d.fastDeadlineDate||d.deadlineDate,
+              updatedAt:d.updatedAt||''
+            }));
+            if(typeof ra==='function') ra();
+          }
+        }
+      }).catch(function(){});
+    }
+  }catch(e){}
+}, 3500);
+</script>
+
 <!-- Firebase SDK v9 compat — โหลดจาก CDN หลัก + fallback -->
 <script>
 (function(){
@@ -9823,54 +9942,6 @@ setTimeout(function(){
 
 
 
-<script>
-// ════ SIMON Copy Protection ════════════════════════════════
-document.addEventListener('DOMContentLoaded', function(){
 
-  // ปิด right-click
-  document.addEventListener('contextmenu', function(e){
-    e.preventDefault(); return false;
-  });
-
-  // ปิด Ctrl+C, Ctrl+U, Ctrl+S, Ctrl+A, Ctrl+P, F12
-  document.addEventListener('keydown', function(e){
-    var ctrl = e.ctrlKey || e.metaKey;
-    var k = e.key.toLowerCase();
-    if(ctrl && ['c','u','s','p','a'].indexOf(k) !== -1){
-      e.preventDefault(); return false;
-    }
-    if(e.key === 'F12'){
-      e.preventDefault(); return false;
-    }
-    if(ctrl && e.shiftKey && ['i','j','c'].indexOf(k) !== -1){
-      e.preventDefault(); return false;
-    }
-  });
-
-  // ปิด select ข้อความ (ยกเว้น input)
-  document.addEventListener('selectstart', function(e){
-    if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    e.preventDefault();
-  });
-
-  // ปิด drag
-  document.addEventListener('dragstart', function(e){
-    if(e.target.tagName !== 'INPUT') e.preventDefault();
-  });
-
-  // ปิด print
-  window.addEventListener('beforeprint', function(e){
-    e.preventDefault();
-  });
-
-  // CSS user-select
-  var s = document.createElement('style');
-  s.textContent = 'body{-webkit-user-select:none!important;user-select:none!important}'
-    + 'input,textarea{-webkit-user-select:text!important;user-select:text!important}'
-    + '@media print{body{visibility:hidden!important}}';
-  document.head.appendChild(s);
-
-});
-</script>
 </body>
 </html>
