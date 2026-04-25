@@ -2110,9 +2110,10 @@ function updPlaster2(rooms,total){
 
 function updKPI(){
   const _kDef=getLiveDef(),vals=getLiveVals(),tgts=_kDef.map(d=>d.tgt||100);
-  let done=0,inprog=0,notstarted=0,sum=0;
-  vals.forEach((x,i)=>{const r=x/(tgts[i]||100);if(r>=1)done++;else if(x>0)inprog++;else notstarted++;sum+=r;});
-  const ovr=vals.length?sum/vals.length*100:0;
+  let done=0,inprog=0,notstarted=0;
+  vals.forEach((x,i)=>{const r=x/(tgts[i]||100);if(r>=1)done++;else if(x>0)inprog++;else notstarted++;});
+  // ใช้ calcAllOverall() (weighted) เหมือน Admin Portal และ pushOverallPct
+  const ovr = typeof calcAllOverall==='function' ? calcAllOverall() : 0;
   const s=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
   s('kp-d',done);s('kp-p',inprog);s('kp-o',ceilTo2(ovr)+'%');s('kp-n',notstarted);
 }
