@@ -283,16 +283,36 @@ function loadLocal(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)||'[
 function saveLocal(arr){ localStorage.setItem(STORE_KEY,JSON.stringify(arr)); }
 
 async function loadProjects(){
-  // Priority: cloud > local (merge by id — cloud wins on conflict)
+  // Priority: cloud > local สำหรับ metadata
+  // แต่ local wins สำหรับ lastPct/lastSync (ค่าที่ refresh มาล่าสุด)
   var local = loadLocal();
   if(!fbConnected()) return local;
   var cloud = await cloudGet('admin_projects');
   if(!Array.isArray(cloud)) return local;
-  // Merge: use cloud as master, keep local entries not in cloud
+
+  // Build local lookup map
+  var localMap = {};
+  local.forEach(function(p){ localMap[p.id] = p; });
+
+  // Merge: cloud เป็น base แต่ preserve lastPct/lastSync จาก local ถ้าใหม่กว่า
+  var merged = cloud.map(function(cp){
+    var lp = localMap[cp.id];
+    if(!lp) return cp;
+    // local wins for lastPct/lastSync (ค่าจาก refreshAllPcts)
+    var localSyncTime = lp.lastSync ? new Date(lp.lastSync).getTime() : 0;
+    var cloudSyncTime = cp.lastSync ? new Date(cp.lastSync).getTime() : 0;
+    if(localSyncTime >= cloudSyncTime && lp.lastPct !== null && lp.lastPct !== undefined){
+      return Object.assign({}, cp, {lastPct: lp.lastPct, lastSync: lp.lastSync});
+    }
+    return cp;
+  });
+
+  // Keep local-only entries
   var cloudIds = cloud.map(function(p){return p.id;});
   var localOnly = local.filter(function(p){return !cloudIds.includes(p.id);});
-  var merged = cloud.concat(localOnly);
-  saveLocal(merged); // keep local in sync
+  merged = merged.concat(localOnly);
+
+  saveLocal(merged);
   return merged;
 }
 
@@ -698,7 +718,7 @@ async function refreshOnePct(projId, btn){
   var pct=await fetchDashboardPct(p.fbUrl, p.fbToken||'');
   var dates=await fetchDashboardDates(p.fbUrl, p.fbToken||'');
   var changed=false;
-  if(pct!==null&&Math.abs((p.lastPct||0)-pct)>0.01){ p.lastPct=pct; p.lastSync=new Date().toISOString(); changed=true; }
+  if(pct!==null){ p.lastPct=pct; p.lastSync=new Date().toISOString(); changed=true; }
   if(dates){
     if(dates.deadlineDate&&dates.deadlineDate!==p.deadline){ p.deadline=dates.deadlineDate; changed=true; }
     if(dates.startDate&&dates.startDate!==p.startDate){ p.startDate=dates.startDate; changed=true; }
@@ -715,10 +735,10 @@ async function refreshAllPcts(){
     if(!p.fbUrl||p.status==='done') continue;
     var pct=await fetchDashboardPct(p.fbUrl, p.fbToken||'');
     var dates=await fetchDashboardDates(p.fbUrl, p.fbToken||'');
-    if(pct!==null&&Math.abs((p.lastPct||0)-pct)>0.01){ p.lastPct=pct; p.lastSync=new Date().toISOString(); changed=true; }
+    if(pct!==null){ projects[i].lastPct=pct; projects[i].lastSync=new Date().toISOString(); changed=true; }
     if(dates){
-      if(dates.deadlineDate&&dates.deadlineDate!==p.deadline){ p.deadline=dates.deadlineDate; changed=true; }
-      if(dates.startDate&&dates.startDate!==p.startDate){ p.startDate=dates.startDate; changed=true; }
+      if(dates.deadlineDate&&dates.deadlineDate!==p.deadline){ projects[i].deadline=dates.deadlineDate; changed=true; }
+      if(dates.startDate&&dates.startDate!==p.startDate){ projects[i].startDate=dates.startDate; changed=true; }
     }
   }
   if(changed){ await saveProjects(projects); renderAll(); }
@@ -730,10 +750,10 @@ async function refreshAllPcts(){
 var _refreshTimer=null;
 async function autoRefreshLoop(){
   setSyncIndicator('loading');
-  // 1. Pull project list from cloud first
-  await renderAll();
-  // 2. Pull dashboard pcts
+  // 1. Pull dashboard pcts ก่อน (fetch จาก Firebase ของแต่ละ project)
   await refreshAllPcts();
+  // 2. Render (จะใช้ local data ที่อัปเดตแล้ว)
+  await renderAll();
   setSyncIndicator('done');
   _refreshTimer=setTimeout(autoRefreshLoop,30000);
 }
