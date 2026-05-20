@@ -283,33 +283,31 @@ function loadLocal(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)||'[
 function saveLocal(arr){ localStorage.setItem(STORE_KEY,JSON.stringify(arr)); }
 
 async function loadProjects(){
-  // Priority: cloud > local สำหรับ metadata
-  // แต่ local wins สำหรับ lastPct/lastSync (ค่าที่ refresh มาล่าสุด)
+  // cloud = master for metadata (name, deadline, startDate, color, etc.)
+  // แต่ local wins เสมอสำหรับ lastPct / lastSync เพราะ refreshAllPcts เขียน local โดยตรง
   var local = loadLocal();
   if(!fbConnected()) return local;
   var cloud = await cloudGet('admin_projects');
   if(!Array.isArray(cloud)) return local;
 
-  // Build local lookup map
-  var localMap = {};
-  local.forEach(function(p){ localMap[p.id] = p; });
-
-  // Merge: cloud เป็น base แต่ preserve lastPct/lastSync จาก local ถ้าใหม่กว่า
-  var merged = cloud.map(function(cp){
-    var lp = localMap[cp.id];
-    if(!lp) return cp;
-    // local wins for lastPct/lastSync (ค่าจาก refreshAllPcts)
-    var localSyncTime = lp.lastSync ? new Date(lp.lastSync).getTime() : 0;
-    var cloudSyncTime = cp.lastSync ? new Date(cp.lastSync).getTime() : 0;
-    if(localSyncTime >= cloudSyncTime && lp.lastPct !== null && lp.lastPct !== undefined){
-      return Object.assign({}, cp, {lastPct: lp.lastPct, lastSync: lp.lastSync});
+  // Build local pct map — เก็บ lastPct/lastSync จาก local ทุก project
+  var localPctMap = {};
+  local.forEach(function(p){
+    if(p.lastPct !== null && p.lastPct !== undefined){
+      localPctMap[p.id] = { lastPct: p.lastPct, lastSync: p.lastSync };
     }
+  });
+
+  // cloud เป็น base สำหรับ metadata แต่ restore lastPct จาก local เสมอ
+  var cloudIds = cloud.map(function(p){return p.id;});
+  var merged = cloud.map(function(cp){
+    var lp = localPctMap[cp.id];
+    if(lp){ return Object.assign({}, cp, { lastPct: lp.lastPct, lastSync: lp.lastSync }); }
     return cp;
   });
 
-  // Keep local-only entries
-  var cloudIds = cloud.map(function(p){return p.id;});
-  var localOnly = local.filter(function(p){return !cloudIds.includes(p.id);});
+  // เพิ่ม local-only (ยังไม่อยู่ใน cloud)
+  var localOnly = local.filter(function(p){ return !cloudIds.includes(p.id); });
   merged = merged.concat(localOnly);
 
   saveLocal(merged);
@@ -500,6 +498,13 @@ function renderProjectCards(projects){
   // Add new card
   html+='<div class="add-card" onclick="openAddModal()"><div style="font-size:36px;opacity:.4">➕</div><div style="font-size:13px;font-weight:700;color:var(--tx3)">เพิ่มโครงการใหม่</div></div>';
   grid.innerHTML=html;
+}
+
+// render จาก local ทันทีโดยไม่ pull cloud (ใช้หลัง refresh pct)
+function renderFromLocal(){
+  var projects = loadLocal();
+  renderStats(projects);
+  renderProjectCards(projects);
 }
 
 async function renderAll(){
@@ -723,7 +728,7 @@ async function refreshOnePct(projId, btn){
     if(dates.deadlineDate&&dates.deadlineDate!==p.deadline){ p.deadline=dates.deadlineDate; changed=true; }
     if(dates.startDate&&dates.startDate!==p.startDate){ p.startDate=dates.startDate; changed=true; }
   }
-  if(changed){ await saveProjects(projects); renderAll(); }
+  if(changed){ saveLocal(projects); renderFromLocal(); cloudPut('admin_projects',projects).catch(function(){}); }
   if(btn){btn.textContent='🔄';btn.disabled=false;}
 }
 
@@ -733,15 +738,21 @@ async function refreshAllPcts(){
   for(var i=0;i<projects.length;i++){
     var p=projects[i];
     if(!p.fbUrl||p.status==='done') continue;
+    console.log('[refreshAllPcts] project:', p.name, '| fbUrl:', p.fbUrl, '| fbToken:', p.fbToken ? '***'+p.fbToken.slice(-4) : '(none)');
     var pct=await fetchDashboardPct(p.fbUrl, p.fbToken||'');
     var dates=await fetchDashboardDates(p.fbUrl, p.fbToken||'');
+    console.log('[refreshAllPcts] result pct:', pct, '| old lastPct:', p.lastPct);
     if(pct!==null){ projects[i].lastPct=pct; projects[i].lastSync=new Date().toISOString(); changed=true; }
     if(dates){
       if(dates.deadlineDate&&dates.deadlineDate!==p.deadline){ projects[i].deadline=dates.deadlineDate; changed=true; }
       if(dates.startDate&&dates.startDate!==p.startDate){ projects[i].startDate=dates.startDate; changed=true; }
     }
   }
-  if(changed){ await saveProjects(projects); renderAll(); }
+  if(changed){
+    saveLocal(projects);       // บันทึก local ทันที
+    renderFromLocal();         // render จาก local โดยตรง ไม่ pull cloud
+    cloudPut('admin_projects',projects).catch(function(){}); // sync cloud แบบ async
+  }
 }
 
 // ══════════════════════════════════════════════════════════
@@ -750,10 +761,10 @@ async function refreshAllPcts(){
 var _refreshTimer=null;
 async function autoRefreshLoop(){
   setSyncIndicator('loading');
-  // 1. Pull dashboard pcts ก่อน (fetch จาก Firebase ของแต่ละ project)
-  await refreshAllPcts();
-  // 2. Render (จะใช้ local data ที่อัปเดตแล้ว)
+  // pull metadata from cloud (project list, names, etc.) then render
   await renderAll();
+  // fetch fresh pct from each dashboard firebase — save local & re-render WITHOUT pulling cloud again
+  await refreshAllPcts();
   setSyncIndicator('done');
   _refreshTimer=setTimeout(autoRefreshLoop,30000);
 }
