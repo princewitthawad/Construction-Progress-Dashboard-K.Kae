@@ -205,6 +205,11 @@ body{background:var(--bg);color:var(--tx);font-family:var(--f);min-height:100vh}
       <div id="fb-test-result" style="font-size:11px;margin-top:5px;min-height:14px;font-family:var(--m)"></div>
       <div class="form-hint">Firebase แยกต่างหากสำหรับแต่ละโครงการ เพื่อให้ข้อมูลไม่ปนกัน</div>
     </div>
+    <div class="form-group">
+      <label class="form-label">Firebase Auth Token (ถ้ามี)</label>
+      <input class="form-input" id="f-fb-token" placeholder="zZDaQMRH... (ใส่ถ้า Dashboard ใช้ ?auth= token)" style="font-family:var(--m);font-size:11px">
+      <div class="form-hint">ดูได้จากโค้ด Dashboard ในฟังก์ชัน fbPath() บรรทัดที่มี ?auth=...</div>
+    </div>
 
     <div class="form-section">รหัสผ่าน</div>
     <div class="form-row">
@@ -527,6 +532,7 @@ function openAddModal(){
   document.getElementById('f-start').value=new Date().toISOString().slice(0,10);
   document.getElementById('f-deadline').value='';
   document.getElementById('f-fb').value='';
+  document.getElementById('f-fb-token').value='';
   document.getElementById('f-admin-pw').value='19841984';
   document.getElementById('f-acct-pw').value='30072530';
   document.getElementById('fb-test-result').innerHTML='';
@@ -548,6 +554,7 @@ function openEdit(idx){
   document.getElementById('f-start').value=p.startDate||'';
   document.getElementById('f-deadline').value=p.deadline||'';
   document.getElementById('f-fb').value=p.fbUrl||'';
+  document.getElementById('f-fb-token').value=p.fbToken||'';
   document.getElementById('f-admin-pw').value=p.adminHash||'';
   document.getElementById('f-acct-pw').value=p.acctHash||'';
   document.getElementById('fb-test-result').innerHTML='';
@@ -573,6 +580,7 @@ async function saveProject(){
     startDate: document.getElementById('f-start').value,
     deadline:  deadline,
     fbUrl:     fb,
+    fbToken:   (document.getElementById('f-fb-token').value||'').trim(),
     adminHash: document.getElementById('f-admin-pw').value||'19841984',
     acctHash:  document.getElementById('f-acct-pw').value||'30072530',
     template:  'dashboard_template.html',
@@ -594,15 +602,17 @@ async function saveProject(){
 
 async function testFbUrl(){
   var url=(document.getElementById('f-fb').value||'').trim();
+  var token=(document.getElementById('f-fb-token').value||'').trim();
   var res=document.getElementById('fb-test-result');
   var btn=document.getElementById('fb-test-btn');
   if(!url){res.innerHTML='<span style="color:var(--orange)">กรุณาใส่ Firebase URL ก่อน</span>';return;}
   if(!url.startsWith('https://')){res.innerHTML='<span style="color:var(--red)">❌ URL ต้องขึ้นต้นด้วย https://</span>';return;}
   btn.textContent='⏳...';btn.disabled=true;
+  var auth = token ? ('?auth=' + token) : '';
   try{
-    var r=await fetch(url.replace(/\/+$/,'')+'/.json',{method:'GET',signal:AbortSignal.timeout(6000)});
+    var r=await fetch(url.replace(/\/+$/,'')+'/.json'+auth,{method:'GET',signal:AbortSignal.timeout(6000)});
     if(r.ok||r.status===404||r.status===401){
-      res.innerHTML='<span style="color:var(--green)">✅ เชื่อมต่อสำเร็จ!</span>';
+      res.innerHTML='<span style="color:var(--green)">✅ เชื่อมต่อสำเร็จ!'+(token?' (พร้อม auth token)':'')+'</span>';
       btn.textContent='✅';
     } else throw new Error('HTTP '+r.status);
   }catch(e){
@@ -697,13 +707,14 @@ function calcPctFromSDataV3(sData){
   return parseFloat(weighted.toFixed(2));
 }
 
-async function fetchDashboardPct(fbUrl){
+async function fetchDashboardPct(fbUrl, fbToken){
   if(!fbUrl || !fbUrl.startsWith('https://')) return null;
   var base = fbUrl.replace(/\/+$/, '');
+  var auth = fbToken ? ('?auth=' + fbToken) : '';
 
   // ── วิธีที่ 1: donut_pct.json (Dashboard ใหม่ Rev07+ push ค่า weighted ที่คำนวณแล้ว) ──
   try{
-    var r = await fetch(base + '/donut_pct.json', {signal: AbortSignal.timeout(5000)});
+    var r = await fetch(base + '/donut_pct.json' + auth, {signal: AbortSignal.timeout(5000)});
     if(r.ok){
       var d = await r.json();
       if(d && typeof d.weighted === 'number') return parseFloat(d.weighted.toFixed(2));
@@ -712,7 +723,7 @@ async function fetchDashboardPct(fbUrl){
 
   // ── วิธีที่ 2: overall_pct.json (Dashboard เก่าและใหม่ push ค่าสรุป) ──
   try{
-    var r2 = await fetch(base + '/overall_pct.json', {signal: AbortSignal.timeout(5000)});
+    var r2 = await fetch(base + '/overall_pct.json' + auth, {signal: AbortSignal.timeout(5000)});
     if(r2.ok){
       var d2 = await r2.json();
       if(d2 && typeof d2.pct === 'number') return parseFloat(d2.pct.toFixed(2));
@@ -721,7 +732,7 @@ async function fetchDashboardPct(fbUrl){
 
   // ── วิธีที่ 3: construction_progress.json → ลอง s_data_v3 ก่อน แล้ว fallback แบบเก่า ──
   try{
-    var r3 = await fetch(base + '/construction_progress.json', {signal: AbortSignal.timeout(6000)});
+    var r3 = await fetch(base + '/construction_progress.json' + auth, {signal: AbortSignal.timeout(6000)});
     if(!r3.ok) return null;
     var state = await r3.json();
     if(!state) return null;
@@ -758,23 +769,13 @@ async function fetchDashboardPct(fbUrl){
     return parseFloat((sumRatio / vals.length * 100).toFixed(2));
 
   }catch(e){ return null; }
-
-  // ── วิธีที่ 4: s_data_v3.json node แยก ──
-  try{
-    var r4 = await fetch(base + '/s_data_v3.json', {signal: AbortSignal.timeout(5000)});
-    if(r4.ok){
-      var sd = await r4.json();
-      if(sd && Object.keys(sd).length > 0) return calcPctFromSDataV3(sd);
-    }
-  }catch(e){}
-
-  return null;
 }
-async function fetchDashboardDates(fbUrl){
+async function fetchDashboardDates(fbUrl, fbToken){
   if(!fbUrl||!fbUrl.startsWith('https://')) return null;
   var base=fbUrl.replace(/\/+$/,'');
+  var auth = fbToken ? ('?auth=' + fbToken) : '';
   try{
-    var r=await fetch(base+'/project_dates.json',{signal:AbortSignal.timeout(5000)});
+    var r=await fetch(base+'/project_dates.json'+auth,{signal:AbortSignal.timeout(5000)});
     if(r.ok){ var d=await r.json(); if(d&&d.deadlineDate) return d; }
   }catch(e){}
   return null;
@@ -785,8 +786,8 @@ async function refreshOnePct(projId, btn){
   var projects=loadLocal();
   var p=projects.find(function(x){return x.id===projId;});
   if(!p||!p.fbUrl){ if(btn){btn.textContent='🔄';btn.disabled=false;} return; }
-  var pct=await fetchDashboardPct(p.fbUrl);
-  var dates=await fetchDashboardDates(p.fbUrl);
+  var pct=await fetchDashboardPct(p.fbUrl, p.fbToken||'');
+  var dates=await fetchDashboardDates(p.fbUrl, p.fbToken||'');
   var changed=false;
   if(pct!==null&&Math.abs((p.lastPct||0)-pct)>0.01){ p.lastPct=pct; p.lastSync=new Date().toISOString(); changed=true; }
   if(dates){
@@ -803,8 +804,8 @@ async function refreshAllPcts(){
   for(var i=0;i<projects.length;i++){
     var p=projects[i];
     if(!p.fbUrl||p.status==='done') continue;
-    var pct=await fetchDashboardPct(p.fbUrl);
-    var dates=await fetchDashboardDates(p.fbUrl);
+    var pct=await fetchDashboardPct(p.fbUrl, p.fbToken||'');
+    var dates=await fetchDashboardDates(p.fbUrl, p.fbToken||'');
     if(pct!==null&&Math.abs((p.lastPct||0)-pct)>0.01){ p.lastPct=pct; p.lastSync=new Date().toISOString(); changed=true; }
     if(dates){
       if(dates.deadlineDate&&dates.deadlineDate!==p.deadline){ p.deadline=dates.deadlineDate; changed=true; }
