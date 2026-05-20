@@ -645,61 +645,130 @@ async function toggleDone(idx){
 // ══════════════════════════════════════════════════════════
 // FIREBASE SYNC — PULL DASHBOARD PCT
 // ══════════════════════════════════════════════════════════
-async function fetchDashboardPct(fbUrl){
-  if(!fbUrl||!fbUrl.startsWith('https://')) return null;
-  var base=fbUrl.replace(/\/+$/,'');
+// ══════════════════════════════════════════════════════════
+// โครงสร้าง OD และ S4R เดียวกับ Dashboard (สำหรับคำนวณ out และ s4)
+// ══════════════════════════════════════════════════════════
+var OD_TEMPLATE = [
+  {id:'o1',wt:13, fa:33.6,  ba:33.6,  sl:30, sr:30},
+  {id:'o2',wt:21, fa:72.94, ba:72.94, sl:30, sr:30},
+  {id:'o3',wt:21, fa:72.94, ba:72.94, sl:30, sr:30},
+  {id:'o4',wt:21, fa:72.94, ba:72.94, sl:30, sr:30},
+  {id:'o5',wt:24, fa:87.45, ba:87.45, sl:30, sr:30},
+];
+var S4R_TEMPLATE = [
+  {id:'r41', wt:30},
+  {id:'r42', wt:25},
+  {id:'r43', wt:25},
+  {id:'r44', wt:10},
+  {id:'r45', wt:10},
+];
+// targets ของแต่ละ section — ตรงกับ Dashboard เก่า
+var SECTION_TGTS = [100, 100, 50, 100, 80, 50, 40];
 
-  // ── วิธีที่ 1: ดึงจาก overall_pct.json (dashboard push ไว้) ──
+// น้ำหนัก category ของ Dashboard template ใหม่ (Rev07+)
+var CAT_WEIGHTS_NEW = { structure: 0.40, architecture: 0.40, electrical: 0.15, sanitary: 0.05 };
+
+// คำนวณ % ก่ออิฐนอก weighted ของ 1 ชั้น (สูตรเดียวกับ calcOut() ใน Dashboard เก่า)
+function calcOutWp(o, savedO){
+  var fd   = savedO ? (savedO.fd  || 0) : 0;
+  var bd   = savedO ? (savedO.bd  || 0) : 0;
+  var sld  = savedO ? (savedO.sld || savedO.sd || 0) : 0;
+  var srd  = savedO ? (savedO.srd || 0) : 0;
+  var ta   = o.fa + o.ba + o.sl + o.sr;
+  var da   = fd + bd + sld + srd;
+  return ta > 0 ? (da / ta) * o.wt : 0;
+}
+
+// คำนวณ overall จาก s_data_v3 (Dashboard template ใหม่ Rev07+)
+// สูตร: calcCatOverall = avg(raw pct ทุก item ใน cat), calcAllOverall = Σ cat × weight
+function calcPctFromSDataV3(sData){
+  var cats = Object.keys(CAT_WEIGHTS_NEW);
+  var weighted = 0;
+  cats.forEach(function(cat){
+    // ดึง item ทุกตัวใน category นี้ (prefix = cat + '_')
+    var prefix = cat + '_';
+    var keys = Object.keys(sData).filter(function(k){ return k.startsWith(prefix); });
+    if(!keys.length) return;
+    var sum = keys.reduce(function(a, k){
+      return a + Math.min(100, Math.max(0, (sData[k] && sData[k].pct) || 0));
+    }, 0);
+    weighted += (sum / keys.length) * (CAT_WEIGHTS_NEW[cat] || 0);
+  });
+  return parseFloat(weighted.toFixed(2));
+}
+
+async function fetchDashboardPct(fbUrl){
+  if(!fbUrl || !fbUrl.startsWith('https://')) return null;
+  var base = fbUrl.replace(/\/+$/, '');
+
+  // ── วิธีที่ 1: donut_pct.json (Dashboard ใหม่ Rev07+ push ค่า weighted ที่คำนวณแล้ว) ──
   try{
-    var r=await fetch(base+'/overall_pct.json',{signal:AbortSignal.timeout(5000)});
+    var r = await fetch(base + '/donut_pct.json', {signal: AbortSignal.timeout(5000)});
     if(r.ok){
-      var d=await r.json();
-      if(d&&typeof d.pct==='number') return d.pct;
+      var d = await r.json();
+      if(d && typeof d.weighted === 'number') return parseFloat(d.weighted.toFixed(2));
     }
   }catch(e){}
 
-  // ── วิธีที่ 2: คำนวณจาก s_data_v3 โดยตรง (fallback เมื่อ overall_pct ไม่มี/ผิด) ──
-  // สูตร Weighted: โครงสร้าง 40% + สถาปัตย์ 40% + ไฟฟ้า 15% + สุขาภิบาล 5%
+  // ── วิธีที่ 2: overall_pct.json (Dashboard เก่าและใหม่ push ค่าสรุป) ──
   try{
-    var r2=await fetch(base+'/construction_progress.json',{signal:AbortSignal.timeout(5000)});
+    var r2 = await fetch(base + '/overall_pct.json', {signal: AbortSignal.timeout(5000)});
     if(r2.ok){
-      var state=await r2.json();
-      if(state&&state.s_data_v3&&Object.keys(state.s_data_v3).length>0){
-        return calcPctFromSData(state.s_data_v3);
-      }
+      var d2 = await r2.json();
+      if(d2 && typeof d2.pct === 'number') return parseFloat(d2.pct.toFixed(2));
+    }
+  }catch(e){}
+
+  // ── วิธีที่ 3: construction_progress.json → ลอง s_data_v3 ก่อน แล้ว fallback แบบเก่า ──
+  try{
+    var r3 = await fetch(base + '/construction_progress.json', {signal: AbortSignal.timeout(6000)});
+    if(!r3.ok) return null;
+    var state = await r3.json();
+    if(!state) return null;
+
+    // ── 3a: s_data_v3 (Dashboard ใหม่ Rev07+) ──
+    if(state.s_data_v3 && Object.keys(state.s_data_v3).length > 0){
+      return calcPctFromSDataV3(state.s_data_v3);
+    }
+
+    // ── 3b: format เก่า — คำนวณจาก s1, fd[], od[], r41–r45, s5, s6, s7 ──
+    var s1 = parseFloat(state.s1) || 0;
+    var fdArr = Array.isArray(state.fd) ? state.fd : [];
+    var f25 = fdArr.length > 0
+      ? fdArr.reduce(function(a, v){ return a + (parseFloat(v) || 0); }, 0) / fdArr.length
+      : 0;
+    var odArr = Array.isArray(state.od) ? state.od : [];
+    var out = 0;
+    for(var oi = 0; oi < OD_TEMPLATE.length; oi++){
+      out += calcOutWp(OD_TEMPLATE[oi], odArr[oi] || null);
+    }
+    var s4 = 0;
+    for(var si = 0; si < S4R_TEMPLATE.length; si++){
+      s4 += (parseFloat(state[S4R_TEMPLATE[si].id]) || 0) * S4R_TEMPLATE[si].wt / 100;
+    }
+    var s5 = parseFloat(state.s5) || 0;
+    var s6 = parseFloat(state.s6) || 0;
+    var s7 = parseFloat(state.s7) || 0;
+
+    var vals = [s1, f25, out, s4, s5, s6, s7];
+    var sumRatio = 0;
+    for(var i = 0; i < vals.length; i++){
+      sumRatio += Math.min(1, vals[i] / SECTION_TGTS[i]);
+    }
+    return parseFloat((sumRatio / vals.length * 100).toFixed(2));
+
+  }catch(e){ return null; }
+
+  // ── วิธีที่ 4: s_data_v3.json node แยก ──
+  try{
+    var r4 = await fetch(base + '/s_data_v3.json', {signal: AbortSignal.timeout(5000)});
+    if(r4.ok){
+      var sd = await r4.json();
+      if(sd && Object.keys(sd).length > 0) return calcPctFromSDataV3(sd);
     }
   }catch(e){}
 
   return null;
-}
-
-// คำนวณ Weighted Overall % จาก s_data_v3 (สูตรเดียวกับ Dashboard)
-function calcPctFromSData(sData){
-  var CAT_WEIGHTS = { structure:0.40, architecture:0.40, electrical:0.15, sanitary:0.05 };
-  var CAT_PREFIXES = {
-    structure: ['str_s1','str_s2','str_s3a','str_s3b','str_s4','str_s5','str_s6','str_s7','str_s8','str_s9','str_s10','str_s11'],
-    architecture: ['arc_s1','arc_s2','arc_s3','arc_s4','arc_s5','arc_s6','arc_s7','arc_s8','arc_s9','arc_s10','arc_s11','arc_s12','arc_s13'],
-    electrical: ['elc_s1','elc_s2','elc_s3','elc_s4','elc_s5','elc_s6','elc_s7','elc_s8','elc_s9','elc_s10a','elc_s10b','elc_s10c'],
-    sanitary: ['san_s1','san_s2','san_s3','san_s4','san_s5','san_s6','san_s7','san_s8']
-  };
-  var weighted = 0;
-  var cats = Object.keys(CAT_WEIGHTS);
-  for(var ci=0;ci<cats.length;ci++){
-    var cat = cats[ci];
-    var keys = Object.keys(sData).filter(function(k){ return k.startsWith(cat.slice(0,3)+'_'); });
-    // รวม custom items ด้วย
-    if(!keys.length) keys = CAT_PREFIXES[cat].filter(function(k){ return sData[k]; });
-    if(!keys.length){ continue; }
-    var sum=0;
-    for(var ki=0;ki<keys.length;ki++){
-      var item = sData[keys[ki]] || {};
-      var pct = Math.min(100, Math.max(0, item.pct||0));
-      var tgt = (item.pctTarget>0&&item.pctTarget<=100) ? item.pctTarget : 100;
-      sum += Math.min(100, pct/tgt*100);
-    }
-    weighted += (sum/keys.length) * CAT_WEIGHTS[cat];
-  }
-  return parseFloat(weighted.toFixed(2));
 }
 async function fetchDashboardDates(fbUrl){
   if(!fbUrl||!fbUrl.startsWith('https://')) return null;
