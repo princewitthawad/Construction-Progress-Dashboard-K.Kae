@@ -440,8 +440,8 @@ function renderProjectCards(projects){
     var col=p.color||'#00d4ff';
     var hasPct = p.lastPct !== null && p.lastPct !== undefined;
     var pct = hasPct ? p.lastPct : 0;
-    var pctDisplay = hasPct ? pct.toFixed(1)+'%' : '—';
-    var barWidth = hasPct ? Math.min(100,pct).toFixed(1) : '0';
+    var pctDisplay = hasPct ? ceilTo2(pct).toFixed(2)+'%' : '—';
+    var barWidth = hasPct ? Math.min(100, ceilTo2(pct)).toFixed(2) : '0';
     var dl=daysLeft(p.deadline);
     var dlCol=dl!==null?(dl<0?'var(--red)':dl<=7?'var(--orange)':'var(--tx3)'):'var(--tx3)';
     var syncAgo='';
@@ -660,6 +660,9 @@ async function toggleDone(idx){
 // ══════════════════════════════════════════════════════════
 // FIREBASE SYNC — PULL DASHBOARD PCT
 // ══════════════════════════════════════════════════════════
+// ปัดตัวเลขแบบเดียวกับ Dashboard (ceilTo2 = Math.ceil ×100 /100)
+function ceilTo2(v){ return Math.ceil(v * 100) / 100; }
+
 async function fetchDashboardPct(fbUrl, fbToken){
   if(!fbUrl || !fbUrl.startsWith('https://')) return null;
   var base = fbUrl.replace(/\/+$/, '');
@@ -670,7 +673,7 @@ async function fetchDashboardPct(fbUrl, fbToken){
     var r = await fetch(base + '/donut_pct.json' + auth, {signal: AbortSignal.timeout(6000)});
     if(r.ok){
       var d = await r.json();
-      if(d && typeof d.weighted === 'number') return parseFloat(d.weighted.toFixed(2));
+      if(d && typeof d.weighted === 'number') return ceilTo2(d.weighted);
     }
   }catch(e){}
 
